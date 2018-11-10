@@ -6,6 +6,8 @@ SHREOS
 .idea
 testdir
 ?.*
+?
+??
 *.swp
 doxygen
 .DS_Store
