@@ -20,8 +20,6 @@ POST _data/api/v1/lookuprecord/get
 POST _data/api/v1/lookuprecord/getnd
 GET _data/api/v1/lookuprecord/esbulk?{params}
 
-GET _query/api/v1/typeahead/{profile}?{params}
-
 POST _zpds/master/v1/endpoint
 POST _zpds/remote/v1/endpoint
 

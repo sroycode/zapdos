@@ -60,32 +60,3 @@ Please set the environment ( See .profile.centos7/ubuntu/mac ). There are two en
 `ZAPDOS_TPSRC` is where the source code packages are downloaded ( defaults to /opt/backup ).
 Order is important since rocksdb needs snappy.
 
-## Compiling
-
-Create a build directory
-
-```
-mkdir build
-cd build
-# Debug
-cmake -DCMAKE_BUILD_TYPE=Debug .. && make
-# Release
-cmake .. && make
-```
-
-On Centos with cmake3 and custom Boost ( See README.LINUX.md )
-
-```
-# Debug
-cmake3 -DCMAKE_BUILD_TYPE=Debug -DBOOST_ROOT=/opt/local/boost .. && make
-# Release
-cmake3 -DBOOST_ROOT=/opt/local/boost .. && make
-```
-
-Note the number of concurrent connections is limited by number of active threads, you can adjust it
-by setting `LIBASYNC_NUM_THREADS` as an environment variable before compiling.
-
-```
-export LIBASYNC_NUM_THREADS=30
-```
-
