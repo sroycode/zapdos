@@ -1,0 +1,17 @@
+
+{
+	"pkey" : "K_PROFILE",
+	"name" : "Profile",
+	"namespace" : "zpds::store",
+	"desc" : " profile",
+	"pname" : "profile",
+	"uindex" : [
+		{
+			"keytype" : "U_PROFILE_NAME",
+			"keys" : [
+				{ "name" : "name", "type" : "std::string" }
+			]
+		}
+	],
+	"project" : "zapdos"
+}

@@ -1,0 +1,18 @@
+
+{
+	"pkey" : "K_SIMPLETEMPLATE",
+	"name" : "SimpleTemplate",
+	"namespace" : "zpds::store",
+	"desc" : " simpletemplate",
+	"pname" : "simpletemplate",
+	"uindex" : [
+		{
+			"keytype" : "U_SIMPLETEMPLATE_NAME_QTYP",
+			"keys" : [
+				{ "name" : "name", "type" : "std::string" },
+				{ "name" : "qtyp", "type" : "uint64_t" }
+			]
+		}
+	],
+	"project" : "zapdos"
+}

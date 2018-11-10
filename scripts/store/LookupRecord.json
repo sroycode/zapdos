@@ -1,0 +1,29 @@
+
+{
+	"pkey" : "K_LOOKUPRECORD",
+	"name" : "LookupRecord",
+	"namespace" : "zpds::store",
+	"desc" : " lookuprecord",
+	"pname" : "lookuprecord",
+	"uindex" : [
+		{
+			"keytype" : "U_LOOKUPRECORD_STYP_LANG_UNIQUEID",
+			"keys" : [
+				{ "name" : "styp", "type" : "int32_t" },
+				{ "name" : "lang", "type" : "int32_t" },
+				{ "name" : "uniqueid", "type" : "std::string" }
+			]
+		}
+	],
+	"sindex" : [
+		{
+			"keytype" : "I_LOOKUPRECORD_STYP_LANG_LASTUP",
+			"keys" : [
+				{ "name" : "styp", "type" : "int32_t" },
+				{ "name" : "lang", "type" : "int32_t" },
+				{ "name" : "updated_at", "type" : "uint64_t" }
+			]
+		}
+	],
+	"project" : "zapdos"
+}

@@ -1,0 +1,119 @@
+syntax  =  "proto3";
+option optimize_for  =  SPEED;
+// option cc_enable_arenas  =  true;
+
+package zpds.search;
+
+// Language Types
+enum LangTypeE {
+	EN                                                              =  0; // english
+}
+
+// Lookup Record Source Types
+enum SourceTypeE {
+	S_NONE                                                          =  0;
+	S_OSM                                                           =  1; // openstreetmaps
+	S_LOCAL                                                         =  2; // your own data
+}
+
+// Query DS
+
+message PointLocT {
+	string ccode                                                    =  1; // country code
+	string scode                                                    =  2; // state code
+	string city                                                     =  3; // city
+	double lat                                                      =  4; // latitude
+	double lon                                                      =  5; // longitude
+	string geohash                                                  =  6; // for geo
+	string pincode                                                  =  7; // pincode
+
+	bool dont_use                                                   =  8; // dont use this 
+}
+
+enum QueryTypeE {
+	QRY_UNKNOWN                                                     =  0; 
+	QRY_COMPLETION_PHOTON                                           =  1; 
+}
+
+message UsedParamsT {
+	PointLocT                     cur                               =  1; // detected coords INPUT lat lon
+	PointLocT                     top_right                         =  2; // for geo bounded
+	PointLocT                     bottom_left                       =  3; // for geo bounded
+	uint64                        items                             =  4; // INPUT no of results to return
+
+	LangTypeE                     lang                              =  5; // INPUT language
+	string                        name                              =  6; // INPUT profile name
+
+	uint64                        no_of_words                       = 10; // no of words
+
+	string                        query                             = 11; // stemmed query
+	string                        raw_query                         = 12; // INPUT raw query
+
+	bool                          full_words                        = 15; // INPUT flag by space at end
+	bool                          sort_by_dist                      = 16; // INPUT sort by distance
+
+	bool                          all_partial                       = 17; // use partials for all words
+	bool                          begin_with                        = 19; // prefer beginning with
+	bool                          last_partial                      = 20; // lst is partial
+
+	string                        extra                             = 21; // extra to add
+	bool                          extra_is_full                     = 22; // extra to add as full_word
+
+	int64                         distance_band                     = 24; // sort distance band in m
+	double                        distance_def                      = 25; // default distance in m
+
+	// output
+	repeated uint64               ids                               = 26; // ids 
+	repeated string               sortkeys                          = 28; // sorting keys
+
+}
+
+enum LimitTypeE {
+	L_NONE                                                          =  0;
+	L_CCODE                                                         =  1;
+	L_CITY                                                          =  2;
+	L_PINCODE                                                       =  3;
+	L_GEOHASH5                                                      =  4;
+	L_GEOHASH7                                                      =  5;
+	L_GEOHASH9                                                      =  6;
+}
+
+enum SearchTypeE {
+	S_DEFAULT                                                       =  0;
+	S_PARTIAL_BEGIN                                                 =  1;
+	S_PARTIAL                                                       =  2;
+	S_FULLWORD                                                      =  3;
+	S_FIRSTWORD                                                     =  4;
+}
+
+enum OrderTypeE {
+	O_DEFAULT                                                       =  0;
+	O_DIST_BAND                                                     =  1;
+	O_DIST_ONLY                                                     =  2;
+}
+
+enum InputTypeE {
+	I_QUERY                                                         =  0;
+}
+
+message QueryOrderT {
+	string                        rec_tagid                          =  1; // INPUT this tag id for merge needs
+	uint64                        weight                             =  2; // INPUT order descending
+	SourceTypeE                   rec_styp                           =  3; // INPUT query record styp
+	uint64                        rec_count                          =  4; // INPUT  max records
+
+	string                        desc                               =  8; // INPUT description of this
+
+	double                        distance_def                       =  9; // INPUT default distance in m
+	int64                         distance_band                      = 10; // INPUT sort distance band in m
+
+	LimitTypeE                    limit_type                         = 11; // INPUT limit by
+	SearchTypeE                   search_type                        = 12; // INPUT search text for
+	OrderTypeE                    order_type                         = 13; // INPUT order by
+	InputTypeE                    input_type                         = 14; // INPUT input type
+
+}
+
+message QueryProfileT {
+	repeated QueryOrderT          orders                             =  1; // the order
+}

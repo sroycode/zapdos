@@ -1,0 +1,109 @@
+syntax  =  "proto3";
+option optimize_for  =  SPEED;
+// option cc_enable_arenas  =  true;
+
+import "Search.proto";
+import "Store.proto";
+
+package zpds.query;
+
+message StateT {
+	string hostname                                                 =  1;
+	string master                                                   =  2;
+	bool is_master                                                  =  5;
+	bool is_ready                                                   =  6;
+	uint64 ts                                                       =  7;
+
+	bool not_found                                                  = 21;
+}
+
+message ErrorT {
+	string errorcode                                                =  1;
+	string error                                                    =  2;
+	bool success                                                    =  3;
+	int32 ecode                                                     =  4;
+
+	uint64 inputcount                                               =  8;
+	uint64 updatecount                                              =  9;
+}
+
+// ProfileService
+message ProfileRespT {
+	string   name                                                   =  1;
+	string   oldpass                                                =  2; // old password
+	string   newpass                                                =  3; // new password
+
+	uint64   updated_at                                             = 20; // profile last updated
+	bool     not_found                                              = 21;
+}
+
+message SimpleProRespT {
+	string   name                                                   =  1;
+	string   passkey                                                =  2; // current password
+
+	search.QueryTypeE qtyp                                          =  4; // query type id
+	search.QueryProfileT qprof                                      =  5; // query profile template
+	bool     ignore                                                 =  6;	//  ignore this profile
+
+	uint64   updated_at                                             = 20; // profile last updated
+	bool     not_found                                              = 21;
+}
+
+message MultiSimpleProRespT {
+	string   name                                                   =  1;
+	string   passkey                                                =  2; // current password
+
+	repeated SimpleProRespT qtpls                                   =  3; // templates
+}
+
+message SimpleFieldT {
+	string   name                                                   =  1;
+	string   desc                                                   =  2;
+	string   type                                                   =  3;
+	repeated string values                                          =  4;
+	bool     is_repeated                                            =  5;
+}
+
+message SimpleFieldListT {
+	repeated SimpleFieldT fields                                    =  1;
+}
+
+// LookupData
+
+message LookupDataT {
+	repeated zpds.store.LookupRecordT records                      =  1; // default records
+	bool                          merge                             =  3;
+	bool                          delete                            =  4;
+
+	string   name                                                   = 11; // for use by update
+	string   passkey                                                = 12; // for use by update
+}
+
+message LookupRespT {
+	uint64                        count                             =  1; // no of updates
+	bool                          success                           =  2;
+}
+
+message LookupParamsT {
+	LookupDataT                   ldata                             =  1;
+	LookupRespT                   lresp                             =  2;
+
+	string   name                                                   = 11;
+	string   passkey                                                = 12; // new password
+
+	search.LangTypeE              lang                              = 21; // record type
+	search.SourceTypeE            styp                              = 22; // record type
+	uint64                        last_up                           = 23; // updated after
+	uint64                        last_id                           = 24; // last id as secondary
+	uint64                        limit                             = 25; // no of items
+
+}
+
+// PhotonService
+
+message PhotonParamsT {
+	search.UsedParamsT            cdata                             =  1;
+	store.LookupRecordListT       cresp                             =  2;
+
+}
+

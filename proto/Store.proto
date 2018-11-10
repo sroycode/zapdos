@@ -1,0 +1,156 @@
+syntax  =  "proto3";
+option optimize_for  =  SPEED;
+// option cc_enable_arenas  =  true;
+
+import "Search.proto";
+
+package zpds.store;
+
+enum KeyTypeE {
+	NOKEY                                                           =  0;
+	SYSKEY                                                          =  1;
+	KEYPAIRS                                                        =  2;
+
+// Primary 
+	K_NONODE                                                        = 10;
+
+	K_PROFILE                                                       = 11;
+	K_SIMPLETEMPLATE                                                = 12;
+
+	K_ELASTICRECORD                                                 = 13;
+	K_LOOKUPRECORD                                                  = 14;
+
+	K_LOGNODE                                                       = 29; // must be before K_MAXNODE
+	K_MAXNODE                                                       = 30;
+
+// Indexes
+	I_NOINDEX                                                       = 50;
+
+	U_PROFILE_NAME                                                  = 51;
+
+	U_SIMPLETEMPLATE_NAME_QTYP                                      = 53;
+
+	U_LOOKUPRECORD_STYP_LANG_UNIQUEID                               = 55;
+	I_LOOKUPRECORD_STYP_LANG_LASTUP                                 = 56; // this sequence is for reduced bloom
+
+};
+
+
+// DONOT TOUCH THIS - START
+message ErrorT {
+	string                        status                            =  1;
+	string                        msg                               =  2;
+}
+
+message NodeT {
+	KeyTypeE                      keytype                           =  1;
+	uint64                        id                                =  2;
+}
+
+message NodeListT {
+	repeated NodeT                node                              =  1;
+}
+
+message TransItemT {
+	string                        key                               =  1;
+	bytes                         value                             =  2;
+	bool                          to_del                            =  3;
+}
+
+message TransactionT {
+	uint64                        id                                =  1;
+	repeated TransItemT           item                              =  2;
+	uint64                        ts                                =  3;
+
+	bool                          notfound                          = 51;
+}
+
+message TransListT {
+	uint64                        lastid                            =  1;
+	uint64                        limit                             =  2;
+	repeated TransactionT         trans                             =  3;
+	uint64                        currid                            =  4;
+	uint64                        ts                                =  5;
+	string                        endpoint                          =  6;
+}
+// DONOT TOUCH THIS - END
+
+// profile start
+
+message ProfileT {
+	uint64                        id                                =  1;
+	string                        name                              =  2; // profile name
+	string                        passkey                           =  3; // profile password
+
+	uint64                        created_at                        = 49; // created
+	uint64                        updated_at                        = 50; // last updated
+	bool                          notfound                          = 51;
+}
+
+message SimpleTemplateT {
+	uint64                        id                                =  1;
+	string                        name                              =  2; // profile name
+	search.QueryTypeE             qtyp                              =  3; // query type id
+	search.QueryProfileT          qprof                             =  4; // query profile xapian
+
+	bool                          ignore                            =  6;	 //  ignore this profile
+
+	uint64                        created_at                        = 49; // created
+	uint64                        updated_at                        = 50; // last updated
+	bool                          notfound                          = 51;
+}
+
+// record for lookup
+
+message LookupRecordT {
+	uint64                        id                                =  1; // record id  
+	search.SourceTypeE            styp                              =  2; // INPUT record source type
+	string                        uniqueid                          =  3; // INPUT unique id
+
+	double                        importance                        =  4; // INPUT importance or equivalent
+
+	string                        ccode                             =  6; // INPUT country code Alpha 3
+	string                        scode                             =  7; // INPUT state code
+	string                        city                              =  8; // INPUT city name
+	string                        country                           = 14; // INPUT country
+	string                        suggest                           = 15; // suggest field generated
+	string                        fld_name                          = 16; // INPUT name field
+	string                        fld_area                          = 17; // INPUT area field
+	string                        address                           = 18; // INPUT address
+	string                        pincode                           = 19; // INPUT pin code
+
+	double                        accuracy                          = 22; // INPUT accuracy of lat lon in m
+	double                        lat                               = 23; // INPUT latitude
+	double                        lon                               = 24; // INPUT longitude
+	string                        geohash9                          = 25; // geohash 9 chars
+	double                        rating                            = 26; // INPUT average rating of place
+	string                        location                          = 27; // location string for es
+
+	string                        landmark                          = 32; // INPUT landmark
+	string                        is_in_place                       = 34; // INPUT uniqueid of parent place
+	string                        tags                              = 35; // INPUT keywords
+
+	int64                         osm_id                            = 36; // INPUT osm_id
+	string                        osm_key                           = 37; // INPUT osm_key like place
+	string                        osm_value                         = 38; // INPUT osm_value like hamlet
+	string                        osm_type                          = 39; // INPUT osm_type like N
+
+	search.SourceTypeE            alias_styp                        = 48; // INPUT alias source type
+	string                        alias_uniqueid                    = 49; // INPUT alias unique id
+
+	search.LangTypeE              lang                              = 50; // INPUT language
+
+	repeated string               matched_queries                   = 51; // fetched from search
+	double                        score                             = 52; // score from search
+
+	bool                          is_deleted                        = 95; // soft delete
+	uint64                        created_at                        = 96; // created
+	uint64                        updated_at                        = 97; // last updated
+	bool                          notfound                          = 99; // return val 
+
+}
+
+message LookupRecordListT {
+	repeated LookupRecordT        record                            =  1;
+}
+

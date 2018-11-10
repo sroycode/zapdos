@@ -1,0 +1,27 @@
+GET help
+GET info
+
+GET _admin/api/v1/get_profile?{params}
+GET _admin/api/v1/set_profile?{params}
+GET _admin/api/v1/new_profile?{params}
+POST _admin/api/v1/set_profile
+POST _admin/api/v1/new_profile
+
+GET _admin/api/v1/get_simpletemplate?{params}
+GET _admin/api/v1/get_simpletemplates?{params}
+GET _admin/api/v1/check_simpletemplates?{params}
+POST _admin/api/v1/set_simpletemplate
+POST _admin/api/v1/get_profileformat
+
+POST _data/api/v1/lookuprecord/upsert
+POST _data/api/v1/lookuprecord/merge
+POST _data/api/v1/lookuprecord/delete
+POST _data/api/v1/lookuprecord/get
+POST _data/api/v1/lookuprecord/getnd
+GET _data/api/v1/lookuprecord/esbulk?{params}
+
+GET _query/api/v1/typeahead/{profile}?{params}
+
+POST _zpds/master/v1/endpoint
+POST _zpds/remote/v1/endpoint
+
