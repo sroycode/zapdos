@@ -8,15 +8,16 @@ This code is work in progress and is to change frequently.
 
 ## What is it
 
-This is a search engine that sets up a local search from OSM data
+This is a completion engine that sets up a local search from OSM data.
+Other geocoding functionality is in the works.
+
+This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`.
+The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-compatible endpoint. 
 
 Supports rudimentary replication. All write queries go to master, read queries are on slave.
 
 For replication , the service listens to two ports , you can expose the main port to public, the second port is for
 communication between servers. See README.REPLICATION.md for details.
-
-This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`
-The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-compatible endpoint. 
 
 
 ## Run using Docker
