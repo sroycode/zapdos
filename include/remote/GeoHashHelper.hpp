@@ -112,7 +112,7 @@ public:
 	* @return
 	*   std::string
 	*/
-	std::string Encode(double lat, double lon, size_t prec=ZPDS_DEFAULT_GEOHASH_PRECISION);
+	std::string Encode(double lat, double lon, size_t prec=ZPDS_DEFAULT_GEOHASH_PRECISION) const;
 
 	/**
 	* Decode: decode geohash

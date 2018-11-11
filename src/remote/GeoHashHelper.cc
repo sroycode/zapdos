@@ -57,7 +57,7 @@ static std::string odd_borders[4] = {"bcfguvyz", "prxz", "0145hjnp", "028b"};
 * Encode: get geohash of this precision
 *
 */
-std::string zpds::remote::GeoHashHelper::Encode(double lat, double lon,size_t prec)
+std::string zpds::remote::GeoHashHelper::Encode(double lat, double lon,size_t prec) const
 {
 	if( lon>ZPDS_ALLOWED_MAX_LON || lon<ZPDS_ALLOWED_MIN_LON || lat>ZPDS_ALLOWED_MAX_LAT || lat<ZPDS_ALLOWED_MIN_LAT)
 		throw zpds::BadDataException("Invalid LonLat");

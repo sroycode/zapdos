@@ -75,7 +75,7 @@ bool zpds::store::PhotonService::RuleSearch (
     ::zpds::search::UsedParamsT* qr,
     ::zpds::search::QueryOrderT* rule,
     ::zpds::store::LookupRecordListT* records,
-    size_t target)
+    size_t target) const
 {
 
 	::zpds::search::SearchTrie trie( stptr->xapath.Get() );

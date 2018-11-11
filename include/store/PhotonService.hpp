@@ -105,7 +105,7 @@ private:
 	    ::zpds::search::UsedParamsT* qr,
 	    ::zpds::search::QueryOrderT* rule,
 	    ::zpds::store::LookupRecordListT* records,
-	    size_t target);
+	    size_t target) const;
 
 };
 } // namespace store
