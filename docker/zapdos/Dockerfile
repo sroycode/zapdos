@@ -272,7 +272,7 @@ RUN yum -y install libpqxx-devel
 
 ### MAIN 
 
-RUN echo OK
+RUN echo OK 121
 
 ENV MVERSION devel
 ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
