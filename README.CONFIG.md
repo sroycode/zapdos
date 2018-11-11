@@ -15,23 +15,23 @@
 ## Section work
 
 - datadir : location of rocksdb database
-- cachesize : rocksdb cachesize in MB
+- cachesize : rocksdb cachesize in MB ( use at least 8192 on production )
 - logdatadir : location of log database , - ignored if ZPDS_USE_SEPARATE_LOGDB not set
 - logcachesize : log database cachesize in MB , - ignored if ZPDS_USE_SEPARATE_LOGDB not set
 
 ## Section http
 
-- host : HTTP host for internal HTTP host
+- host : HTTP host for external
 - port : HTTP port
 
 ## Section hrpc 
 
-- host : intermachine host for internal HTTP host
-- port : intermachine port
+- host : host for inter machine access , should not be exposed outside LAN
+- port : port
 - thisurl : URL to reach this service from other machines in cluster
 
 ## Section whatwhere
 - datadir : xapian store directory
-- jampath : path to jamspell directory
-- jinpath : path to jamspell source file for building above file 
+- jampath : path to jamspell directory , the spell file for EN is EN.bin
+- jinpath : path to jamspell source file EN.txt for building above file 
 

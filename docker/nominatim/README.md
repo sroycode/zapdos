@@ -8,7 +8,7 @@
 
 3. Initialize Nominatim Database
   ```
-  docker run -t -v /home/me/nominatimdata:/data nominatim  sh /app/init.sh /data/merged.osm.pbf postgresdata 4
+  docker run -t -v ${HOME}/Docker/nomina:/data nominatim  sh /app/init.sh /data/bangalore-20181026.osm.pbf postgresdata 4
   ```
   Where 4 is the number of threads to use during import. In general the import of data in postgres is a very time consuming
   process that may take hours or days. If you run this process on a multiprocessor system make sure that it makes the best use
@@ -18,5 +18,5 @@
 4. After the import is finished the /home/me/nominatimdata/postgresdata folder will contain the full postgress binaries of
    a postgis/nominatim database. The easiest way to start the nominatim as a single node is the following:
    ```
-   docker run --restart=always -p 6432:5432 -p 7070:8080 -d -v /home/me/nominatimdata/postgresdata:/var/lib/postgresql/9.5/main nominatim sh /app/start.sh
+   docker run --restart=always -p 6432:5432 -p 7070:8080 -d -v ${HOME}/Docker/nomina/postgresdata:/var/lib/postgresql/9.5/main nominatim sh /app/start.sh
    ```

@@ -66,7 +66,7 @@
 // #define ZPDS_FMT_SEP "\x1E"
 #define ZPDS_FMT_SEP ":"
 /* UINT STRN SINT is defined here so can be changed independent of node if needed */
-#define ZPDS_FMT_UINT_ONLY(A)    ZPDS_FMT_NODE_ONLY(A)
+#define ZPDS_FMT_UINT_ONLY(A)   ZPDS_MACRO_HEX(ZPDS_NODE_LEN) << A
 #define ZPDS_FMT_STRN_ONLY(A)    A
 #define ZPDS_FMT_SINT_ONLY(A)   ZPDS_MACRO_HEX(ZPDS_NODE_LEN) << A
 
@@ -74,7 +74,10 @@
 #define ZPDS_FMT_STRN_KEY(A,B)   ZPDS_FMT_ID_KEY(A) << ZPDS_FMT_STRN_ONLY(B)
 #define ZPDS_FMT_SINT_KEY(A,B)   ZPDS_FMT_ID_KEY(A) << ZPDS_FMT_SINT_ONLY(B)
 
+#define ZPDS_MAX_INTVAL std::numeric_limits<int64_t>::max()
+
 #include <iomanip>
+#include <limits>
 #include <sstream>
 #include "utils/BaseUtils.hpp"
 #include "../proto/Store.pb.h"
@@ -181,14 +184,22 @@ template<> void MakeSuffix(std::ostream& o, uint64_t t)
 }
 
 /**
+* MakeSuffix : make suffix key for single item uint32_t specialization
+*
+*/
+template<> void MakeSuffix(std::ostream& o, uint32_t t)
+{
+	MakeSuffix<uint64_t>(o, (uint64_t) t );
+}
+
+/**
 * MakeSuffix : make suffix key for single item int64_t
 *
 */
 template<> void MakeSuffix(std::ostream& o, int64_t t)
 {
-	if (t<0)
-		throw ::zpds::BadCodeException("Negative cannot be used in key");
-	o << ZPDS_FMT_SEP << ZPDS_FMT_SINT_ONLY(t);
+	if (t<0) MakeSuffix<uint64_t>(o, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
+	else MakeSuffix<uint64_t>(o, (uint64_t) ZPDS_MAX_INTVAL + (uint64_t) std::abs(t) );
 }
 
 /**
@@ -197,9 +208,8 @@ template<> void MakeSuffix(std::ostream& o, int64_t t)
 */
 template<> void MakeSuffix(std::ostream& o, int32_t t)
 {
-	if (t<0)
-		throw ::zpds::BadCodeException("Negative cannot be used in key");
-	o << ZPDS_FMT_SEP << ZPDS_FMT_SINT_ONLY(t);
+	if (t<0) MakeSuffix<uint64_t>(o, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
+	else MakeSuffix<uint64_t>(o, (uint64_t) ZPDS_MAX_INTVAL + (uint64_t) std::abs(t) );
 }
 
 /**
@@ -251,14 +261,12 @@ template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, uint64_t t)
 }
 
 /**
-* MakePrefix : each prefix item type int32_t
+* MakePrefix : each prefix item type uint32_t
 *
 */
-template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int32_t t)
+template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, uint32_t t)
 {
-	if (t<0)
-		throw ::zpds::BadCodeException("Negative cannot be used in key");
-	o << ZPDS_FMT_SINT_KEY( (unsigned short)k, t);
+	MakePrefix<uint64_t>(o, k, (uint64_t) t );
 }
 
 /**
@@ -267,9 +275,18 @@ template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int32_t t)
 */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int64_t t)
 {
-	if (t<0)
-		throw ::zpds::BadCodeException("Negative cannot be used in key");
-	o << ZPDS_FMT_SINT_KEY( (unsigned short)k, t);
+	if (t<0) MakePrefix<uint64_t>(o, k, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
+	else MakePrefix<uint64_t>(o, k, (uint64_t) ZPDS_MAX_INTVAL + (uint64_t) std::abs(t) );
+}
+
+/**
+* MakePrefix : each prefix item type int32_t
+*
+*/
+template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int32_t t)
+{
+	if (t<0) MakePrefix<uint64_t>(o, k, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
+	else MakePrefix<uint64_t>(o, k, (uint64_t) ZPDS_MAX_INTVAL + (uint64_t) std::abs(t) );
 }
 
 /**

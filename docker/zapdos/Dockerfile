@@ -275,8 +275,8 @@ RUN yum -y install libpqxx-devel
 ENV MVERSION devel
 ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
 
-RUN cd ${MWORKDIR} \
-	&& git clone https://github.com/sroycode/zapdos.git zapdos-${MVERSION} \
+RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
+	&& cd ${MWORKDIR} \
 	&& git checkout ${MVERSION} \
 	&& ln -s ${ZAPDOS_DEPS}/thirdparty ${MWORKDIR}/thirdparty \
 	&& mkdir -p ${MWORKDIR}/build \

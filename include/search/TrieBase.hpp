@@ -87,18 +87,18 @@ public:
 	TrieBase () = default;
 
 	/**
-	* Stem : stemmed version
+	* StemQuery: stem the quer
 	*
 	* @param input
 	*   std::string& input
 	*
 	* @param notlast
-	*   bool not last elem
+	*   bool not last
 	*
 	* @return
-	*   std::string stemmed
+	*   std::string output
 	*/
-	std::string Stem(const std::string& input, bool notlast);
+	std::string StemQuery(std::string& input, bool notlast);
 
 protected:
 	::zpds::remote::GeoHashHelper gh;

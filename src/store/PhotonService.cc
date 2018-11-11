@@ -46,6 +46,7 @@
 #include "utils/SortHelpers.hpp"
 
 #include "store/LookupRecordTable.hpp"
+#include "search/DistanceSlabKeyMaker.hpp"
 
 /**
 * Constructor
@@ -65,6 +66,139 @@ zpds::store::PhotonService::~PhotonService()
 }
 
 // shreos wip
+
+/**
+* RuleSearch : do the search from rule
+*
+*/
+bool zpds::store::PhotonService::RuleSearch (
+    ::zpds::search::UsedParamsT* qr,
+    ::zpds::search::QueryOrderT* rule,
+    ::zpds::store::LookupRecordListT* records,
+    size_t target)
+{
+
+	::zpds::search::SearchTrie trie( stptr->xapath.Get() );
+	::zpds::search::UsedParamsT mp = *qr;
+	auto ploc = mp.mutable_cur();
+
+	// items to populate
+	mp.set_items ( KeepInBound<uint64_t>(rule->rec_count(), 1, mp.items() ) );
+	if (rule->distance_def() > 0 ) mp.set_distance_def( rule->distance_def() );
+	if (rule->distance_band() > 0 ) mp.set_distance_band( rule->distance_band() );
+
+	std::ostringstream extra;
+
+	// input_type
+	switch ( rule->input_type() ) {
+	default:
+		return false;
+		break;
+	case zpds::search::InputTypeE::I_QUERY:
+		mp.set_last_partial(! mp.full_words() );
+		break;
+	}
+
+
+	// limit_type
+	switch ( rule->limit_type() ) {
+	default:
+	case zpds::search::LimitTypeE::L_NONE:
+		break;
+	case zpds::search::LimitTypeE::L_CCODE:
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->ccode(), XAP_CCODE_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_CITY:
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->city() + ploc->ccode(), XAP_CITY_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_PINCODE:
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->pincode() + ploc->ccode(), XAP_PINCODE_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_GEOHASH5:
+		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 5), XAP_GEOHASH5_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_GEOHASH7:
+		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 7), XAP_GEOHASH7_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_GEOHASH9:
+		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 9), XAP_GEOHASH9_PREFIX );
+		break;
+	}
+
+	// search_type
+	switch ( rule->search_type() ) {
+	default:
+	case zpds::search::SearchTypeE::S_DEFAULT:
+		break;
+	case zpds::search::SearchTypeE::S_FULLWORD:
+		mp.set_last_partial( false );
+		break;
+	case zpds::search::SearchTypeE::S_PARTIAL_BEGIN:
+		mp.set_begin_with( true );
+		break;
+	case zpds::search::SearchTypeE::S_PARTIAL:
+		mp.set_all_partial( true );
+		break;
+	case zpds::search::SearchTypeE::S_FIRSTWORD: {
+		auto ss = Split( mp.query() );
+		if ( ss.size() >0) {
+			extra << XAP_FORMAT_SPPL;
+			if ( ( mp.all_partial() ) || ( mp.last_partial() && ss.size()==1 ) )
+				extra << XAP_BEGINPART_PREFIX;
+			else
+				extra << XAP_BEGINFULL_PREFIX;
+			extra << ss.front();
+		}
+		break;
+	}
+		// end switch
+	}
+
+	// set the extra
+	mp.set_extra( extra.str() );
+
+	uint64_t currtime = ZPDS_CURRTIME_MS;
+	// order_type
+	switch ( rule->order_type() ) {
+	default:
+	case zpds::search::OrderTypeE::O_DEFAULT:
+		trie.FindFull( &mp, true );
+		break;
+	case zpds::search::OrderTypeE::O_DIST_BAND:
+		trie.FindNear( &mp, true );
+		break;
+	case zpds::search::OrderTypeE::O_DIST_ONLY:
+		mp.set_distance_band ( 10 );
+		trie.FindNear( &mp, true );
+		break;
+	}
+
+	constexpr double dsmax = XAP_DSLAB_MAX_IMPORTANCE * XAP_DSLAB_MAX_DISTANCE;
+
+	if (mp.ids_size() != mp.sortkeys_size())
+		throw ::zpds::BadCodeException("ids dont match scores");
+
+	for (auto i =0 ; i < mp.ids_size() ; ++i ) {
+		auto r = records->add_record();
+		r->set_id( mp.ids(i) );
+		double sortkey = Xapian::sortable_unserialise ( mp.sortkeys(i));
+		DLOG(INFO) << sortkey ;
+		switch ( rule->order_type() ) {
+		default:
+		case zpds::search::OrderTypeE::O_DEFAULT:
+			r->set_score( sortkey );
+			break;
+		case zpds::search::OrderTypeE::O_DIST_BAND:
+		case zpds::search::OrderTypeE::O_DIST_ONLY:
+			r->set_score( dsmax- sortkey );
+			break;
+		}
+
+	}
+
+	return true;
+}
+
 /**
 * GetCompleteAction : get completion wip
 *
@@ -94,21 +228,21 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 
 	if ( ! qr->full_words() ) qr->set_full_words( qr->raw_query().back() == ' ' );
 
-	::zpds::search::SearchTrie trie( stptr->xapath.Get() );
 
 	{
 		std::string q ;
 		size_t wc =0 ;
 		std::tie(q,wc ) = FlattenCount( qr->raw_query() );
 		auto pos = q.find_last_of(" ");
-		if (pos == std::string::npos) {
+		if ( qr->full_words() ) {
 			q = stptr->jamdb->Correct(qr->lang() , q);
-		}
-		else {
+		} else if (pos != std::string::npos) {
 			q = stptr->jamdb->Correct(qr->lang() , q.substr(0,pos)) + q.substr(pos);
+		} else {
+			// dont correct anything if one word partial
 		}
 		qr->set_no_of_words( wc );
-		qr->set_query( trie.StemQuery( q, (!qr->full_words()) ));
+		qr->set_query( StemQuery( q, (!qr->full_words()) ));
 		DLOG(INFO) << q << " | " << qr->query();
 	}
 
@@ -157,7 +291,7 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 		// populate rec if not exists
 		if ( recmap.find( rule->rec_tagid() ) == recmap.end() ) {
 			reclist.Clear();
-			bool status = trie.RuleSearch( qr, rule, &reclist, counter);
+			bool status = RuleSearch( qr, rule, &reclist, counter);
 			// populate from local
 			for (auto rid = 0 ; rid < reclist.record_size() ; ++ rid ) {
 				auto score = reclist.record(rid).score();

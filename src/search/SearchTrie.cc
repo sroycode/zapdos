@@ -139,9 +139,10 @@ std::string zpds::search::SearchTrie::GetQueryStringPart(
 * FindNear: check if exists nearby
 *
 */
-bool zpds::search::SearchTrie::FindNear(::zpds::search::SearchTrie::DatabaseT& db, ::zpds::search::UsedParamsT* qr, bool reset)
+bool zpds::search::SearchTrie::FindNear(::zpds::search::UsedParamsT* qr, bool reset)
 {
 
+	auto db = Get(qr->lang());
 	auto wordstr_size = wordstr.size();
 	if (reset) wordstr_size = SetQuery(qr->query());
 	if (wordstr_size==0) return false;
@@ -183,7 +184,7 @@ bool zpds::search::SearchTrie::FindNear(::zpds::search::SearchTrie::DatabaseT& d
 	mset = enquire.get_mset(0,qr->items());
 	if (mset.size()>0) {
 		for (Xapian::MSetIterator m = mset.begin(); m != mset.end(); ++m) {
-			qr->add_ids(*m);
+			qr->add_ids( boost::lexical_cast<uint64_t>( m.get_document().get_value( XAP_ROCKSID_POS )) );
 			qr->add_sortkeys( m.get_sort_key() );
 		}
 	}
@@ -194,9 +195,10 @@ bool zpds::search::SearchTrie::FindNear(::zpds::search::SearchTrie::DatabaseT& d
 * FindFull: check if exists nearby
 *
 */
-bool zpds::search::SearchTrie::FindFull(::zpds::search::SearchTrie::DatabaseT& db, ::zpds::search::UsedParamsT* qr,bool reset)
+bool zpds::search::SearchTrie::FindFull(::zpds::search::UsedParamsT* qr,bool reset)
 {
 
+	auto db = Get(qr->lang());
 	auto wordstr_size = wordstr.size();
 	if (reset) wordstr_size = SetQuery(qr->query());
 	if (wordstr_size==0) return false;
@@ -234,41 +236,13 @@ bool zpds::search::SearchTrie::FindFull(::zpds::search::SearchTrie::DatabaseT& d
 	mset = enquire.get_mset(0,qr->items());
 	if (mset.size()>0) {
 		for (Xapian::MSetIterator m = mset.begin(); m != mset.end(); ++m) {
-			qr->add_ids(*m);
+			qr->add_ids( boost::lexical_cast<uint64_t>( m.get_document().get_value( XAP_ROCKSID_POS )) );
 			qr->add_sortkeys( m.get_sort_key() );
 		}
 	}
 	return (mset.size()>0);
 }
 
-/**
-* StemQuery : stem the query
-*
-*/
-std::string zpds::search::SearchTrie::StemQuery(std::string& input, bool notlast)
-{
-
-	std::ostringstream xtmp;
-	bool space=false;
-	auto words = Split(input);
-	size_t xc = words.size();
-	for ( auto it = words.begin() ; it != words.end() ; ++it) {
-		bool to_stem = (it->length() >= XAP_MIN_STEM_LEN );
-		--xc;
-		if ( notlast && xc==0) to_stem=false;
-		if (to_stem) {
-			char word[26];
-			strcpy(word, it->substr(0,25).c_str() );
-			const char* nword = stemmer.kstem_stemmer(word);
-			xtmp << std::string(nword);
-		}
-		else {
-			xtmp << *it;
-		}
-		if (xc>0) xtmp << " ";
-	}
-	return xtmp.str();
-}
 
 /**
 * EstimateExec: estimate execution time
@@ -319,14 +293,14 @@ void zpds::search::SearchTrie::WarmCache(::zpds::search::LangTypeE lang, size_t 
 			}
 		}
 	}
-	WarmCache(db,wvec);
+	DoWarmCache(db,wvec);
 }
 
 /**
-* WarmCache : warms up cache for a set of words
+* DoWarmCache : warms up cache for a set of words
 *
 */
-void zpds::search::SearchTrie::WarmCache(::zpds::search::SearchTrie::DatabaseT& db, zpds::search::SearchTrie::WordVecT wvec)
+void zpds::search::SearchTrie::DoWarmCache(::zpds::search::SearchTrie::DatabaseT& db, zpds::search::SearchTrie::WordVecT wvec)
 {
 
 	WordVecT pvec { "", XAP_BEGINFULL_PREFIX, XAP_BEGINPART_PREFIX, XAP_PARTWORD_PREFIX};
@@ -364,141 +338,5 @@ void zpds::search::SearchTrie::WarmCache(::zpds::search::SearchTrie::DatabaseT& 
 			LOG(INFO) << "Step " << counter << "/" << wvec.size() << " took " << (ZPDS_CURRTIME_MS - currtime)/1000 << " s";
 		}
 	}
-}
-
-
-
-// shreos wip
-/**
-* RuleSearch : do the search from rule
-*
-*/
-bool zpds::search::SearchTrie::RuleSearch(
-    ::zpds::search::UsedParamsT* qr,
-    ::zpds::search::QueryOrderT* rule,
-    ::zpds::store::LookupRecordListT* records,
-    size_t target)
-{
-
-	::zpds::search::UsedParamsT mp = *qr;
-	auto ploc = mp.mutable_cur();
-
-	auto db = Get(mp.lang());
-
-	// items to populate
-	mp.set_items ( KeepInBound<uint64_t>(rule->rec_count(), 1, mp.items() ) );
-	if (rule->distance_def() > 0 ) mp.set_distance_def( rule->distance_def() );
-	if (rule->distance_band() > 0 ) mp.set_distance_band( rule->distance_band() );
-
-	std::ostringstream extra;
-
-	// input_type
-	switch ( rule->input_type() ) {
-	default:
-		return false;
-		break;
-	case zpds::search::InputTypeE::I_QUERY:
-		mp.set_last_partial(! mp.full_words() );
-		break;
-	}
-
-
-	// limit_type
-	switch ( rule->limit_type() ) {
-	default:
-	case zpds::search::LimitTypeE::L_NONE:
-		break;
-	case zpds::search::LimitTypeE::L_CCODE:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->ccode(), XAP_CCODE_PREFIX );
-		break;
-	case zpds::search::LimitTypeE::L_CITY:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->city() + ploc->ccode(), XAP_CITY_PREFIX );
-		break;
-	case zpds::search::LimitTypeE::L_PINCODE:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->pincode() + ploc->ccode(), XAP_PINCODE_PREFIX );
-		break;
-	case zpds::search::LimitTypeE::L_GEOHASH5:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 5), XAP_GEOHASH5_PREFIX );
-		break;
-	case zpds::search::LimitTypeE::L_GEOHASH7:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 7), XAP_GEOHASH7_PREFIX );
-		break;
-	case zpds::search::LimitTypeE::L_GEOHASH9:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 9), XAP_GEOHASH9_PREFIX );
-		break;
-	}
-
-	// search_type
-	switch ( rule->search_type() ) {
-	default:
-	case zpds::search::SearchTypeE::S_DEFAULT:
-		break;
-	case zpds::search::SearchTypeE::S_FULLWORD:
-		mp.set_last_partial( false );
-		break;
-	case zpds::search::SearchTypeE::S_PARTIAL_BEGIN:
-		mp.set_begin_with( true );
-		break;
-	case zpds::search::SearchTypeE::S_PARTIAL:
-		mp.set_all_partial( true );
-		break;
-	case zpds::search::SearchTypeE::S_FIRSTWORD: {
-		auto ss = Split( mp.query() );
-		if ( ss.size() >0) {
-			extra << XAP_FORMAT_SPPL;
-			if ( ( mp.all_partial() ) || ( mp.last_partial() && ss.size()==1 ) )
-				extra << XAP_BEGINPART_PREFIX;
-			else
-				extra << XAP_BEGINFULL_PREFIX;
-			extra << ss.front();
-		}
-		break;
-	}
-		// end switch
-	}
-
-	// set the extra
-	mp.set_extra( extra.str() );
-
-	uint64_t currtime = ZPDS_CURRTIME_MS;
-	// order_type
-	switch ( rule->order_type() ) {
-	default:
-	case zpds::search::OrderTypeE::O_DEFAULT:
-		FindFull( db, &mp, true );
-		break;
-	case zpds::search::OrderTypeE::O_DIST_BAND:
-		FindNear( db, &mp, true );
-		break;
-	case zpds::search::OrderTypeE::O_DIST_ONLY:
-		mp.set_distance_band ( 10 );
-		FindNear( db, &mp, true );
-		break;
-	}
-
-	constexpr double dsmax = XAP_DSLAB_MAX_IMPORTANCE * XAP_DSLAB_MAX_DISTANCE;
-
-	if (mp.ids_size() != mp.sortkeys_size())
-		throw ::zpds::BadCodeException("ids dont match scores");
-
-	for (auto i =0 ; i < mp.ids_size() ; ++i ) {
-		auto r = records->add_record();
-		r->set_id(boost::lexical_cast<uint64_t>( db.get_document( mp.ids(i)).get_value( XAP_ROCKSID_POS )) );
-		double sortkey = Xapian::sortable_unserialise ( mp.sortkeys(i));
-		DLOG(INFO) << sortkey ;
-		switch ( rule->order_type() ) {
-		default:
-		case zpds::search::OrderTypeE::O_DEFAULT:
-			r->set_score( sortkey );
-			break;
-		case zpds::search::OrderTypeE::O_DIST_BAND:
-		case zpds::search::OrderTypeE::O_DIST_ONLY:
-			r->set_score( dsmax- sortkey );
-			break;
-		}
-
-	}
-
-	return true;
 }
 

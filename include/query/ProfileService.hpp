@@ -615,6 +615,7 @@ public:
 					getp.set_not_found( false ); // check
 					getp.set_updated_at( currtime );
 
+
 					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
 
 					// action

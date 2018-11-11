@@ -34,13 +34,13 @@
 #include "search/TrieBase.hpp"
 #include "utils/StringHelpers.hpp"
 
-
 /**
- * Stem : stem
- *
- */
-std::string zpds::search::TrieBase::Stem(const std::string& input, bool notlast)
+* StemQuery : stem the query
+*
+*/
+std::string zpds::search::TrieBase::StemQuery(std::string& input, bool notlast)
 {
+
 	std::ostringstream xtmp;
 	bool space=false;
 	auto words = Split(input);
@@ -58,7 +58,7 @@ std::string zpds::search::TrieBase::Stem(const std::string& input, bool notlast)
 		else {
 			xtmp << *it;
 		}
-		if (xc) xtmp << ' ';
+		if (xc>0) xtmp << " ";
 	}
 	return xtmp.str();
 }

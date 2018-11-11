@@ -12,8 +12,8 @@ if [ -z "${qprof}" ] ; then
 export qprof='{
 "orders" : [
 	{
-		"rec_styp": "S_NONE", "tagid": "#t001", "desc": "places to add",
-		"limit_type": "L_NONE", "search_type": "S_ALLWORDS", "order_type": "O_DIST_BAND", "input_type": "I_QUERY",
+		"rec_styp": "S_NONE", "rec_tagid": "#t001", "rec_count":10, "desc": "places to add",
+		"limit_type": "L_NONE", "search_type": "S_DEFAULT", "order_type": "O_DIST_BAND", "input_type": "I_QUERY",
 		"distance_band": 1000, "weight": 10
 	}
 ]

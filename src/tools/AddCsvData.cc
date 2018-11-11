@@ -50,8 +50,8 @@ static bool IsNonEmptyMessage(const char *flagname, const std::string &value)
 
 DEFINE_string(infile, "", "input file for lookuprecord");
 DEFINE_string(action, "", "input action");
-DEFINE_string(user, "myuser", "user to update for");
-DEFINE_string(passkey, "mypass", "user passkey");
+DEFINE_string(user, "", "user to update for");
+DEFINE_string(passkey, "", "user passkey");
 DEFINE_bool(print, false, "print data");
 DEFINE_bool(update, false, "update data");
 // local url
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	std::string usage(
 	    "The program loads data for types.  Sample usage:\n"
 	    + std::string(argv[0])
-	    + " -action UPSERT -infile file.txt -chunk 50000 -user myuser -passkey mypass -print -update -jurl http://localhost:9200\n"
+	    + " -action UPSERT -infile file.txt -chunk 5000 -user myuser -passkey mypass -print -update -jurl http://localhost:9091\n"
 	    + "UPSERT (25): insert or update\n"
 	    + "UPDATE (25): same as upsert\n"
 	    + "Fields:\n"
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	if ( FLAGS_user.empty() || FLAGS_passkey.empty() ) {
+	if (FLAGS_update && ( FLAGS_user.empty() || FLAGS_passkey.empty() ) ) {
 		std::cerr << "Error: Need user and passkey" << std::endl;
 		std::cerr << usage << std::endl;
 		return 0;

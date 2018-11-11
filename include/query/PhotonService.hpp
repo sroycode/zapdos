@@ -145,7 +145,8 @@ public:
 
 					// aftermath
 					std::string output;
-					pb2json(localparams.mutable_cresp(),output);
+					// pb2json(localparams.mutable_cresp(),output);
+					pb2json(&localparams,output);
 
 					ok=true;
 					this->HttpOKAction(response,request,200,"OK","application/json",output,true);

@@ -38,11 +38,12 @@
 
 #include "query/QueryBase.hpp"
 #include "store/ProfileService.hpp"
+#include "search/TrieBase.hpp"
 
 namespace zpds {
 namespace store {
 
-class PhotonService : virtual public ProfileService {
+class PhotonService : virtual public ProfileService , virtual public ::zpds::search::TrieBase {
 public:
 
 	/**
@@ -81,6 +82,30 @@ public:
 private:
 	::zpds::utils::SharedTable::pointer stptr;
 	boost::mutex mtx;
+
+	/**
+	* RuleSearch : do the search from rule
+	*
+	* @param qr
+	*   ::zpds::search::UsedParamsT* query params
+	*
+	* @param rule
+	*   ::zpds::search::QueryOrderT* query order rule
+	*
+	* @param records
+	*   ::zpds::store::LookupRecordListT* records to fetch
+	*
+	* @param target
+	*   size_t no of records to fetch
+	*
+	* @return
+	*   bool if found
+	*/
+	bool RuleSearch(
+	    ::zpds::search::UsedParamsT* qr,
+	    ::zpds::search::QueryOrderT* rule,
+	    ::zpds::store::LookupRecordListT* records,
+	    size_t target);
 
 };
 } // namespace store

@@ -85,43 +85,6 @@ public:
 	*/
 	virtual ~SearchTrie ();
 
-	/**
-	* RuleSearch : do the search from rule
-	*
-	* @param qr
-	*   ::zpds::search::UsedParamsT* query params
-	*
-	* @param rule
-	*   ::zpds::search::QueryOrderT* query order rule
-	*
-	* @param records
-	*   ::zpds::store::LookupRecordListT* records to fetch
-	*
-	* @param target
-	*   size_t no of records to fetch
-	*
-	* @return
-	*   bool if found
-	*/
-	bool RuleSearch(
-	    ::zpds::search::UsedParamsT* qr,
-	    ::zpds::search::QueryOrderT* rule,
-	    ::zpds::store::LookupRecordListT* records,
-	    size_t target);
-
-	/**
-	* StemQuery: stem the quer
-	*
-	* @param input
-	*   std::string& input
-	*
-	* @param notlast
-	*   bool not last
-	*
-	* @return
-	*   std::string output
-	*/
-	std::string StemQuery(std::string& input, bool notlast);
 
 	/**
 	* WarmCache: cache warm by query
@@ -139,6 +102,34 @@ public:
 	*   none
 	*/
 	void WarmCache(::zpds::search::LangTypeE lang, size_t modno=0, size_t outof=0);
+
+	/**
+	* FindNear: check if exists nearby
+	*
+	* @param qr
+	*   ::zpds::search::UsedParamsT* params
+	*
+	* @param reset
+	*   bool reset wordstr
+	*
+	* @return
+	*   bool if at least one match
+	*/
+	bool FindNear(::zpds::search::UsedParamsT* qr, bool reset);
+
+	/**
+	* FindFull: check if exists
+	*
+	* @param qr
+	*   ::zpds::search::UsedParamsT* query
+	*
+	* @param reset
+	*   bool reset wordstr
+	*
+	* @return
+	*   bool if at least one match
+	*/
+	bool FindFull(::zpds::search::UsedParamsT* qr, bool reset);
 
 protected:
 	const std::string dbpath;
@@ -215,39 +206,6 @@ protected:
 	*/
 	std::string GetQueryStringPart(QueryWordsE qtype, size_t start, size_t end, const std::string& extra, std::string prefix="+" );
 
-	/**
-	* FindNear: check if exists nearby
-	*
-	* @param db
-	*   DatabaseT& db
-	*
-	* @param qr
-	*   ::zpds::search::UsedParamsT* params
-	*
-	* @param reset
-	*   bool reset wordstr
-	*
-	* @return
-	*   bool if at least one match
-	*/
-	bool FindNear(DatabaseT& db, ::zpds::search::UsedParamsT* qr, bool reset);
-
-	/**
-	* FindFull: check if exists
-	*
-	* @param db
-	*   DatabaseT& db
-	*
-	* @param qr
-	*   ::zpds::search::UsedParamsT* query
-	*
-	* @param reset
-	*   bool reset wordstr
-	*
-	* @return
-	*   bool if at least one match
-	*/
-	bool FindFull(DatabaseT& db, ::zpds::search::UsedParamsT* qr, bool reset);
 
 	/**
 	* EstimateExec: estimate time based on keyword freq
@@ -264,7 +222,7 @@ protected:
 	uint64_t EstimateExec(DatabaseT& db, std::string& input);
 
 	/**
-	* WarmCache: cache warm by query
+	* DoWarmCache: cache warm by query
 	*
 	* @param db
 	*   DatabaseT& db
@@ -275,7 +233,7 @@ protected:
 	* @return
 	*   none
 	*/
-	void WarmCache(DatabaseT& db, WordVecT wvec);
+	void DoWarmCache(DatabaseT& db, WordVecT wvec);
 
 };
 
