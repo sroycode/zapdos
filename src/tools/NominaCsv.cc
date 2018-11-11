@@ -50,8 +50,8 @@ static bool IsNonEmptyMessage(const char *flagname, const std::string &value)
 
 // if only name
 DEFINE_bool(onlyname, false, "if set prints only name");
-// range for data
-DEFINE_string(range, "", "record range comma separated sets");
+// where for data
+DEFINE_string(where, "TRUE", "data filters default TRUE");
 // DEFINE_validator(range, &IsNonEmptyMessage);
 // nominatim postgres url
 DEFINE_string(pgparams, "dbname=nominatim user=nominatim host=127.0.0.1 port=6432", "nominatim pg");
@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
 	std::string usage(
 	    "The program converts range of nominatim data to csv for zpds . Sample usage:\n"
 	    + std::string(argv[0])
-	    + " -range 164060 - 164070 , 165204 -pgparams dbname=nominatim user=nominatim host=127.0.0.1 port=6432 \n"
-	    + " -range 164060 - 164070 , -onlyname -pgparams dbname=nominatim user=nominatim host=127.0.0.1 port=6432 \n"
+	    + " -pgparams dbname=nominatim user=nominatim host=127.0.0.1 port=6432 \n"
+	    + " -onlyname -pgparams dbname=nominatim user=nominatim host=127.0.0.1 port=6432 \n"
 	    + "\n"
 	);
 
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 	/** Logging **/
 	google::InitGoogleLogging(argv[0]);
 
-	if ( FLAGS_range.empty() ) {
-		std::cerr << "Error: Need range" << std::endl;
+	if ( FLAGS_where.empty() ) {
+		std::cerr << "Error: Need filters" << std::endl;
 		std::cerr << usage << std::endl;
 		return 0;
 	}
@@ -112,34 +112,21 @@ int main(int argc, char *argv[])
 		pqxx::connection pgconn(FLAGS_pgparams.c_str());
 		pqxx::connection pgconn2(FLAGS_pgparams.c_str());
 		std::vector<uint64_t> ids;
-		std::vector<std::string> lvec;
-		boost::split( lvec, FLAGS_range, boost::is_any_of(","));
-		for (auto& line : lvec ) {
-			std::vector<std::string> rvec;
-			boost::split( rvec, line, boost::is_any_of("-"));
-			for (auto& l : rvec ) boost::algorithm::trim(l);
-			if (rvec.size()==0) continue;
-			auto ifrom = boost::lexical_cast<uint64_t>( rvec.at(0) );
-			auto ito = boost::lexical_cast<uint64_t>( (rvec.size()>1) ? rvec.at(1) : rvec.at(0) );
-			if (ito<ifrom) continue;
-
-			// from placex get ids
-			std::ostringstream xtmp;
-			xtmp << "SELECT place_id, name->'name' as name FROM placex WHERE place_id>=" << ifrom << " AND place_id <= " << ito << ";";
-			pqxx::work txn(pgconn);
-			auto res = txn.exec(xtmp.str());
-			for (auto row : res ) {
-				if ( row[1].is_null() ) continue;
-				if (FLAGS_onlyname) {
-					std::cout << row[1].c_str() << std::endl;
-				}
-				else {
-					::zpds::tools::DataFieldT d { pgconn2, row[0].as<uint64_t>() };
-					d.Print();
-				}
+		// from placex get ids and then only extract those that have name one by one
+		std::ostringstream xtmp;
+		xtmp << "SELECT place_id, name->'name' as name FROM placex WHERE " << FLAGS_where << ";";
+		pqxx::work txn(pgconn);
+		auto res = txn.exec(xtmp.str());
+		for (auto row : res ) {
+			if ( row[1].is_null() ) continue;
+			if (FLAGS_onlyname) {
+				std::cout << row[1].c_str() << std::endl;
+			}
+			else {
+				::zpds::tools::DataFieldT d { pgconn2, row[0].as<uint64_t>() };
+				d.Print();
 			}
 		}
-
 
 	}
 	catch(zpds::BaseException& e) {

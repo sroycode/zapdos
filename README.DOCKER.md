@@ -81,8 +81,7 @@ If you have a different source of data please copy to this file
 
 ```
 docker run --network=my_zapdos -t zapdos \
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" \
--onlyname -range "1-999999999" > ${THOME}/EN.txt 
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" -onlyname  ${THOME}/EN.txt 
 ```
 
 ### Step 3 : Optional : load data for spellchecker 
@@ -120,8 +119,7 @@ This just dumps the names from the nominatim into `${THOME}/search_data.txt` .
 
 ```
 docker run --network=my_zapdos -t zapdos \
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" \
--range "1-999999999" > ${THOME}/data_search.txt 
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" > ${THOME}/data_search.txt 
 ```
 
 ### Step 6 : create a user on zapdos and load the data
