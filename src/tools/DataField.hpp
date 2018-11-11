@@ -90,7 +90,7 @@ struct DataFieldT {
 	std::string   osm_key; // INPUT osm_key
 	std::string   osm_value; // INPUT osm_value
 	std::string   osm_type; // INPUT osm_type
-	std::string   geometry; // INPUT geometry
+	std::string   my_geom; // INPUT geometry
 
 	// additional
 	double area ; // Geometry area in sqm
@@ -137,7 +137,7 @@ struct DataFieldT {
 		        << "osm_type= "<< osm_type << "\n"
 		        << "osm_key= "<< osm_key << "\n"
 		        << "osm_value= "<< osm_value << "\n"
-		        << "geometry length= "<<  geometry.length()<< "\n"
+		        << "my_geom length= "<<  my_geom.length()<< "\n"
 		        << "area= "<< area << "\n"
 		        << "lang= "<< lang << std::endl;
 	}
@@ -189,7 +189,7 @@ struct DataFieldT {
 		        << osm_value << "\t"
 		        << "" << "\t"
 		        << "" << "\t"
-		        << geometry << std::endl;
+		        << my_geom << std::endl;
 	}
 
 	/**
@@ -338,7 +338,7 @@ struct DataFieldT {
 		     << ",address->'street' as a_street , address->'country_code' as a_ccode"
 		     << ",address->'housenumber' as a_house , address->'postcode' as a_pincode"
 		     << ",rank_address, rank_search, parent_place_id, linked_place_id"
-		     << ",ST_y(centroid) AS lat, ST_x(centroid) AS lon , geometry"
+		     << ",ST_y(centroid) AS lat, ST_x(centroid) AS lon , ST_AsText(geometry) as my_geom"
 		     << ",CASE WHEN importance = 0 OR importance IS NULL THEN 0.75-(rank_search::float/40) ELSE importance END AS importance"
 		     << " FROM placex WHERE place_id = " << id << " LIMIT 1;" ;
 		pqxx::result res = txn.exec(xtmp.str());
@@ -363,6 +363,7 @@ struct DataFieldT {
 			TRY_CATCH_LOOP( importance=row.at("importance").as<double>(); )
 			// extra
 			housenumber = row.at("a_house").is_null() ?  row.at("housenumber").c_str() : row.at("a_house").c_str();
+			my_geom = row.at("my_geom").c_str();
 
 		}
 
