@@ -69,27 +69,32 @@ message UsedParamsT {
 }
 
 enum LimitTypeE {
-	L_NONE                                                          =  0;
-	L_CCODE                                                         =  1;
-	L_CITY                                                          =  2;
-	L_PINCODE                                                       =  3;
-	L_GEOHASH5                                                      =  4;
-	L_GEOHASH7                                                      =  5;
-	L_GEOHASH9                                                      =  6;
+	L_NONE                                                          =  0; // default
+	L_CCODE                                                         =  1; // by country code
+	L_CITY                                                          =  2; // by city , avoid , use nbrhash3
+	L_PINCODE                                                       =  3; // by pincode
+
+	L_GEOHASH3                                                      =  4; // geohash 3
+	L_GEOHASH5                                                      =  5; // geohash 5
+	L_GEOHASH7                                                      =  6; // geohash 7
+	L_GEOHASH9                                                      =  7; // geohash 9
+
+	L_NBRHASH3                                                      =  8; // geohash 3 neighbours
+	L_NBRHASH5                                                      =  9; // geohash 5 two level neighbours
 }
 
 enum SearchTypeE {
 	S_DEFAULT                                                       =  0;
-	S_PARTIAL_BEGIN                                                 =  1;
+	S_BEGIN                                                         =  1;
 	S_PARTIAL                                                       =  2;
 	S_FULLWORD                                                      =  3;
 	S_FIRSTWORD                                                     =  4;
 }
 
 enum OrderTypeE {
-	O_DEFAULT                                                       =  0;
-	O_DIST_BAND                                                     =  1;
-	O_DIST_ONLY                                                     =  2;
+	O_DEFAULT                                                       =  0; // imp only no distance other than filters
+	O_DIST_BAND                                                     =  1; // distance and importance band
+	O_DIST_ONLY                                                     =  2; // distance only , shortcut to band with 10m
 }
 
 enum InputTypeE {

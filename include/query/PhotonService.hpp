@@ -80,7 +80,9 @@ public:
 				"f : set 1 if fulltext aka no partial",
 				"limit : page size aka no of results",
 				"lon: detected longitude",
-				"lat: detected latitude"
+				"lat: detected latitude",
+				"ccode : country code",
+				"city : city "
 			}
 		});
 
@@ -132,8 +134,17 @@ public:
 					if ( params.find("lat") != params.end() )
 						cdata->mutable_cur()->set_lat( std::strtod( params.at("lat").c_str(), NULL) );
 
+					// dont_use lat lon
 					if ( params.find("lon") == params.end() || params.find("lon") == params.end() )
 						cdata->mutable_cur()->set_dont_use( true );
+
+					// ccode
+					if ( params.find("ccode") != params.end() )
+						cdata->mutable_cur()->set_ccode( params.at("ccode"));
+
+					// city
+					if ( params.find("city") != params.end() )
+						cdata->mutable_cur()->set_city( params.at("city"));
 
 					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
 

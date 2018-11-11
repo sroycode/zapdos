@@ -95,7 +95,6 @@ bool zpds::store::PhotonService::RuleSearch (
 		return false;
 		break;
 	case zpds::search::InputTypeE::I_QUERY:
-		mp.set_last_partial(! mp.full_words() );
 		break;
 	}
 
@@ -106,22 +105,40 @@ bool zpds::store::PhotonService::RuleSearch (
 	case zpds::search::LimitTypeE::L_NONE:
 		break;
 	case zpds::search::LimitTypeE::L_CCODE:
+		if ( ploc->ccode().empty() ) return false;
 		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->ccode(), XAP_CCODE_PREFIX );
 		break;
 	case zpds::search::LimitTypeE::L_CITY:
+		if ( ploc->city().empty() || ploc->ccode().empty() ) return false;
 		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->city() + ploc->ccode(), XAP_CITY_PREFIX );
 		break;
 	case zpds::search::LimitTypeE::L_PINCODE:
+		if ( ploc->pincode().empty() || ploc->ccode().empty() ) return false;
 		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->pincode() + ploc->ccode(), XAP_PINCODE_PREFIX );
 		break;
+	case zpds::search::LimitTypeE::L_GEOHASH3:
+		if ( ploc->dont_use() ) return false;
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->geohash().substr(0,3), XAP_GEOHASH3_PREFIX );
+		break;
 	case zpds::search::LimitTypeE::L_GEOHASH5:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 5), XAP_GEOHASH5_PREFIX );
+		if ( ploc->dont_use() ) return false;
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->geohash().substr(0,5), XAP_GEOHASH5_PREFIX );
 		break;
 	case zpds::search::LimitTypeE::L_GEOHASH7:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 7), XAP_GEOHASH7_PREFIX );
+		if ( ploc->dont_use() ) return false;
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->geohash().substr(0,7), XAP_GEOHASH7_PREFIX );
 		break;
 	case zpds::search::LimitTypeE::L_GEOHASH9:
-		extra << XAP_FORMAT_SPPL + FormatPrefix( gh.Encode( ploc->lat(), ploc->lon(), 9), XAP_GEOHASH9_PREFIX );
+		if ( ploc->dont_use() ) return false;
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->geohash().substr(0,9), XAP_GEOHASH9_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_NBRHASH3:
+		if ( ploc->dont_use() ) return false;
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->geohash().substr(0,3), XAP_NBRHASH3_PREFIX );
+		break;
+	case zpds::search::LimitTypeE::L_NBRHASH5:
+		if ( ploc->dont_use() ) return false;
+		extra << XAP_FORMAT_SPPL + FormatPrefix( ploc->geohash().substr(0,5), XAP_NBRHASH5_PREFIX );
 		break;
 	}
 
@@ -133,7 +150,7 @@ bool zpds::store::PhotonService::RuleSearch (
 	case zpds::search::SearchTypeE::S_FULLWORD:
 		mp.set_last_partial( false );
 		break;
-	case zpds::search::SearchTypeE::S_PARTIAL_BEGIN:
+	case zpds::search::SearchTypeE::S_BEGIN:
 		mp.set_begin_with( true );
 		break;
 	case zpds::search::SearchTypeE::S_PARTIAL:
