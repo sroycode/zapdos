@@ -86,11 +86,11 @@ private:
 	/**
 	* RuleSearch : do the search from rule
 	*
-	* @param qr
-	*   ::zpds::search::UsedParamsT* query params
+	* @param mp
+	*   ::zpds::search::UsedParamsT query params copy
 	*
 	* @param rule
-	*   ::zpds::search::QueryOrderT* query order rule
+	*   ::zpds::search::QueryOrderT query order rule copy
 	*
 	* @param records
 	*   ::zpds::store::LookupRecordListT* records to fetch
@@ -102,8 +102,8 @@ private:
 	*   bool if found
 	*/
 	bool RuleSearch(
-	    ::zpds::search::UsedParamsT* qr,
-	    ::zpds::search::QueryOrderT* rule,
+	    ::zpds::search::UsedParamsT qr,
+	    ::zpds::search::QueryOrderT rule,
 	    ::zpds::store::LookupRecordListT* records,
 	    size_t target) const;
 

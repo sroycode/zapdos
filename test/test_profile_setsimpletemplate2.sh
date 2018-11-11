@@ -12,6 +12,11 @@ if [ -z "${qprof}" ] ; then
 export qprof='{
 "orders" : [
 	{
+		"rec_styp": "S_NONE", "rec_tagid": "#t001", "rec_count":10, "desc": "one word query for upto 2 chars",
+		"limit_type": "L_NONE", "search_type": "S_FIRSTWORD", "order_type": "O_DEFAULT",
+		"input_type": "I_ONEWORD", "oneword_length" : 2, "weight": 100
+	},
+	{
 		"rec_styp": "S_NONE", "rec_tagid": "#t002", "rec_count":10, "desc": "by distance 1km bands",
 		"limit_type": "L_NONE", "search_type": "S_DEFAULT", "order_type": "O_DIST_BAND", "input_type": "I_DEFAULT",
 		"distance_band": 1000, "weight": 90

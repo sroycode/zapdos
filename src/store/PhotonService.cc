@@ -72,35 +72,40 @@ zpds::store::PhotonService::~PhotonService()
 *
 */
 bool zpds::store::PhotonService::RuleSearch (
-    ::zpds::search::UsedParamsT* qr,
-    ::zpds::search::QueryOrderT* rule,
+    ::zpds::search::UsedParamsT mp,
+    ::zpds::search::QueryOrderT rule,
     ::zpds::store::LookupRecordListT* records,
     size_t target) const
 {
 
 	::zpds::search::SearchTrie trie( stptr->xapath.Get() );
-	::zpds::search::UsedParamsT mp = *qr;
 	auto ploc = mp.mutable_cur();
 
 	// items to populate
-	mp.set_items ( KeepInBound<uint64_t>( (rule->rec_count() >0 ? rule->rec_count() : 10 ), 1, mp.items() ) );
-	if (rule->distance_def() > 0 ) mp.set_distance_def( rule->distance_def() );
-	if (rule->distance_band() > 0 ) mp.set_distance_band( rule->distance_band() );
+	mp.set_items ( KeepInBound<uint64_t>( (rule.rec_count() >0 ? rule.rec_count() : 10 ), 1, mp.items() ) );
+	if (rule.distance_def() > 0 ) mp.set_distance_def( rule.distance_def() );
+	if (rule.distance_band() > 0 ) mp.set_distance_band( rule.distance_band() );
+
+	DLOG(INFO) << mp.DebugString();
 
 	std::ostringstream extra;
 
 	// input_type
-	switch ( rule->input_type() ) {
+	switch ( rule.input_type() ) {
 	default:
 		return false;
 		break;
-	case zpds::search::InputTypeE::I_QUERY:
+	case zpds::search::InputTypeE::I_DEFAULT:
+		break;
+	case zpds::search::InputTypeE::I_ONEWORD:
+		if ( mp.no_of_words() > 1 ) return false;
+		if ( rule.oneword_length()>0 && mp.query().length() > rule.oneword_length() ) return false;
 		break;
 	}
 
 
 	// limit_type
-	switch ( rule->limit_type() ) {
+	switch ( rule.limit_type() ) {
 	default:
 	case zpds::search::LimitTypeE::L_NONE:
 		break;
@@ -143,7 +148,7 @@ bool zpds::store::PhotonService::RuleSearch (
 	}
 
 	// search_type
-	switch ( rule->search_type() ) {
+	switch ( rule.search_type() ) {
 	default:
 	case zpds::search::SearchTypeE::S_DEFAULT:
 		break;
@@ -174,9 +179,11 @@ bool zpds::store::PhotonService::RuleSearch (
 	// set the extra
 	mp.set_extra( extra.str() );
 
+	DLOG(INFO) << mp.DebugString();
+
 	uint64_t currtime = ZPDS_CURRTIME_MS;
 	// order_type
-	switch ( rule->order_type() ) {
+	switch ( rule.order_type() ) {
 	default:
 	case zpds::search::OrderTypeE::O_DEFAULT:
 		trie.FindFull( &mp, true );
@@ -202,7 +209,7 @@ bool zpds::store::PhotonService::RuleSearch (
 		r->set_id( mp.ids(i) );
 		double sortkey = Xapian::sortable_unserialise ( mp.sortkeys(i));
 		DLOG(INFO) << sortkey ;
-		switch ( rule->order_type() ) {
+		switch ( rule.order_type() ) {
 		default:
 		case zpds::search::OrderTypeE::O_DEFAULT:
 			r->set_score( sortkey );
@@ -245,7 +252,10 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 	const uint64_t counter = KeepInBound<uint64_t>(qr->items(), 1, 100);
 	qr->set_items( counter );
 
-	if ( ! qr->full_words() ) qr->set_full_words( qr->raw_query().back() == ' ' );
+	// set last partial
+	qr->set_last_partial( qr->raw_query().back() != ' ' );
+	// set full words if not already set
+	if ( ! qr->full_words() ) qr->set_full_words(! qr->last_partial() );
 
 
 	{
@@ -310,7 +320,7 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 		// populate rec if not exists
 		if ( recmap.find( rule->rec_tagid() ) == recmap.end() ) {
 			reclist.Clear();
-			bool status = RuleSearch( qr, rule, &reclist, counter);
+			bool status = RuleSearch( *qr, *rule, &reclist, counter);
 			// populate from local
 			for (auto rid = 0 ; rid < reclist.record_size() ; ++ rid ) {
 				auto score = reclist.record(rid).score();

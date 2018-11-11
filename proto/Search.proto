@@ -98,7 +98,8 @@ enum OrderTypeE {
 }
 
 enum InputTypeE {
-	I_QUERY                                                         =  0;
+	I_DEFAULT                                                       =  0; // default
+	I_ONEWORD                                                       =  1; // special case oneword query
 }
 
 message QueryOrderT {
@@ -106,6 +107,7 @@ message QueryOrderT {
 	uint64                        weight                             =  2; // INPUT order descending
 	SourceTypeE                   rec_styp                           =  3; // INPUT query record styp
 	uint64                        rec_count                          =  4; // INPUT  max records
+	uint64                        oneword_length                     =  5; // INPUT  max length of oneword query to apply this
 
 	string                        desc                               =  8; // INPUT description of this
 
