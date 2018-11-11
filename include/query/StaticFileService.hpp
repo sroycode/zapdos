@@ -72,7 +72,6 @@ public:
 
 #ifdef ZPDS_BUILD_WITH_CTEMPLATE
 
-
 #endif
 
 	}

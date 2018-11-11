@@ -33,6 +33,8 @@
 
 #include <unordered_map>
 #include <functional>
+#include <boost/lexical_cast.hpp>
+#include <regex>
 #include <sparsepp/spp.h>
 #include <boost/utility/binary.hpp>
 
@@ -264,10 +266,12 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 		std::tie(q,wc ) = FlattenCount( qr->raw_query() );
 		auto pos = q.find_last_of(" ");
 		if ( qr->full_words() ) {
-			q = stptr->jamdb->Correct(qr->lang() , q);
-		} else if (pos != std::string::npos) {
-			q = stptr->jamdb->Correct(qr->lang() , q.substr(0,pos)) + q.substr(pos);
-		} else {
+			q = stptr->jamdb->Correct(qr->lang(), q);
+		}
+		else if (pos != std::string::npos) {
+			q = stptr->jamdb->Correct(qr->lang(), q.substr(0,pos)) + q.substr(pos);
+		}
+		else {
 			// dont correct anything if one word partial
 		}
 		qr->set_no_of_words( wc );
@@ -374,6 +378,7 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 	}
 
 	// populate result
+	const std::regex r("BOX\\(([0-9\\-\\.]*) ([0-9\\-\\.]*),([0-9\\-\\.]*) ([0-9\\-\\.]*)\\)");
 	auto cresp = params->mutable_cresp();
 	cresp->set_type( "FeatureCollection" );
 	size_t populated = 0;
@@ -389,11 +394,23 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 		prop->set_city( it->second->city() );
 		prop->set_country( it->second->country() );
 		prop->set_state( it->second->state() );
-		prop->set_name( PrintWithComma( it->second->fld_name() , it->second->fld_area() ) );
+		prop->set_name( PrintWithComma( it->second->fld_name(), it->second->fld_area() ) );
 		prop->set_address( it->second->address() );
 		prop->set_postcode( it->second->pincode() );
 
 		// TODO : extents
+		try {
+			std::smatch sm;
+			if ( std::regex_search( it->second->geometry(), sm, r) ) {
+				if (sm.size()==5) {
+					prop->add_extent( boost::lexical_cast<double>(sm.str(1) ) );
+					prop->add_extent( boost::lexical_cast<double>(sm.str(2) ) );
+					prop->add_extent( boost::lexical_cast<double>(sm.str(3) ) );
+					prop->add_extent( boost::lexical_cast<double>(sm.str(4) ) );
+				}
+			}
+		}
+		catch (std::exception& e) {}
 
 		auto geom = feat->mutable_geometry();
 		geom->set_type( "Point" );
