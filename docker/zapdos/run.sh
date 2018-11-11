@@ -15,14 +15,12 @@ docker build -t zapdos . \
 
 function make_spell_data () {
 docker run --network=my_zapdos -t zapdos \
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" \
--onlyname -range "1-999999999" > ${THOME}/EN.txt 
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" -onlyname > ${THOME}/EN.txt 
 }
 
 function make_srch_data () {
 docker run --network=my_zapdos -t zapdos \
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" \
--range "1-999999999" > ${THOME}/data_search.txt 
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" > ${THOME}/EN_data.txt 
 }
 
 function load_spell_data () {

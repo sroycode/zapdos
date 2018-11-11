@@ -119,7 +119,7 @@ This just dumps the names from the nominatim into `${THOME}/search_data.txt` .
 
 ```
 docker run --network=my_zapdos -t zapdos \
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" > ${THOME}/data_search.txt 
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=5432" > ${THOME}/EN_data.txt 
 ```
 
 ### Step 6 : create a user on zapdos and load the data
@@ -137,7 +137,7 @@ name=myuser newpass=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
 -t zapdos zpds_addcsv \
 -action UPSERT \
--infile /data1/tmp/data_search.txt \
+-infile /data1/tmp/EN_data.txt \
 -chunk 10000 -user myuser -passkey mypass \
 -update -jurl http://${ZAPDOS_IP}:9091
 ```
