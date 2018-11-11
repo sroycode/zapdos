@@ -54,6 +54,7 @@ DEFINE_bool(warmcache, false, "Warms Cache");
 DEFINE_bool(dryrun, false, "Dry run to load spellcheck etc");
 DEFINE_string(jinpath, "", "overwrite jinpath from cmd line");
 DEFINE_string(shared_secret, "", "overwrite shared_secret from cmd line");
+DEFINE_string(hrpc_thisurl, "", "overwrite hrpc/thisurl from cmd line");
 /* GFlags End */
 
 #include <utils/BaseUtils.hpp>
@@ -199,6 +200,11 @@ int main(int argc, char *argv[])
 		if ( ! FLAGS_jinpath.empty() ) jinpath = FLAGS_jinpath;
 		uint64_t currtime = ZPDS_CURRTIME_MS;
 		stptr->jamdb = std::make_shared<::zpds::jamspell::StoreJam>(jampath, jinpath);
+
+		// hrpc_thisurl
+		if ( ! FLAGS_hrpc_thisurl.empty() ) {
+			MyCFG->Update("hrpc", "thisurl" , FLAGS_hrpc_thisurl );
+		}
 
 #ifdef ZPDS_BUILD_WITH_CTEMPLATE
 		std::string templatedir = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_SYSTEM, "templatedir");
