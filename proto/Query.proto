@@ -101,9 +101,42 @@ message LookupParamsT {
 
 // PhotonService
 
+// record for photon type interface
+
+message PhotonPropT {
+	int64                         osm_id                            =  1; // osm_id
+	string                        osm_key                           =  2; // osm_key like place
+	string                        osm_value                         =  3; // osm_value like hamlet
+	string                        osm_type                          =  4; // osm_type like N
+	string                        city                              =  5; // city name
+	string                        country                           =  6; // country
+	string                        state                             =  7; // state
+	string                        name                              =  8; // name field
+	string                        address                           =  9; // address
+	string                        postcode                          = 10; // pin code
+	string                        area                              = 11; // area
+	repeated double               extent                            = 12; // extent from bbox
+}
+
+message PhotonGeomT {
+	string                        type                              =  1; // like Point
+	repeated double               coordinates                       =  2; // lat lon
+}
+
+message PhotonFeatureT {
+	string                        type                              =  1; // Feature
+	PhotonPropT                   properties                        =  2; // properties
+	PhotonGeomT                   geometry                          =  3; // geometry
+}
+
+message PhotonFeatureListT {
+	string                        type                              =  1; // like FeatureCollection
+	repeated PhotonFeatureT       features                          =  2;
+}
+
 message PhotonParamsT {
 	search.UsedParamsT            cdata                             =  1;
-	store.LookupRecordListT       cresp                             =  2;
+	PhotonFeatureListT            cresp                             =  2;
 
 }
 

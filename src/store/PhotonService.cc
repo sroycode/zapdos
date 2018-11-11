@@ -375,9 +375,32 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 
 	// populate result
 	auto cresp = params->mutable_cresp();
+	cresp->set_type( "FeatureCollection" );
 	size_t populated = 0;
 	for ( auto it = smap.rbegin() ; it != smap.rend() ; ++it) {
-		it->second->Swap( cresp->add_record() );
+		auto feat = cresp->add_features() ;
+		feat->set_type( "Feature" );
+
+		auto prop = feat->mutable_properties();
+		prop->set_osm_id( it->second->osm_id() );
+		prop->set_osm_key( it->second->osm_key() );
+		prop->set_osm_value( it->second->osm_value() );
+		prop->set_osm_type( it->second->osm_type() );
+		prop->set_city( it->second->city() );
+		prop->set_country( it->second->country() );
+		prop->set_state( it->second->state() );
+		prop->set_name( it->second->fld_name() );
+		prop->set_address( it->second->address() );
+		prop->set_postcode( it->second->pincode() );
+		prop->set_area( it->second->fld_area() );
+
+		// TODO : extents
+
+		auto geom = feat->mutable_geometry();
+		geom->set_type( "Point" );
+		geom->add_coordinates( it->second->lon() );
+		geom->add_coordinates( it->second->lat() );
+
 		if (++populated >= counter) break;
 	}
 

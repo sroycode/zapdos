@@ -268,7 +268,7 @@ RUN cd ${ZAPDOS_TEMP} \
 	&& CFLAGS="-I ${ZAPDOS_DEPS}/thirdparty/include -L${ZAPDOS_DEPS}/thirdparty/lib" \
 	./configure --prefix=${ZAPDOS_DEPS}/thirdparty && make && make install
 
-RUN yum -y install libpqxx-devel
+RUN yum -y install libpqxx-devel nginx
 
 ### MAIN 
 
