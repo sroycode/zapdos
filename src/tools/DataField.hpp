@@ -188,7 +188,7 @@ struct DataFieldT {
 		        << osm_key << "\t"
 		        << osm_value << "\t"
 		        << "" << "\t"
-		        << "" << "\t";
+		        << "" << "\t"
 		        << geometry << std::endl;
 	}
 
