@@ -79,54 +79,56 @@ void zpds::tools::LineReader::ReadLookupRecord(
 	record->set_city(strvec[5]);
 	// string          country        =  6 ( INPUT country )
 	record->set_country(strvec[6]);
-	// string          fld_name       =  7 ( INPUT name field )
-	record->set_fld_name(strvec[7]);
-	// string          fld_area       =  8 ( INPUT area field )
-	record->set_fld_area(strvec[8]);
-	// string          address        =  9 ( INPUT address )
-	record->set_address(strvec[9]);
-	// string          pincode        = 10 ( INPUT pin code )
-	record->set_pincode(strvec[10]);
-	// double          accuracy       = 11 ( INPUT accuracy of lat lon in m )
-	if (!strvec[11].empty()) record->set_accuracy( boost::lexical_cast<uint64_t> (strvec[11]) );
-	// double          lat            = 12 ( INPUT latitude )
-	if (!strvec[12].empty()) record->set_lat( boost::lexical_cast<double> (strvec[12]) );
-	// double          lon            = 13 ( INPUT longitude )
-	if (!strvec[13].empty()) record->set_lon( boost::lexical_cast<double> (strvec[13]) );
-	// double          rating         = 14 ( INPUT average rating of place )
-	if (!strvec[14].empty()) record->set_rating( boost::lexical_cast<double> (strvec[14]) );
-	// string          landmark       = 15 ( INPUT landmark )
-	record->set_landmark(strvec[15]);
-	// string          is_in_place    = 16 ( INPUT uniqueid of parent place comma sep )
-	record->set_is_in_place(strvec[16]);
-	// string          tags           = 17 ( INPUT keywords comma sep )
-	record->set_tags(strvec[17]);
-	// string          lang           = 18 ( INPUT language )
-	if (!strvec[18].empty()) {
-		std::string lang = strvec.at(18);
+	// string          state          =  7 ( INPUT state )
+	record->set_state(strvec[7]);
+	// string          fld_name       =  8 ( INPUT name field )
+	record->set_fld_name(strvec[8]);
+	// string          fld_area       =  9 ( INPUT area field )
+	record->set_fld_area(strvec[9]);
+	// string          address        = 10 ( INPUT address )
+	record->set_address(strvec[10]);
+	// string          pincode        = 11 ( INPUT pin code )
+	record->set_pincode(strvec[11]);
+	// double          accuracy       = 12 ( INPUT accuracy of lat lon in m )
+	if (!strvec[12].empty()) record->set_accuracy( boost::lexical_cast<uint64_t> (strvec[12]) );
+	// double          lat            = 13 ( INPUT latitude )
+	if (!strvec[13].empty()) record->set_lat( boost::lexical_cast<double> (strvec[13]) );
+	// double          lon            = 14 ( INPUT longitude )
+	if (!strvec[14].empty()) record->set_lon( boost::lexical_cast<double> (strvec[14]) );
+	// double          rating         = 15 ( INPUT average rating of place )
+	if (!strvec[15].empty()) record->set_rating( boost::lexical_cast<double> (strvec[15]) );
+	// string          landmark       = 16 ( INPUT landmark )
+	record->set_landmark(strvec[16]);
+	// string          is_in_place    = 17 ( INPUT uniqueid of parent place comma sep )
+	record->set_is_in_place(strvec[17]);
+	// string          tags           = 18 ( INPUT keywords comma sep )
+	record->set_tags(strvec[18]);
+	// string          lang           = 19 ( INPUT language )
+	if (!strvec[19].empty()) {
+		std::string lang = strvec.at(19);
 		boost::algorithm::to_upper(lang);
 		const google::protobuf::EnumDescriptor *descriptor = zpds::search::LangTypeE_descriptor();
 		if ( descriptor->FindValueByName( lang ) )
 			record->set_lang( zpds::search::LangTypeE ( descriptor->FindValueByName(lang)->number() ) );
 	}
-	// string          osm_id          = 19 ( INPUT  osm_id )
-	if (!strvec[19].empty()) record->set_osm_id( boost::lexical_cast<int64_t> (strvec[19]) );
-	// string          osm_key         = 20 ( INPUT  osm_key )
-	record->set_osm_key(strvec[20]);
-	// string          osm_value       = 21 ( INPUT  osm_value )
-	record->set_osm_value(strvec[21]);
-	// string          osm_type        = 22 ( INPUT  osm_type )
-	record->set_osm_type(strvec[22]);
-	// SourceTypeE     alias_styp      =  23 ( INPUT record alias source type )
-	if (! strvec[23].empty()) {
+	// string          osm_id          = 20 ( INPUT  osm_id )
+	if (!strvec[20].empty()) record->set_osm_id( boost::lexical_cast<int64_t> (strvec[20]) );
+	// string          osm_key         = 21 ( INPUT  osm_key )
+	record->set_osm_key(strvec[21]);
+	// string          osm_value       = 22 ( INPUT  osm_value )
+	record->set_osm_value(strvec[22]);
+	// string          osm_type        = 23 ( INPUT  osm_type )
+	record->set_osm_type(strvec[23]);
+	// SourceTypeE     alias_styp      = 24 ( INPUT record alias source type )
+	if (! strvec[24].empty()) {
 		const google::protobuf::EnumDescriptor *descriptor = zpds::search::SourceTypeE_descriptor();
-		if ( descriptor->FindValueByName( strvec[23] ) )
-			record->set_alias_styp( zpds::search::SourceTypeE ( descriptor->FindValueByName( strvec[0] )->number() ) );
+		if ( descriptor->FindValueByName( strvec[24] ) )
+			record->set_alias_styp( zpds::search::SourceTypeE ( descriptor->FindValueByName( strvec[24] )->number() ) );
 	}
-	// string          alias_uniqueid   = 24 ( INPUT alias unique id )
-	record->set_alias_uniqueid( strvec[24] );
-	// string          geometry         = 25 ( INPUT geometry )
-	record->set_geometry( strvec[25] );
+	// string          alias_uniqueid   = 25 ( INPUT alias unique id )
+	record->set_alias_uniqueid( strvec[25] );
+	// string          geometry         = 26 ( INPUT geometry )
+	record->set_geometry( strvec[26] );
 
 }
 
@@ -144,7 +146,7 @@ void zpds::tools::LineReader::ReadToLookup(
 			break;
 		case 1: // UPSERT
 		case 2: // UPDATE
-			if (strvec.size()<26) {
+			if (strvec.size()<27) {
 				LOG(INFO) << "Rejected Line no due to size " << counter ;
 				break;
 			}

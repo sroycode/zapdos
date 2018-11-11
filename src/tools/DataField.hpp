@@ -74,6 +74,7 @@ struct DataFieldT {
 	std::string   scode; // INPUT state code
 	std::string   city; // INPUT city name
 	std::string   country; // INPUT country
+	std::string   state; // INPUT state
 	std::string   fld_name; // INPUT name field
 	std::string   fld_area; // INPUT area field
 	std::string   address; // INPUT address
@@ -119,6 +120,7 @@ struct DataFieldT {
 		        << "scode= "<< scode << "\n"
 		        << "city= "<< city << "\n"
 		        << "country= "<< country << "\n"
+		        << "state= "<< state << "\n"
 		        << "fld_name= "<< fld_name << "\n"
 		        << "fld_area= "<< fld_area << "\n"
 		        << "address= "<< address << "\n"
@@ -171,6 +173,7 @@ struct DataFieldT {
 		        << scode << "\t"
 		        << city << "\t"
 		        << country << "\t"
+		        << state << "\t"
 		        << fld_name << "\t"
 		        << fld_area << "\t"
 		        << address << "\t"
@@ -402,6 +405,7 @@ struct DataFieldT {
 
 			if (isaddress && class_type=="place:city") city = name;
 			else if (isaddress && class_type=="place:country") country = name;
+			else if (isaddress && class_type=="place:state") state = name;
 			else if (isaddress && class_type=="place:county") county = name;
 			else if (isaddress && class_type=="place:neighbourhood" ) fld_area += std::string(", ") + name;
 			else if (isaddress && class_type=="place:suburb" ) fld_area += std::string(", ") + name;

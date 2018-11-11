@@ -113,11 +113,12 @@ message LookupRecordT {
 	string                        scode                             =  7; // INPUT state code
 	string                        city                              =  8; // INPUT city name
 	string                        country                           = 14; // INPUT country
-	string                        suggest                           = 15; // suggest field generated
-	string                        fld_name                          = 16; // INPUT name field
-	string                        fld_area                          = 17; // INPUT area field
-	string                        address                           = 18; // INPUT address
-	string                        pincode                           = 19; // INPUT pin code
+	string                        state                             = 15; // INPUT state
+	string                        suggest                           = 16; // suggest field generated
+	string                        fld_name                          = 17; // INPUT name field
+	string                        fld_area                          = 18; // INPUT area field
+	string                        address                           = 19; // INPUT address
+	string                        pincode                           = 20; // INPUT pin code
 
 	double                        accuracy                          = 22; // INPUT accuracy of lat lon in m
 	double                        lat                               = 23; // INPUT latitude
