@@ -8,7 +8,7 @@ This code is work in progress and is to change frequently.
 
 ## What is it
 
-This is a completion engine that sets up a local search from OSM data.
+This is a completion engine that as of now uses Nominatim/OSM data. You can add your own data as well.
 Other geocoding functionality is in the works.
 
 This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`.
