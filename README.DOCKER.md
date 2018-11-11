@@ -126,10 +126,14 @@ zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=54
 
 Find the zapdos IP , start another zapdos docker and use it to load to the already running my_zapdos.
 Please change the myuser and mypass to something of your choice.
+This will create a new profile and add a search template to it.
 
 ```
 ZAPDOS_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my_zapdos`
+# create user
 shared_secret="${SHARED_SECRET}" name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
+# set search template as user
+name=myuser newpass=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
 -t zapdos zpds_addcsv \
 -action UPSERT \

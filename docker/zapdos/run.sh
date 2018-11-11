@@ -42,14 +42,13 @@ docker run \
 
 function load_srch_data () {
 ZAPDOS_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my_zapdos`
-name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
 shared_secret="${SHARED_SECRET}" name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
+name=myuser newpass=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
 -t zapdos zpds_addcsv \
 -action UPSERT \
 -infile /data1/tmp/data_search.txt \
--chunk 10000 -user myuser -passkey mypass -print 
-# -update -jurl http://${ZAPDOS_IP}:9091
+-chunk 10000 -user myuser -passkey mypass -update -jurl http://${ZAPDOS_IP}:9091
 }
 
 if [ $# -ne 1 ] ; then echo "Usage $0 <build|makes|loads|run|maked|loadd>" ; exit 1 ; fi

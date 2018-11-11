@@ -46,22 +46,49 @@ cmake3 -DBOOST_ROOT=/opt/local/boost .. && make
 
 ## Running
 
+This example below assumes two variables are set :
+- `RHOME` is the directory that will have the zapdos data
+- `THOME` is the directory that will have the zapdos dumps which you can delete later , `THOME` is not needed at run time
+
 1. You need to have a config file , see README.CONFIG.md for details. There is a sample in etc for you to edit
+
+2. Getting the data: Assuming you have Nominatim Docker setup and its pgsql is exposed to 6432 ( see README.DOCKER.md ),
+this will dump the names from the nominatim into `${THOME}/EN.txt` and the data in `${THOME}/EN_data.txt` .
+Most users will create their own spell files.
+
+```
+# only name for spelling
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=localhost port=6432" -onlyname  > ${THOME}/EN.txt 
+# actual data
+zpds_nomina -pgparams "dbname=nominatim user=nominatim host=localhost port=6432" > ${THOME}/EN_data.txt 
+```
 
 2. If you want to enable spellcheck , add a file for training in `jinpath` as EN.txt . The jinpath can be set in config and 
 can be overridden at command line. Note this is needed only once so subsequent restarts will not need this.
 
-3. Start the server ( default starts in master mode) . Default config listens 9091 for service + 9092 for intermachine
+3. Start the server ( default starts in master mode) . Default config listens 9091 for service + 9092 for intermachine.
+See step below for creating the spellcheck training file.
 
 ```
-./zpds_server --config ../etc/zpds.conf -jinpath=/path/to/directory
+./zpds_server --config ../etc/zpds.conf -jinpath=${THOME}
 # Subsequent restarts omit the jinpath
 ```
 
-3. To start another server in slave mode (optional) pointing to master started at port 9092 of same machine. You will
+To start another server in slave mode (optional) pointing to master started at port 9092 of same machine. You will
 
 ```
 ./zpds_server --config ../etc/zpds2.conf --master="http://127.0.0.1:9092" -jinpath=/path/to/directory
+```
+
+4. Add the data 
+
+```
+# creates user
+shared_secret="${SHARED_SECRET}" name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
+# loads data
+name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
+# creates search profile for user
+zpds_addcsv -action UPSERT -infile ${THOME}/data_search.txt -user myuser -passkey mypass -update -jurl http://localhost:9091
 ```
 
 ## Testing
