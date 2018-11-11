@@ -130,7 +130,7 @@ void zpds::search::StoreTrie::AddData(::zpds::store::LookupRecordT* record)
 		// handle first word
 		if (i==0) doc.add_posting(XAP_BEGINFULL_PREFIX + wvec.at(i), pos);
 
-		// handle partial words 
+		// handle partial words
 		for (auto j=0; j< wvec.at(i).length() ; ++j) {
 			doc.add_posting(XAP_PARTWORD_PREFIX + wvec.at(i).substr(0,j+1), pos);
 			// special case of first word
@@ -164,17 +164,32 @@ void zpds::search::StoreTrie::AddData(::zpds::store::LookupRecordT* record)
 
 
 	// add geohash ignore if throw
-	if ( (record->lat() !=0.0 || record->lon() !=0.0) ) {
+	if ( ! (record->lat() ==0.0 && record->lon() ==0.0) ) {
 		try {
-			doc.add_term( FormatPrefix( gh.Encode( record->lat(), record->lon(), 5), XAP_GEOHASH5_PREFIX ) );
-			doc.add_term( FormatPrefix( gh.Encode( record->lat(), record->lon(), 7), XAP_GEOHASH7_PREFIX ) );
-			doc.add_term( FormatPrefix( gh.Encode( record->lat(), record->lon(), 9), XAP_GEOHASH9_PREFIX ) );
-			Xapian::LatLongCoords coords;
-			coords.append(Xapian::LatLongCoord(record->lat(),record->lon()));
-			doc.add_value(XAP_LATLON_POS, coords.serialise());
+			std::string hash = gh.Encode( record->lat(), record->lon(), 9);
+
+			// exact geohash
+			doc.add_term( FormatPrefix( hash.substr(0,3), XAP_GEOHASH3_PREFIX ) );
+			doc.add_term( FormatPrefix( hash.substr(0,5), XAP_GEOHASH5_PREFIX ) );
+			doc.add_term( FormatPrefix( hash.substr(0,7), XAP_GEOHASH7_PREFIX ) );
+			doc.add_term( FormatPrefix( hash.substr(0,9), XAP_GEOHASH9_PREFIX ) );
+
+			// 3 char neighbour for city or zone range
+			doc.add_term( FormatPrefix( hash.substr(0,3), XAP_NBRHASH3_PREFIX ) );
+			for (auto it : gh.GetNeighbours(hash.substr(0,3),1)) doc.add_term(FormatPrefix(it, XAP_NBRHASH3_PREFIX));
+
+			// 5 char two level neighbour for locality range
+			doc.add_term( FormatPrefix( hash.substr(0,5), XAP_NBRHASH5_PREFIX ) );
+			for (auto it : gh.GetNeighbours(hash.substr(0,5),1)) doc.add_term(FormatPrefix(it, XAP_NBRHASH5_PREFIX));
+			for (auto it : gh.GetNeighbours(hash.substr(0,5),2)) doc.add_term(FormatPrefix(it, XAP_NBRHASH5_PREFIX));
+
 		}
 		catch (::zpds::BaseException& e) {}
 	}
+
+	Xapian::LatLongCoords coords;
+	coords.append(Xapian::LatLongCoord(record->lat(),record->lon()));
+	doc.add_value(XAP_LATLON_POS, coords.serialise());
 
 	std::string idterm = "Q" + std::to_string(record->id());
 	doc.add_boolean_term(idterm);

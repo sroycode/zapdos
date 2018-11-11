@@ -61,9 +61,14 @@
 #define XAP_CCODE_PREFIX     "e_"
 #define XAP_CITY_PREFIX      "c_"
 #define XAP_PINCODE_PREFIX   "z_"
+
+#define XAP_GEOHASH3_PREFIX  "g3_"
 #define XAP_GEOHASH5_PREFIX  "g5_"
 #define XAP_GEOHASH7_PREFIX  "g7_"
 #define XAP_GEOHASH9_PREFIX  "g9_"
+
+#define XAP_NBRHASH3_PREFIX  "n3_"
+#define XAP_NBRHASH5_PREFIX  "n5_"
 
 #define XAP_TAG_PREFIX       "t_"
 #define XAP_ISINP_PREFIX     "ii_"
