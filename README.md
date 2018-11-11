@@ -58,9 +58,9 @@ Most users will create their own spell files.
 
 ```
 # only name for spelling
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=localhost port=6432" -onlyname  > ${THOME}/EN.txt 
+./zpds_nomina -pgparams "dbname=nominatim user=nominatim host=localhost port=6432" -onlyname  > ${THOME}/EN.txt 
 # actual data
-zpds_nomina -pgparams "dbname=nominatim user=nominatim host=localhost port=6432" > ${THOME}/EN_data.txt 
+./zpds_nomina -pgparams "dbname=nominatim user=nominatim host=localhost port=6432" > ${THOME}/EN_data.txt 
 ```
 
 2. If you want to enable spellcheck , add a file for training in `jinpath` as EN.txt . The jinpath can be set in config and 
@@ -70,6 +70,7 @@ can be overridden at command line. Note this is needed only once so subsequent r
 See step below for creating the spellcheck training file.
 
 ```
+export GLOG_logtostderr=1  # to log to stderr
 ./zpds_server --config ../etc/zpds.conf -jinpath=${THOME}
 # Subsequent restarts omit the jinpath
 ```
