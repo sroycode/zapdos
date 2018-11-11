@@ -389,10 +389,9 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 		prop->set_city( it->second->city() );
 		prop->set_country( it->second->country() );
 		prop->set_state( it->second->state() );
-		prop->set_name( it->second->fld_name() );
+		prop->set_name( PrintWithComma( it->second->fld_name() , it->second->fld_area() ) );
 		prop->set_address( it->second->address() );
 		prop->set_postcode( it->second->pincode() );
-		prop->set_area( it->second->fld_area() );
 
 		// TODO : extents
 

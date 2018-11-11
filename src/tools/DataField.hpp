@@ -38,6 +38,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <pqxx/pqxx>
+#include <limits>
 
 #define TRY_CATCH_LOOP(X) try { X } catch(...){}
 
@@ -112,6 +113,7 @@ struct DataFieldT {
 	*/
 	void PrintDebug()
 	{
+		std::cout.precision(std::numeric_limits< double >::max_digits10);
 		std::cout
 		        << "styp= "<< styp << "\n"
 		        << "uniqueid= "<< placeid << "\n"
@@ -165,6 +167,7 @@ struct DataFieldT {
 	void Print()
 	{
 		// if (! is_useful_for_context() ) return;
+		std::cout.precision(std::numeric_limits< double >::max_digits10);
 		std::cout
 		        << styp << "\t"
 		        << placeid << "\t"
