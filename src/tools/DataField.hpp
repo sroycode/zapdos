@@ -338,7 +338,7 @@ struct DataFieldT {
 		     << ",address->'street' as a_street , address->'country_code' as a_ccode"
 		     << ",address->'housenumber' as a_house , address->'postcode' as a_pincode"
 		     << ",rank_address, rank_search, parent_place_id, linked_place_id"
-		     << ",ST_y(centroid) AS lat, ST_x(centroid) AS lon , ST_AsText(ST_Envelope(geometry)) as my_geom"
+		     << ",ST_y(centroid) AS lat, ST_x(centroid) AS lon , Box2D(geometry) as my_geom"
 		     << ",CASE WHEN importance = 0 OR importance IS NULL THEN 0.75-(rank_search::float/40) ELSE importance END AS importance"
 		     << " FROM placex WHERE place_id = " << id << " LIMIT 1;" ;
 		pqxx::result res = txn.exec(xtmp.str());
