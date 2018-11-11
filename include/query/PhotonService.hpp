@@ -72,20 +72,19 @@ public:
 	{
 		if (!(this->myscope & scope)) return; // scope mismatch
 
-		helpquery->add({scope, "GET _query/api/v1/photon/{lang}/{profile}?{params}", {
+		helpquery->add({scope, "GET _query/api/v1/photon/{profile}?{params}", {
 				"for completion local by profile ",
 				"Parameters:",
 				"q : query text",
+				"lang : language default en",
 				"f : set 1 if fulltext aka no partial",
-				"sortd : set 1 if local should be distance sorted",
-				"nogeo : set 1 if latlong is not found",
 				"limit : page size aka no of results",
 				"lon: detected longitude",
 				"lat: detected latitude"
 			}
 		});
 
-		server->resource["/_query/api/v1/photon/(en)/(.*)$"]["GET"]
+		server->resource["/_query/api/v1/photon/(.*)$"]["GET"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -97,21 +96,23 @@ public:
 					zpds::query::PhotonParamsT localparams;
 					auto cdata = localparams.mutable_cdata();
 
+					// check profile
+					if ( request->path_match[1].length()== 0 )
+						throw ::zpds::InitialException("Invalid Profile Name");
+					cdata->set_name( request->path_match[1] );
+
 					// lang default EN
+					cdata->set_lang(::zpds::search::LangTypeE::EN);
+					if ( params.find("lang") != params.end() )
 					{
-						std::string lang = request->path_match[1];
+						std::string lang = params.at("lang");
 						boost::algorithm::to_upper(lang);
 						const google::protobuf::EnumDescriptor *descriptor = zpds::search::LangTypeE_descriptor();
 						if ( descriptor->FindValueByName( lang ) )
 							cdata->set_lang( zpds::search::LangTypeE ( descriptor->FindValueByName(lang)->number() ) );
 						else
-							cdata->set_lang(::zpds::search::LangTypeE::EN);
+							throw ::zpds::InitialException("This language is not supported");
 					}
-
-					// check profile
-					if ( request->path_match[2].length()== 0 )
-						throw ::zpds::InitialException("Invalid Profile Name");
-					cdata->set_name( request->path_match[2] );
 
 					// query
 					if ( params.find("q") != params.end() )
@@ -119,9 +120,6 @@ public:
 					// fulltext
 					if ( params.find("f") != params.end() )
 						cdata->set_full_words( std::strtoul ( params.at("f").c_str(), nullptr, 10) > 0 );
-					// sort by dist
-					if ( params.find("sortd") != params.end() )
-						cdata->set_sort_by_dist( std::strtoul ( params.at("sortd").c_str(), nullptr, 10) > 0 );
 					// limit
 					cdata->set_items( 10 );
 					if ( params.find("limit") != params.end() )
@@ -133,9 +131,9 @@ public:
 					// lat
 					if ( params.find("lat") != params.end() )
 						cdata->mutable_cur()->set_lat( std::strtod( params.at("lat").c_str(), NULL) );
-					// nogeo       
-					if ( params.find("nogeo") != params.end() )
-						cdata->mutable_cur()->set_dont_use( std::strtoul ( params.at("nogeo").c_str(), nullptr, 10) > 0 );
+
+					if ( params.find("lon") == params.end() || params.find("lon") == params.end() )
+						cdata->mutable_cur()->set_dont_use( true );
 
 					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
 

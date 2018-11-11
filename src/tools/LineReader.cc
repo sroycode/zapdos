@@ -125,6 +125,8 @@ void zpds::tools::LineReader::ReadLookupRecord(
 	}
 	// string          alias_uniqueid   = 24 ( INPUT alias unique id )
 	record->set_alias_uniqueid( strvec[24] );
+	// string          geometry         = 25 ( INPUT geometry )
+	record->set_geometry( strvec[25] );
 
 }
 
@@ -142,7 +144,7 @@ void zpds::tools::LineReader::ReadToLookup(
 			break;
 		case 1: // UPSERT
 		case 2: // UPDATE
-			if (strvec.size()<25) {
+			if (strvec.size()<26) {
 				LOG(INFO) << "Rejected Line no due to size " << counter ;
 				break;
 			}

@@ -16,8 +16,9 @@ export f=${f:="0"};
 
 ## ---- main
 
-${HTTPIE} GET ${TESTURL}/_query/api/v1/photon/${lang}/${profile} \
+${HTTPIE} GET ${TESTURL}/_query/api/v1/photon/${profile} \
 	q=="${q}" \
+	lang=="${lang}" \
 	limit=="${limit}" \
 	lon=="${lon}" \
 	lat=="${lat}"

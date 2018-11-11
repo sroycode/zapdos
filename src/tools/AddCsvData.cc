@@ -84,12 +84,12 @@ int main(int argc, char *argv[])
 	    "The program loads data for types.  Sample usage:\n"
 	    + std::string(argv[0])
 	    + " -action UPSERT -infile file.txt -chunk 5000 -user myuser -passkey mypass -print -update -jurl http://localhost:9091\n"
-	    + "UPSERT (25): insert or update\n"
-	    + "UPDATE (25): same as upsert\n"
+	    + "UPSERT (26): insert or update\n"
+	    + "UPDATE (26): same as upsert\n"
 	    + "Fields:\n"
 			+ "styp uniqueid importance ccode scode city country fld_name fld_area "
 			+ "address pincode accuracy lat lon rating landmark is_in_place tags "
-			+ "osm_id osm_key osm_value osm_type alias_styp alias_uniqueid"
+			+ "osm_id osm_key osm_value osm_type alias_styp alias_uniqueid geometry"
 	    + "\n"
 	);
 

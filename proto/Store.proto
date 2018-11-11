@@ -135,6 +135,8 @@ message LookupRecordT {
 	string                        osm_value                         = 38; // INPUT osm_value like hamlet
 	string                        osm_type                          = 39; // INPUT osm_type like N
 
+	string                        geometry                          = 40; // INPUT geometry
+
 	search.SourceTypeE            alias_styp                        = 48; // INPUT alias source type
 	string                        alias_uniqueid                    = 49; // INPUT alias unique id
 

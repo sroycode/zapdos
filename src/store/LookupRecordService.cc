@@ -401,6 +401,24 @@ bool zpds::store::LookupRecordService::MergeOne(zpds::store::LookupRecordT* mto,
 		++change;
 	}
 
+	// alias_styp
+	if (mto->alias_styp() != mfrom->alias_styp() ) {
+		mto->set_alias_styp( mfrom->alias_styp() ); ;
+		++change;
+	}
+
+	// alias_uniqueid
+	if ((! mfrom->alias_uniqueid().empty()) && (mto->alias_uniqueid() != mfrom->alias_uniqueid()) ) {
+		mto->set_alias_uniqueid( mfrom->alias_uniqueid() ); ;
+		++change;
+	}
+
+	// geometry
+	if ((! mfrom->geometry().empty()) && (mto->geometry() != mfrom->geometry()) ) {
+		mto->set_geometry( mfrom->geometry() ); ;
+		++change;
+	}
+
 	// is_deleted
 	if ( (mfrom->is_deleted() ) && (mto->is_deleted() != mfrom->is_deleted()) ) {
 		mto->set_is_deleted( mfrom->is_deleted() ); ;

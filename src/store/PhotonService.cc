@@ -83,7 +83,7 @@ bool zpds::store::PhotonService::RuleSearch (
 	auto ploc = mp.mutable_cur();
 
 	// items to populate
-	mp.set_items ( KeepInBound<uint64_t>(rule->rec_count(), 1, mp.items() ) );
+	mp.set_items ( KeepInBound<uint64_t>( (rule->rec_count() >0 ? rule->rec_count() : 10 ), 1, mp.items() ) );
 	if (rule->distance_def() > 0 ) mp.set_distance_def( rule->distance_def() );
 	if (rule->distance_band() > 0 ) mp.set_distance_band( rule->distance_band() );
 
@@ -165,9 +165,11 @@ bool zpds::store::PhotonService::RuleSearch (
 		trie.FindFull( &mp, true );
 		break;
 	case zpds::search::OrderTypeE::O_DIST_BAND:
+		if (mp.cur().dont_use()) return false;
 		trie.FindNear( &mp, true );
 		break;
 	case zpds::search::OrderTypeE::O_DIST_ONLY:
+		if (mp.cur().dont_use()) return false;
 		mp.set_distance_band ( 10 );
 		trie.FindNear( &mp, true );
 		break;
