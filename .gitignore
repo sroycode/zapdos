@@ -8,6 +8,7 @@ testdir
 ?.*
 ?
 ??
+etc/shreos*.*
 *.swp
 doxygen
 .DS_Store
