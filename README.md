@@ -15,6 +15,10 @@ Supports rudimentary replication. All write queries go to master, read queries a
 For replication , the service listens to two ports , you can expose the main port to public, the second port is for
 communication between servers. See README.REPLICATION.md for details.
 
+This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`
+The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-compatible endpoint. 
+
+
 ## Run using Docker
 
 The easiest way to take it for a spin is by using docker , follow the instructions in README.DOCKER.md
@@ -85,6 +89,11 @@ name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
 # creates search profile for user
 zpds_addcsv -action UPSERT -infile ${THOME}/EN_data.txt -user myuser -passkey mypass -update -jurl http://localhost:9091
 ```
+
+5. Query
+
+Have a look at `test/test_completion_photon.sh`
+
 
 ## Testing
 
