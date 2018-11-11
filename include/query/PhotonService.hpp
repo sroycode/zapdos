@@ -129,7 +129,7 @@ public:
 
 					// lon
 					if ( params.find("lon") != params.end() )
-						cdata->mutable_cur()->set_lat( std::strtod( params.at("lon").c_str(), NULL) );
+						cdata->mutable_cur()->set_lon( std::strtod( params.at("lon").c_str(), NULL) );
 					// lat
 					if ( params.find("lat") != params.end() )
 						cdata->mutable_cur()->set_lat( std::strtod( params.at("lat").c_str(), NULL) );
