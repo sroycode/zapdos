@@ -88,7 +88,7 @@ void zpds::work::WorkServer::init(zpds::utils::ServerBase::ParamsListT params)
 #endif
 
 		// db setup
-		LOG(INFO) << "Finding last keys  takes abnormally long : " ;
+		LOG(INFO) << "Finding last keys  may take abnormally long : " ;
 		uint64_t last_pkey=0;
 		uint64_t last_lkey=0;
 		zpds::store::StoreLevel s{NULL};

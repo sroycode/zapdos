@@ -178,20 +178,35 @@ int main(int argc, char *argv[])
 		stptr->xapath.Set( xapath );
 		stptr->xapdb = std::make_shared<::zpds::search::StoreTrie>(xapath);
 
-		// spellcheck
-		std::string jampath = MyCFG->Find<std::string>("search", "jampath",true);
+		// datadir
+		std::string datadir = MyCFG->Find<std::string>("work", "datadir");
+		if (datadir.empty()) throw zpds::InitialException("datadir is needed");
+		if (!boost::filesystem::exists(datadir)) boost::filesystem::create_directory(datadir);
+#ifdef ZPDS_USE_SEPARATE_LOGDB
+		// logdatadir
+		std::string logdatadir = MyCFG->Find<std::string>("work", "logdatadir");
+		if (logdatadir.empty()) throw zpds::InitialException("logdatadir is needed");
+		if (!boost::filesystem::exists(logdatadir)) boost::filesystem::create_directory(logdatadir);
+#endif
+
+		// spellcheck store jampath
+		std::string jampath = MyCFG->Find<std::string>("search", "jampath");
+		if (jampath.empty()) throw zpds::InitialException("jampath is needed");
+		if (!boost::filesystem::exists(jampath)) boost::filesystem::create_directory(jampath);
+
+		// spellcheck source jinpath is optional
 		std::string jinpath = MyCFG->Find<std::string>("search", "jinpath",true);
 		if ( ! FLAGS_jinpath.empty() ) jinpath = FLAGS_jinpath;
 		uint64_t currtime = ZPDS_CURRTIME_MS;
 		stptr->jamdb = std::make_shared<::zpds::jamspell::StoreJam>(jampath, jinpath);
 
-		// exit in dryrun - just for spellchecker creation
-		if (FLAGS_dryrun) throw InterruptException();
-
 #ifdef ZPDS_BUILD_WITH_CTEMPLATE
 		std::string templatedir = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_SYSTEM, "templatedir");
 		ctemplate::Template::SetTemplateRootDirectory(templatedir);
 #endif
+
+		// exit in dryrun - just for spellchecker creation
+		if (FLAGS_dryrun) throw InterruptException();
 
 		/** Workserver Params OK */
 		for (auto& p : wks_params) p=MyCFG->Find<std::string>(wks_section,p);
