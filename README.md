@@ -13,7 +13,7 @@ This is a search engine that sets up a local search from OSM data
 Supports rudimentary replication. All write queries go to master, read queries are on slave.
 
 For replication , the service listens to two ports , you can expose the main port to public, the second port is for
-communication between servers.
+communication between servers. See README.REPLICATION.md for details.
 
 ## Run using Docker
 
@@ -73,12 +73,6 @@ See step below for creating the spellcheck training file.
 export GLOG_logtostderr=1  # to log to stderr
 ./zpds_server --config ../etc/zpds.conf -jinpath=${THOME}
 # Subsequent restarts omit the jinpath
-```
-
-To start another server in slave mode (optional) pointing to master started at port 9092 of same machine. You will
-
-```
-./zpds_server --config ../etc/zpds2.conf --master="http://127.0.0.1:9092" -jinpath=/path/to/directory
 ```
 
 4. Add the data 

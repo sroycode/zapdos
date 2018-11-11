@@ -1,5 +1,5 @@
-GET help
-GET info
+GET /help
+GET /info
 
 GET _admin/api/v1/get_profile?{params}
 GET _admin/api/v1/set_profile?{params}

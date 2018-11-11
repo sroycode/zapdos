@@ -38,7 +38,7 @@ ENV PATH ${PATH}:${ZAPDOS_DEPS}/thirdparty/bin
 ENV CPPFLAGS -I/opt/local/include -I/usr/local/include -I${ZAPDOS_DEPS}/thirdparty/include
 ENV CXXFLAGS -I/opt/local/include -I/usr/local/include -I${ZAPDOS_DEPS}/thirdparty/include
 ENV LDFLAGS -L/opt/local/lib -L/usr/local/lib -L${ZAPDOS_DEPS}/thirdparty/lib
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ZAPDOS_DEPS}/thirdparty/lib:${ZAPDOS_SOURCE}/thirdparty/lib64
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ZAPDOS_DEPS}/thirdparty/lib:${ZAPDOS_DEPS}/thirdparty/lib64
 ENV PKG_CONFIG_PATH ${PKG_CONFIG_PATH}:${ZAPDOS_DEPS}/thirdparty/lib/pkgconfig:/usr/local/lib/pkgconfig
 ENV CXXFLAGS -std=c++11
 
@@ -270,6 +270,8 @@ RUN cd ${ZAPDOS_TEMP} \
 
 RUN yum -y install libpqxx-devel nginx
 
+RUN rm -Rf ${ZAPDOS_TEMP}/* ${ZAPDOS_TPSRC}/*
+
 ### MAIN 
 
 RUN echo OK 12131
@@ -286,8 +288,9 @@ RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
 	&& source /opt/rh/devtoolset-7/enable \
 	&& cmake3 -DBOOST_ROOT=${BOOST_ROOT} -DCMAKE_INSTALL_PREFIX=${ZAPDOS_DEPS}/thirdparty .. && make && make install
 
-# Prepare initial data
-# Set up spelling
+COPY run_as_master.sh ${ZAPDOS_SOURCE}/run_as_master.sh
+COPY run_as_slave.sh ${ZAPDOS_SOURCE}/run_as_slave.sh
+COPY zapdos.conf ${ZAPDOS_SOURCE}/zapdos.conf
 
 EXPOSE 9091
 EXPOSE 9092

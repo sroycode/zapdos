@@ -1,6 +1,9 @@
 # Running with Docker
 
+
 The docker containers for nominatim and zapdos can be used thus:
+
+Note: Both the folders contain a run.sh
 
 ## Setting up Nominatim
 
@@ -102,7 +105,6 @@ also supercede this as a command line parameter ( as done in this example )
 
 ```
 cp zapdos.conf ${RHOME}/
-export SHARED_SECRET="SOMETHING"
 
 docker run \
 --restart=unless-stopped \
@@ -110,7 +112,7 @@ docker run \
 -v ${RHOME}:/data \
 --network=my_zapdos \
 --name=my_zapdos \
--d zapdos zpds_server -config /data/zapdos.conf -shared_secret "${SHARED_SECRET}"
+-d zapdos bash /app/zapdos/run_as_master.sh
 ```
 
 ### Step 5 : collect nominatim data for search 
@@ -131,13 +133,13 @@ This will create a new profile and add a search template to it.
 ```
 ZAPDOS_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my_zapdos`
 # create user
-shared_secret="${SHARED_SECRET}" name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
+name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
 # set search template as user
-name=myuser newpass=mypass bash ../../test/test_profile_setsimpletemplate.sh
+name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
 -t zapdos zpds_addcsv \
 -action UPSERT \
--infile /data1/tmp/EN_data.txt \
+-infile /data1/EN_data.txt \
 -chunk 10000 -user myuser -passkey mypass \
 -update -jurl http://${ZAPDOS_IP}:9091
 ```

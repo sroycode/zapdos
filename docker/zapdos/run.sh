@@ -8,7 +8,6 @@ SHARED_SECRET="PLEASE_REPLACE_THIS_BY_YOUR_SHARED_SECRET"
 
 function build () {
 docker build -t zapdos . \
-&& cp zapdos.conf ${RHOME}/zapdos.conf \
 && docker run -v ${RHOME}:/data --network=my_zapdos -t zapdos mkdir -p \
 /data/logs /data/zapdos_logs /data/zapdos_data /data/zapdos_jam /data/zapdos_xap /data/zapdos_jin
 }
@@ -25,7 +24,7 @@ zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=54
 
 function load_spell_data () {
 docker run -v ${RHOME}:/data -v ${THOME}:/data1 --network=my_zapdos \
--t zapdos zpds_server -config /data/zapdos.conf -jinpath=/data1 -dryrun 
+-t zapdos zpds_server -config=/app/zapdos/zapdos.conf -jinpath=/data1 -dryrun 
 }
 
 function run () {
@@ -35,18 +34,19 @@ docker run \
 -v ${RHOME}:/data \
 --network=my_zapdos \
 --name=my_zapdos \
--d zapdos zpds_server -config /data/zapdos.conf -shared_secret "${SHARED_SECRET}"
+-d zapdos bash /app/zapdos/run_as_master.sh
 }
 
 function load_srch_data () {
 ZAPDOS_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my_zapdos`
-shared_secret="${SHARED_SECRET}" name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
-name=myuser newpass=mypass bash ../../test/test_profile_setsimpletemplate.sh
+export TESTURL="http://localhost:9091"
+name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
+name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
 -t zapdos zpds_addcsv \
 -action UPSERT \
--infile /data1/tmp/data_search.txt \
--chunk 10000 -user myuser -passkey mypass -update -jurl http://${ZAPDOS_IP}:9091
+-infile /data1/EN_data.txt \
+-chunk 5000 -user myuser -passkey mypass -update -jurl http://${ZAPDOS_IP}:9091
 }
 
 if [ $# -ne 1 ] ; then echo "Usage $0 <build|makes|loads|run|maked|loadd>" ; exit 1 ; fi
