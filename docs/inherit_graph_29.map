@@ -1,6 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$dd/d00/structasync_1_1detail_1_1is__task_3_01const_01shared__task_3_01T_01_4_01_4.html" title="async::detail::is_task\l\&lt; const shared_task\&lt; T \&gt; \&gt;" alt="" coords="130,5,313,44"/>
-<area shape="rect" id="node3" href="$d8/d20/structasync_1_1detail_1_1is__task_3_01const_01task_3_01T_01_4_01_4.html" title="async::detail::is_task\l\&lt; const task\&lt; T \&gt; \&gt;" alt="" coords="150,68,294,107"/>
-<area shape="rect" id="node4" href="$d5/d2e/structasync_1_1detail_1_1is__task_3_01shared__task_3_01T_01_4_01_4.html" title="async::detail::is_task\l\&lt; shared_task\&lt; T \&gt; \&gt;" alt="" coords="148,131,296,169"/>
-<area shape="rect" id="node5" href="$d9/dfa/structasync_1_1detail_1_1is__task_3_01task_3_01T_01_4_01_4.html" title="async::detail::is_task\l\&lt; task\&lt; T \&gt; \&gt;" alt="" coords="150,193,294,232"/>
-</map>
