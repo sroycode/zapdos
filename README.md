@@ -1,4 +1,6 @@
-# Project Zapdos
+# Project Zapdos 
+
+[![Build Status](https://travis-ci.org/sroycode/zapdos.svg?branch=master)](https://travis-ci.org/sroycode/zapdos)
 
 Local Search with OSM data
 
