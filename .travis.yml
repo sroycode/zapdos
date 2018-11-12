@@ -9,4 +9,4 @@ before_install:
 - docker pull sroycode/zapdos_build
 
 script:
-- docker run sroycode/zapdos_build /bin/bash -c "cd /app/zapdos_temp/zapdos-latest && git pull && mkdir -p build && cd build && source /opt/rh/devtoolset-7/enable && cmake3 -DBOOST_ROOT=/opt/local/boost .. && make"
+- docker run sroycode/zapdos_build -v zapdos:/zapdos /bin/bash -c "cd /zapdos && mkdir -p build && cd build && source /opt/rh/devtoolset-7/enable && cmake3 -DBOOST_ROOT=/opt/local/boost .. && make"
