@@ -1,12 +1,12 @@
+sudo: required
+
 language: cpp
 
-compiler:
-  - gcc
-  - clang
+services:
+  - docker
 
-before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
+before_install:
+- docker pull sroycode/zapdos_build
 
-script: make 
+script:
+- docker run sroycode/zapdos /bin/sh -c "cd /app/zapdos_temp/zapdos-latest && git pull && mkdir -p build && cd build && cmake .. && make"
