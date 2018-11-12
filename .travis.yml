@@ -5,6 +5,10 @@ language: cpp
 services:
   - docker
 
+branches:
+  only:
+  - master
+
 before_install:
 - docker pull sroycode/zapdos_build
 
