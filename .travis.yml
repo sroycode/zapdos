@@ -6,7 +6,7 @@ services:
   - docker
 
 before_install:
-- docker pull --cache-from sroycode/zapdos_build:latest sroycode/zapdos_build:latest
+- docker pull sroycode/zapdos_build
 - docker copy sroycode/zapdos sroycode/zapdos_build:/app/zapdos
 
 script:
