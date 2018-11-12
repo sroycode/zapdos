@@ -274,14 +274,11 @@ RUN rm -Rf ${ZAPDOS_TEMP}/* ${ZAPDOS_TPSRC}/*
 
 ### MAIN 
 
-RUN echo OK 12131
-
-ENV MVERSION devel
+# ENV MVERSION 1.0.0 # target
 ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
 
 RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
 	&& cd ${MWORKDIR} \
-	&& git checkout ${MVERSION} \
 	&& ln -s ${ZAPDOS_DEPS}/thirdparty ${MWORKDIR}/thirdparty \
 	&& mkdir -p ${MWORKDIR}/build \
 	&& cd ${MWORKDIR}/build \

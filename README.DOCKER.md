@@ -1,9 +1,51 @@
 # Running with Docker
 
+There is a convenience script to do most of the work as outlined in the Summary section. 
 
-The docker containers for nominatim and zapdos can be used thus:
 
-Note: Both the folders contain a run.sh
+# Summary 
+
+In docker/nominatim/run.sh:
+
+You will need to set these two variables 
+- `NHOME` is the directory that will have the osm data , inside it a directory `postgresdata` is created for pgsql.
+- `OSMFIL` is the osm dump that resides within it . In the example below it is `india-latest.osm.pbf` 
+
+In docker/zapdos/run.sh
+
+You will need to set these two variables 
+- `RHOME` is the directory that will have the zapdos data
+- `THOME` is the directory that will have the zapdos dumps which you can delete later , `THOME` is not needed at run time
+
+
+```
+# create newtwork
+docker network create my_zapdos
+# get data
+wget --output-document=$NHOME/india-latest.osm.pbf http://download.geofabrik.de/asia/india-latest.osm.pbf
+wget --output-document=$NHOME/wikipedia_article.sql.bin http://www.nominatim.org/data/wikipedia_article.sql.bin
+wget --output-document=$NHOME/wikipedia_redirect.sql.bin http://www.nominatim.org/data/wikipedia_redirect.sql.bin
+# start nominatim and feed the data
+cd docker/nominatim
+bash run.sh build
+bash run.sh run
+# start zapdos and feed the data
+cd ../../docker/zapdos
+bash run.sh build
+# make data
+bash run.sh makes
+bash run.sh maked
+# load spell data as dryrun
+bash run.sh loads
+# start daemon
+bash run.sh run
+# make search data
+# load search data
+bash run.sh loadd
+```
+* The details of these steps are explained below *
+
+# Details
 
 ## Setting up Nominatim
 
