@@ -10,16 +10,19 @@ This code is work in progress and is to change frequently.
 
 ## What is it
 
-This is a completion engine that as of now uses Nominatim/OSM data. You can add your own data as well.
-Other geocoding functionality is in the works.
+1.  As of now this is a completion engine . The reverse geocoding and other functions are in the works.
 
-This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`.
+2.  This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`.
 The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-compatible endpoint. 
 
-Supports rudimentary replication. All write queries go to master, read queries are on slave.
+3. Adaptor for importing Nominatim is provided. You can also use your own data. Other adaptors are wip.
 
-For replication , the service listens to two ports , you can expose the main port to public, the second port is for
-communication between servers. See README.REPLICATION.md for details.
+4. Profile based search . You can create several profiles , each with different set of rules for the same endpoint. 
+
+5. Traine-able spellchecker . The spellchecker can be trained from a file containing training data.
+
+6. Supports rudimentary replication. All write queries go to master, read queries are on slave. If master goes down one slave becomes 
+master. See README.REPLICATION.md for details.
 
 
 ## Run using Docker
