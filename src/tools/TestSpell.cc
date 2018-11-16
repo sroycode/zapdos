@@ -33,7 +33,7 @@
 
 #define ZPDS_DEFAULT_EXE_NAME "zpds_spell"
 #define ZPDS_DEFAULT_EXE_VERSION "1.0.0"
-#define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018"
+#define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018-2019 S Roychowdhury"
 
 #include <iostream>
 #include "jamspell/LangModel.hpp"

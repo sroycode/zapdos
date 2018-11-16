@@ -179,7 +179,7 @@ name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
 # set search template as user
 name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
--t zapdos zpds_addcsv \
+-t zapdos zpds_addlocal \
 -action UPSERT \
 -infile /data1/EN_data.txt \
 -chunk 10000 -user myuser -passkey mypass \

@@ -93,7 +93,7 @@ shared_secret="${SHARED_SECRET}" name=myuser newpass=mypass bash ../../test/test
 # loads data
 name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
 # creates search profile for user
-zpds_addcsv -action UPSERT -infile ${THOME}/EN_data.txt -user myuser -passkey mypass -update -jurl http://localhost:9091
+zpds_addlocal -action UPSERT -infile ${THOME}/EN_data.txt -user myuser -passkey mypass -update -jurl http://localhost:9091
 ```
 
 5. Query

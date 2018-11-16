@@ -40,6 +40,8 @@
 
 #include "store/ProfileService.hpp"
 #include "store/LookupRecordService.hpp"
+#include "store/TextRecordService.hpp"
+#include "store/ExtraAttribService.hpp"
 
 namespace zpds {
 namespace hrpc {
@@ -141,12 +143,36 @@ public:
 						DLOG(INFO) << request->path;
 						break;
 					}
-					case ::zpds::hrpc::M_LK_ADDDATA : {
+					case ::zpds::hrpc::M_ADDDATA_LOCAL : {
 						zpds::query::LookupParamsT data;
 						if (!data.ParseFromString( b64_decode(request->content.string()) ))
 							throw zpds::BadDataException("Bad Protobuf Format");
 						// action
 						zpds::store::LookupRecordService service; //AddData
+						service.AddDataAction(stptr, &data);
+						// aftermath
+						data.SerializeToString(&output);
+						DLOG(INFO) << request->path;
+						break;
+					}
+					case ::zpds::hrpc::M_ADDDATA_TEXT : {
+						zpds::query::TextParamsT data;
+						if (!data.ParseFromString( b64_decode(request->content.string()) ))
+							throw zpds::BadDataException("Bad Protobuf Format");
+						// action
+						zpds::store::TextRecordService service; //AddData
+						service.AddDataAction(stptr, &data);
+						// aftermath
+						data.SerializeToString(&output);
+						DLOG(INFO) << request->path;
+						break;
+					}
+					case ::zpds::hrpc::M_ADDDATA_EXTRA : {
+						zpds::query::ExtraParamsT data;
+						if (!data.ParseFromString( b64_decode(request->content.string()) ))
+							throw zpds::BadDataException("Bad Protobuf Format");
+						// action
+						zpds::store::ExtraAttribService service; //AddData
 						service.AddDataAction(stptr, &data);
 						// aftermath
 						data.SerializeToString(&output);

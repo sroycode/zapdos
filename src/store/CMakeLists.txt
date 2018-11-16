@@ -9,9 +9,13 @@ set(ZPDS_STORE_SOURCES
 		ProfileTable.cc
 		SimpleTemplateTable.cc
 		LookupRecordTable.cc
+		TextRecordTable.cc
+		ExtraAttribTable.cc
 
 		ProfileService.cc
 		LookupRecordService.cc
+		TextRecordService.cc
+		ExtraAttribService.cc
 		PhotonService.cc
    )
 

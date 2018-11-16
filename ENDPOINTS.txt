@@ -20,6 +20,19 @@ POST _data/api/v1/lookuprecord/get
 POST _data/api/v1/lookuprecord/getnd
 GET _data/api/v1/lookuprecord/esbulk?{params}
 
+POST _data/api/v1/textrecord/upsert
+POST _data/api/v1/textrecord/merge
+POST _data/api/v1/textrecord/delete
+POST _data/api/v1/textrecord/get
+POST _data/api/v1/textrecord/getnd
+GET _data/api/v1/textrecord/esbulk?{params}
+
+POST _data/api/v1/extrattrib/upsert
+POST _data/api/v1/extrattrib/merge
+POST _data/api/v1/extrattrib/delete
+POST _data/api/v1/extrattrib/get
+POST _data/api/v1/extrattrib/getnd
+
 GET _query/api/v1/photon/{profile}?{params}
 
 POST _zpds/master/v1/endpoint

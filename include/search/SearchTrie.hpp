@@ -92,6 +92,9 @@ public:
 	* @param lang
 	*   ::zpds::search::LangTypeE lang
 	*
+	* @param lang
+	*   ::zpds::search::DataTypeE dtyp
+	*
 	* @param modno
 	*   size_t  modulus no
 	*
@@ -101,7 +104,7 @@ public:
 	* @return
 	*   none
 	*/
-	void WarmCache(::zpds::search::LangTypeE lang, size_t modno=0, size_t outof=0);
+	void WarmCache(::zpds::search::LangTypeE lang, ::zpds::search::DataTypeE dtyp, size_t modno=0, size_t outof=0);
 
 	/**
 	* FindNear: check if exists nearby
@@ -139,13 +142,16 @@ protected:
 	/**
 	* Get: get the storage instance
 	*
+	* @param ltyp
+	*   ::zpds::search::LangTypeE ltyp
+	*
 	* @param dtyp
-	*   ::zpds::search::LangTypeE dtyp
+	*   ::zpds::search::DataTypeE dtyp
 	*
 	* @return
 	*   DatabaseT&
 	*/
-	DatabaseT& Get(::zpds::search::LangTypeE dtyp);
+	DatabaseT& Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp);
 
 	/**
 	* SetQuery : reset the wordstr

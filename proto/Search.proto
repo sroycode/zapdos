@@ -9,11 +9,20 @@ enum LangTypeE {
 	EN                                                              =  0; // english
 }
 
+// Search Types
+enum DataTypeE {
+	LOCAL                                                           =  0; // local data
+	TEXT                                                            =  1; // wiki data
+}
+
 // Lookup Record Source Types
 enum SourceTypeE {
 	S_NONE                                                          =  0;
 	S_OSM                                                           =  1; // openstreetmaps
 	S_LOCAL                                                         =  2; // your own data
+
+	// for wiki
+	S_TEXT                                                          =  3; // wiki data
 }
 
 // Query DS
@@ -43,6 +52,7 @@ message UsedParamsT {
 
 	LangTypeE                     lang                              =  5; // INPUT language
 	string                        name                              =  6; // INPUT profile name
+	DataTypeE                     dtyp                              =  7; // data type
 
 	uint64                        no_of_words                       = 10; // no of words
 

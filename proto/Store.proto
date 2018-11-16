@@ -17,8 +17,9 @@ enum KeyTypeE {
 	K_PROFILE                                                       = 11;
 	K_SIMPLETEMPLATE                                                = 12;
 
-	K_ELASTICRECORD                                                 = 13;
 	K_LOOKUPRECORD                                                  = 14;
+	K_TEXTRECORD                                                    = 15;
+	K_EXTRAATTRIB                                                   = 16;
 
 	K_LOGNODE                                                       = 29; // must be before K_MAXNODE
 	K_MAXNODE                                                       = 30;
@@ -32,6 +33,12 @@ enum KeyTypeE {
 
 	U_LOOKUPRECORD_STYP_LANG_UNIQUEID                               = 55;
 	I_LOOKUPRECORD_STYP_LANG_LASTUP                                 = 56; // this sequence is for reduced bloom
+
+	U_TEXTRECORD_STYP_LANG_UNIQUEID                                 = 58;
+	I_TEXTRECORD_STYP_LANG_LASTUP                                   = 59;
+
+	U_EXTRAATTRIB_STYP_LANG_UNIQUEID                                = 61;
+	I_EXTRAATTRIB_STYP_LANG_LASTUP                                  = 62;
 
 };
 
@@ -100,7 +107,12 @@ message SimpleTemplateT {
 	bool                          notfound                          = 51;
 }
 
-// record for lookup
+// LookupRecord
+
+message KeyValueT {
+	string                        key                               =  1;
+	string                        value                             =  2;
+}
 
 message LookupRecordT {
 	uint64                        id                                =  1; // record id  
@@ -136,7 +148,9 @@ message LookupRecordT {
 	string                        osm_value                         = 38; // INPUT osm_value like hamlet
 	string                        osm_type                          = 39; // INPUT osm_type like N
 
-	string                        geometry                          = 40; // INPUT geometry
+	string                        geometry                          = 40; // INPUT geometry bbox
+
+	repeated KeyValueT            attr                              = 47; // key value pairs
 
 	search.SourceTypeE            alias_styp                        = 48; // INPUT alias source type
 	string                        alias_uniqueid                    = 49; // INPUT alias unique id
@@ -155,5 +169,72 @@ message LookupRecordT {
 
 message LookupRecordListT {
 	repeated LookupRecordT        record                            =  1;
+}
+
+// TextRecord
+
+message TextRecordT {
+	uint64                        id                                =  1; // record id  
+	search.SourceTypeE            styp                              =  2; // INPUT record source type
+	string                        uniqueid                          =  3; // INPUT unique id
+
+	double                        importance                        =  4; // INPUT importance or equivalent
+
+	string                        ccode                             =  6; // INPUT country code Alpha 3
+	string                        scode                             =  7; // INPUT state code
+	string                        city                              =  8; // INPUT city name
+	string                        country                           = 14; // INPUT country
+	string                        state                             = 15; // INPUT state
+
+	string                        title                             = 17; // INPUT title field
+	string                        summary                           = 18; // INPUT summary field
+	string                        details                           = 19; // INPUT details
+
+	double                        rating                            = 26; // INPUT average rating of place
+
+	string                        tags                              = 35; // INPUT keywords
+
+	repeated KeyValueT            attr                              = 47; // key value pairs
+
+	search.SourceTypeE            alias_styp                        = 48; // INPUT alias source type
+	string                        alias_uniqueid                    = 49; // INPUT alias unique id
+
+	search.LangTypeE              lang                              = 50; // INPUT language
+
+	repeated string               matched_queries                   = 51; // fetched from search
+	double                        score                             = 52; // score from search
+
+	bool                          is_deleted                        = 95; // soft delete
+	uint64                        created_at                        = 96; // created
+	uint64                        updated_at                        = 97; // last updated
+	bool                          notfound                          = 99; // return val 
+
+}
+
+message TextRecordListT {
+	repeated TextRecordT          record                            =  1;
+}
+
+// ExtraAttribT
+
+
+message ExtraAttribT {
+	uint64                        id                                =  1; // record id  
+	search.SourceTypeE            styp                              =  2; // INPUT record source type
+	string                        uniqueid                          =  3; // INPUT unique id
+
+	repeated KeyValueT            attr                              = 47; // key value pairs
+
+	search.LangTypeE              lang                              = 50; // INPUT language
+
+	bool                          is_deleted                        = 95; // soft delete
+	uint64                        created_at                        = 96; // created
+	uint64                        updated_at                        = 97; // last updated
+	bool                          notfound                          = 99; // return val 
+
+}
+
+message ExtraAttribListT {
+	repeated ExtraAttribT         record                            =  1;
 }
 

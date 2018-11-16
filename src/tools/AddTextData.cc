@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file src/tools/AddCsvData.cc
+ * @file src/tools/AddTextData.cc
  * @author  S Roychowdhury
  * @version 1.0.0
  *
@@ -27,13 +27,13 @@
  *
  * @section DESCRIPTION
  *
- *  AddCsvData.cc : add lookuprecord data from csv
+ *  AddTextData.cc : add textrecord data from csv
  *
  */
 
-#define ZPDS_DEFAULT_EXE_NAME "zpds_adddata"
+#define ZPDS_DEFAULT_EXE_NAME "zpds_addtext"
 #define ZPDS_DEFAULT_EXE_VERSION "1.0.0"
-#define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018"
+#define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018-2019 S Roychowdhury"
 
 
 #define STRIP_FLAG_HELP 1
@@ -48,7 +48,7 @@ static bool IsNonEmptyMessage(const char *flagname, const std::string &value)
 	return ( value[0] != '\0' );
 }
 
-DEFINE_string(infile, "", "input file for lookuprecord");
+DEFINE_string(infile, "", "input file for textrecord");
 DEFINE_string(action, "", "input action");
 DEFINE_string(user, "", "user to update for");
 DEFINE_string(passkey, "", "user passkey");
@@ -73,7 +73,7 @@ std::unordered_map<std::string,int> ActionMap = {
 	{ "UPDATE",  2 }
 };
 
-void DoAction(::zpds::query::LookupDataT* data, int qtyp);
+void DoAction(::zpds::query::TextDataT* data, int qtyp);
 
 /** main */
 int main(int argc, char *argv[])
@@ -84,12 +84,11 @@ int main(int argc, char *argv[])
 	    "The program loads data for types.  Sample usage:\n"
 	    + std::string(argv[0])
 	    + " -action UPSERT -infile file.txt -chunk 5000 -user myuser -passkey mypass -print -update -jurl http://localhost:9091\n"
-	    + "UPSERT (26): insert or update\n"
-	    + "UPDATE (26): same as upsert\n"
+	    + "UPSERT (16): insert or update\n"
+	    + "UPDATE (16): same as upsert\n"
 	    + "Fields:\n"
-			+ "styp uniqueid importance ccode scode city country fld_name fld_area "
-			+ "address pincode accuracy lat lon rating landmark is_in_place tags "
-			+ "osm_id osm_key osm_value osm_type alias_styp alias_uniqueid geometry"
+
+			+ "styp uniqueid importance ccode scode city country state title summary details rating tags lang alias_styp alias_uniqueid"
 	    + "\n"
 	);
 
@@ -127,7 +126,7 @@ int main(int argc, char *argv[])
 			throw zpds::InitialException("Invalid action - " + FLAGS_action);
 		}
 		int qtyp = it->second;
-		zpds::query::LookupDataT data;
+		zpds::query::TextDataT data;
 
 		std::ifstream file(FLAGS_infile.c_str());
 		if(!file.is_open())
@@ -146,7 +145,7 @@ int main(int argc, char *argv[])
 			}
 			if (strvec.size()<1) continue; // no data
 			if (strvec[0].empty()) continue; // no uniqueid
-			fdata.ReadToLookup(strvec,&data,qtyp,counter);
+			fdata.ReadToText(strvec,&data,qtyp,counter);
 			if (counter % FLAGS_chunk ==0) {
 				LOG(INFO) << "Sending Chunk: Counter is : " << counter << std::endl;
 				DoAction(&data,qtyp);
@@ -175,7 +174,7 @@ int main(int argc, char *argv[])
 }
 
 
-void DoAction(::zpds::query::LookupDataT* data, int qtyp)
+void DoAction(::zpds::query::TextDataT* data, int qtyp)
 {
 	data->set_name( FLAGS_user);
 	data->set_passkey( FLAGS_passkey);
@@ -187,7 +186,7 @@ void DoAction(::zpds::query::LookupDataT* data, int qtyp)
 	}
 
 	if (FLAGS_update) {
-		std::string url = FLAGS_jurl + "/_data/api/v1/lookuprecord/" + ( (qtyp>1) ? std::string("merge") : std::string("upsert") );
+		std::string url = FLAGS_jurl + "/_data/api/v1/textrecord/" + ( (qtyp>1) ? std::string("merge") : std::string("upsert") );
 
 		auto r = cpr::Post(
 		             cpr::Url{url},

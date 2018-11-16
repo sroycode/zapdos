@@ -58,16 +58,18 @@ zpds::search::SearchTrie::~SearchTrie () {}
 * Get: get the storage instance
 *
 */
-zpds::search::SearchTrie::DatabaseT& zpds::search::SearchTrie::Get(::zpds::search::LangTypeE dtyp)
+zpds::search::SearchTrie::DatabaseT& zpds::search::SearchTrie::Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp)
 {
-	const google::protobuf::EnumDescriptor *d = zpds::search::LangTypeE_descriptor();
-	if ( triemap.find(dtyp) == triemap.end() ) {
-		const std::string xapath{dbpath + "/" + d->FindValueByNumber(dtyp)->name()};
+	const google::protobuf::EnumDescriptor *l = zpds::search::LangTypeE_descriptor();
+	const google::protobuf::EnumDescriptor *d = zpds::search::DataTypeE_descriptor();
+	int f = ltyp * 1000 + dtyp;
+	if ( triemap.find(f) == triemap.end() ) {
+		const std::string xapath{dbpath + "/" + l->FindValueByNumber(ltyp)->name() + "_" + d->FindValueByNumber(dtyp)->name()};
 		if (!boost::filesystem::exists(xapath))
-			throw zpds::BadCodeException("search dir does no exist for this language");
-		triemap[dtyp] = zpds::search::SearchTrie::DatabaseT(xapath, Xapian::DB_OPEN );
+			throw ::zpds::BadCodeException("search dir does no exist for this language");
+		triemap[f] = zpds::search::SearchTrie::DatabaseT(xapath, Xapian::DB_OPEN );
 	}
-	return triemap.at(dtyp);
+	return triemap.at(f);
 }
 
 /**
@@ -142,7 +144,7 @@ std::string zpds::search::SearchTrie::GetQueryStringPart(
 bool zpds::search::SearchTrie::FindNear(::zpds::search::UsedParamsT* qr, bool reset)
 {
 
-	auto db = Get(qr->lang());
+	auto db = Get(qr->lang(), qr->dtyp() );
 	auto wordstr_size = wordstr.size();
 	if (reset) wordstr_size = SetQuery(qr->query());
 	if (wordstr_size==0) return false;
@@ -198,7 +200,7 @@ bool zpds::search::SearchTrie::FindNear(::zpds::search::UsedParamsT* qr, bool re
 bool zpds::search::SearchTrie::FindFull(::zpds::search::UsedParamsT* qr,bool reset)
 {
 
-	auto db = Get(qr->lang());
+	auto db = Get(qr->lang(), qr->dtyp() );
 	auto wordstr_size = wordstr.size();
 	if (reset) wordstr_size = SetQuery(qr->query());
 	if (wordstr_size==0) return false;
@@ -264,10 +266,10 @@ uint64_t zpds::search::SearchTrie::EstimateExec(::zpds::search::SearchTrie::Data
 * WarmCache : warms up cache for db
 *
 */
-void zpds::search::SearchTrie::WarmCache(::zpds::search::LangTypeE lang, size_t modno, size_t outof)
+void zpds::search::SearchTrie::WarmCache(::zpds::search::LangTypeE lang, ::zpds::search::DataTypeE dtyp, size_t modno, size_t outof)
 {
 
-	auto db = Get(lang);
+	auto db = Get(lang, dtyp );
 	zpds::search::SearchTrie::WordVecT wvec ;
 
 	if (outof>modno) {

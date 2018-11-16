@@ -152,13 +152,16 @@ void zpds::work::WorkServer::init(zpds::utils::ServerBase::ParamsListT params)
 				std::string xapath = sharedtable->xapath.Get();
 
 				// collect the ids from index
-				const google::protobuf::EnumDescriptor *e = ::zpds::search::SourceTypeE_descriptor();
-				for (auto i=0 ; i < e->value_count() ; ++i ) {
-					LOG(INFO) << "Warming cache : " << e->value(i)->name();
-					async::parallel_for(async::irange(0, 9), [xapath,i](size_t j) {
-						::zpds::search::SearchTrie trie( xapath );
-						trie.WarmCache( ::zpds::search::LangTypeE(i),j,10);
-					});
+				const google::protobuf::EnumDescriptor *l = ::zpds::search::LangTypeE_descriptor();
+				const google::protobuf::EnumDescriptor *d = ::zpds::search::DataTypeE_descriptor();
+				for (auto i=0 ; i < l->value_count() ; ++i ) {
+					for (auto j=0 ; j < d->value_count() ; ++j ) {
+						LOG(INFO) << "Warming cache : " << l->value(i)->name() << "_" << d->value(j)->name() ;
+						async::parallel_for(async::irange(0, 9), [xapath,i,j](size_t k) {
+							::zpds::search::SearchTrie trie( xapath );
+							trie.WarmCache( ::zpds::search::LangTypeE(i),::zpds::search::DataTypeE(j),k,10);
+						});
+					}
 				}
 
 				LOG(INFO) << "Cache Warming took: " << (ZPDS_CURRTIME_MS - currtime)/1000 << " s";

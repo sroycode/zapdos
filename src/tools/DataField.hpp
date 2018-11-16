@@ -167,7 +167,9 @@ struct DataFieldT {
 	void Print()
 	{
 		// if (! is_useful_for_context() ) return;
-		std::cout.precision(std::numeric_limits< double >::max_digits10);
+		// std::cout.precision(std::numeric_limits< double >::max_digits10);
+		// << (double)((int)(lat*1000000))/(double)1000000 << "\t"
+		std::cout.precision(10);
 		std::cout
 		        << styp << "\t"
 		        << placeid << "\t"

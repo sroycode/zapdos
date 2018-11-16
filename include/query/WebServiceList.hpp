@@ -41,6 +41,8 @@
 
 #include "query/ProfileService.hpp"
 #include "query/LookupRecordService.hpp"
+#include "query/TextRecordService.hpp"
+#include "query/ExtraAttribService.hpp"
 #include "query/PhotonService.hpp"
 
 #define ZPDS_WEBSERVICELIST_SCOPE_HTTP \
@@ -50,6 +52,8 @@
 		zpds::query::StaticFileService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::ProfileService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::LookupRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::TextRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::ExtraAttribService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::PhotonService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); 
 
 #endif // _ZPDS_QUERY_WEBSERVICELIST_HPP_

@@ -43,7 +43,7 @@ export TESTURL="http://localhost:9091"
 name=myuser newpass=mypass bash ../../test/test_profile_newprofile.sh
 name=myuser passkey=mypass bash ../../test/test_profile_setsimpletemplate.sh
 docker run -v ${THOME}:/data1 --network=my_zapdos \
--t zapdos zpds_addcsv \
+-t zapdos zpds_addlocal \
 -action UPSERT \
 -infile /data1/EN_data.txt \
 -chunk 5000 -user myuser -passkey mypass -update -jurl http://${ZAPDOS_IP}:9091

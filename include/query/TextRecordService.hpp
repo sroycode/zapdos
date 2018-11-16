@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file include/query/LookupRecordService.hpp
+ * @file include/query/TextRecordService.hpp
  * @author  S Roychowdhury <sroycode AT gmail DOT com>
  * @version 1.0.0
  *
@@ -27,16 +27,16 @@
  *
  * @section DESCRIPTION
  *
- *  LookupRecordService.hpp : Data input service header
+ *  TextRecordService.hpp : Data input service header
  *
  */
-#ifndef _ZPDS_QUERY_LOOKUP_RECORD_SERVICE_HPP_
-#define _ZPDS_QUERY_LOOKUP_RECORD_SERVICE_HPP_
+#ifndef _ZPDS_QUERY_TEXT_RECORD_SERVICE_HPP_
+#define _ZPDS_QUERY_TEXT_RECORD_SERVICE_HPP_
 
 #include "query/QueryBase.hpp"
 #include "hrpc/HrpcClient.hpp"
 #include "store/ProfileService.hpp"
-#include "store/LookupRecordService.hpp"
+#include "store/TextRecordService.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -44,11 +44,11 @@ namespace zpds {
 namespace query {
 
 template <class HttpServerT>
-class LookupRecordService : public zpds::query::ServiceBase<HttpServerT> {
+class TextRecordService : public zpds::query::ServiceBase<HttpServerT> {
 public:
 
 	/**
-	* LookupRecordService : constructor
+	* TextRecordService : constructor
 	*
 	* @param stptr
 	*   zpds::utils::SharedTable::pointer stptr
@@ -66,7 +66,7 @@ public:
 	*   none
 	*/
 
-	LookupRecordService(
+	TextRecordService(
 	    zpds::utils::SharedTable::pointer stptr,
 	    typename std::shared_ptr<HttpServerT> server,
 	    ::zpds::query::HelpQuery::pointer helpquery,
@@ -75,21 +75,21 @@ public:
 	{
 		if (!(this->myscope & scope)) return; // scope mismatch
 
-		// Endpoint : POST _data/api/v1/lookuprecord/upsert
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/upsert", {
+		// Endpoint : POST _data/api/v1/textrecord/upsert
+		helpquery->add({scope, "POST _data/api/v1/textrecord/upsert", {
 				"Update and overwrite",
-				"Parameters: see LookupDataT"
+				"Parameters: see TextDataT"
 			}
 		});
 
-		// Endpoint : POST _data/api/v1/lookuprecord/merge
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/merge", {
+		// Endpoint : POST _data/api/v1/textrecord/merge
+		helpquery->add({scope, "POST _data/api/v1/textrecord/merge", {
 				"Update and merge",
-				"Parameters: see LookupDataT"
+				"Parameters: see TextDataT"
 			}
 		});
 
-		server->resource["/_data/api/v1/lookuprecord/(upsert|merge)$"]["POST"]
+		server->resource["/_data/api/v1/textrecord/(upsert|merge)$"]["POST"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -99,7 +99,7 @@ public:
 				{
 					bool use_json = this->JsonRequest(request);
 
-					zpds::query::LookupParamsT lparams;
+					zpds::query::TextParamsT lparams;
 					auto ldata = lparams.mutable_ldata();
 
 					if (use_json) {
@@ -129,12 +129,12 @@ public:
 					ldata->clear_passkey();
 
 					if (stptr->is_master.Get()) {
-						::zpds::store::LookupRecordService rs;
+						::zpds::store::TextRecordService rs;
 						rs.AddDataAction(stptr,&lparams);
 					}
 					else {
 						zpds::hrpc::HrpcClient hclient;
-						hclient.SendToMaster(stptr,::zpds::hrpc::M_ADDDATA_LOCAL,&lparams);
+						hclient.SendToMaster(stptr,::zpds::hrpc::M_ADDDATA_TEXT,&lparams);
 					}
 					// aftermath
 
@@ -162,23 +162,23 @@ public:
 			});
 		};
 
-		// Endpoint : POST _data/api/v1/lookuprecord/get
+		// Endpoint : POST _data/api/v1/textrecord/get
 
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/get", {
+		helpquery->add({scope, "POST _data/api/v1/textrecord/get", {
 				"gets the data as json",
-				"Parameters: see LookupDataT, just need stype lang uniqueid"
+				"Parameters: see TextDataT, just need stype lang uniqueid"
 			}
 		});
 
-		// Endpoint : POST _data/api/v1/lookuprecord/getnd
+		// Endpoint : POST _data/api/v1/textrecord/getnd
 
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/getnd", {
+		helpquery->add({scope, "POST _data/api/v1/textrecord/getnd", {
 				"gets the data as ndjson",
-				"Parameters: see LookupDataT, just need stype lang uniqueid"
+				"Parameters: see TextDataT, just need stype lang uniqueid"
 			}
 		});
 
-		server->resource["/_data/api/v1/lookuprecord/get(nd|)$"]["POST"]
+		server->resource["/_data/api/v1/textrecord/get(nd|)$"]["POST"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -189,7 +189,7 @@ public:
 					bool use_json = this->JsonRequest(request);
 					bool use_nd = (request->path_match[1]=="nd");
 
-					zpds::query::LookupParamsT lparams;
+					zpds::query::TextParamsT lparams;
 					auto ldata = lparams.mutable_ldata();
 
 					if (use_json) {
@@ -207,7 +207,7 @@ public:
 
 					// action
 
-					::zpds::store::LookupRecordService rs;
+					::zpds::store::TextRecordService rs;
 					rs.GetDataAction(stptr,&lparams);
 					// aftermath
 					std::string output;
@@ -244,9 +244,9 @@ public:
 			});
 		};
 
-		// Endpoint : GET _data/api/v1/lookuprecord/esbulk
+		// Endpoint : GET _data/api/v1/textrecord/esbulk
 
-		helpquery->add({scope, "GET _data/api/v1/lookuprecord/esbulk?{params}", {
+		helpquery->add({scope, "GET _data/api/v1/textrecord/esbulk?{params}", {
 				"this gets the elastic data",
 				"Parameters:",
 				"index: _index to populate",
@@ -259,7 +259,7 @@ public:
 			}
 		});
 
-		server->resource["/_data/api/v1/lookuprecord/esbulk$"]["GET"]
+		server->resource["/_data/api/v1/textrecord/esbulk$"]["GET"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -268,7 +268,7 @@ public:
 				try
 				{
 					auto params = urldecode( request->query_string );
-					zpds::query::LookupParamsT lparams;
+					zpds::query::TextParamsT lparams;
 
 					// index for es
 					if ( params.find("index") == params.end() )
@@ -324,7 +324,7 @@ public:
 
 					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
 
-					::zpds::store::LookupRecordService rs;
+					::zpds::store::TextRecordService rs;
 					rs.GetIndexDataAction(stptr,&lparams);
 					// aftermath
 					auto ldata = lparams.mutable_ldata();
@@ -373,5 +373,5 @@ private:
 } // namespace query
 } // namespace zpds
 
-#endif // _ZPDS_QUERY_LOOKUP_RECORD_SERVICE_HPP_
+#endif // _ZPDS_QUERY_TEXT_RECORD_SERVICE_HPP_
 

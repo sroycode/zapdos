@@ -83,6 +83,26 @@ public:
 	*/
 	void ReadToLookup(StrVecT strvec, ::zpds::query::LookupDataT* data, int qtyp, size_t counter);
 
+	/**
+	* ReadToText: load to TextDataT
+	*
+	* @param strvec
+	*   StrVecT input vector
+	*
+	* @param data
+	*   ::zpds::query::TextDataT* data
+	*
+	* @param qtyp
+	*   int qtyp
+	*
+	* @param counter
+	*   size_t stating counter
+	*
+	* @return
+	*   none
+	*/
+	void ReadToText(StrVecT strvec, ::zpds::query::TextDataT* data, int qtyp, size_t counter);
+
 private:
 	std::unordered_set<std::string> whatset;
 
@@ -99,6 +119,21 @@ private:
 	*   none
 	*/
 	void ReadLookupRecord(StrVecT& strvec, ::zpds::store::LookupRecordT* record);
+
+	/**
+	* ReadTextRecord: read line vec to TextRecordT
+	*
+	* @param strvec
+	*   StrVecT& input vector
+	*
+	* @param data
+	*   ::zpds::store::TextRecordT* record
+	*
+	* @return
+	*   none
+	*/
+	void ReadTextRecord(StrVecT& strvec, ::zpds::store::TextRecordT* record);
+
 };
 } // namespace tools
 } // namespace zpds

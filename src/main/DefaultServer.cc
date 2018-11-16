@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
 		std::string jampath = MyCFG->Find<std::string>("search", "jampath");
 		if (jampath.empty()) throw zpds::InitialException("jampath is needed");
 		if (!boost::filesystem::exists(jampath)) boost::filesystem::create_directory(jampath);
+		DLOG(INFO) << "Jampath Created";
 
 		// spellcheck source jinpath is optional
 		std::string jinpath = MyCFG->Find<std::string>("search", "jinpath",true);

@@ -236,6 +236,7 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 
 	auto qr = params->mutable_cdata();
 	auto cur = qr->mutable_cur();
+	qr->set_dtyp( ::zpds::search::DataTypeE::LOCAL );
 
 	::zpds::store::SimpleTemplateT one_t;
 	one_t.set_qtyp ( ::zpds::search::QRY_COMPLETION_PHOTON );

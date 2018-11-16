@@ -192,8 +192,16 @@ void zpds::store::StoreTrans::AddToCache(::zpds::utils::SharedTable::pointer stp
 			::zpds::store::LookupRecordT record;
 			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
 
-			if ( to_del ) stptr->xapdb->DelData( &record );
-			else stptr->xapdb->AddData( &record );
+			if ( to_del ) stptr->xapdb->DelLocalData( &record );
+			else stptr->xapdb->AddLocalData( &record );
+			break;
+		}
+		case K_TEXTRECORD: {
+			::zpds::store::TextRecordT record;
+			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
+
+			if ( to_del ) stptr->xapdb->DelTextData( &record );
+			else stptr->xapdb->AddTextData( &record );
 			break;
 		}
 

@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file include/store/LookupRecordService.hpp
+ * @file include/store/ExtraAttribService.hpp
  * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
@@ -27,11 +27,11 @@
  *
  * @section DESCRIPTION
  *
- *  LookupRecordService.hpp : Header for es record data service
+ *  ExtraAttribService.hpp : Header for es record data service
  *
  */
-#ifndef _ZPDS_STORE_LOOKUP_RECORD_SERVICE_HPP_
-#define _ZPDS_STORE_LOOKUP_RECORD_SERVICE_HPP_
+#ifndef _ZPDS_STORE_EXTRA_ATTRIB_SERVICE_HPP_
+#define _ZPDS_STORE_EXTRA_ATTRIB_SERVICE_HPP_
 
 #include "query/QueryBase.hpp"
 #include "store/StoreBase.hpp"
@@ -41,7 +41,7 @@
 namespace zpds {
 namespace store {
 
-class LookupRecordService : public StoreBase  {
+class ExtraAttribService : public StoreBase  {
 public:
 
 	/**
@@ -51,12 +51,12 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::LookupParamsT* esparams
+	*   ::zpds::query::ExtraParamsT* esparams
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::LookupParamsT* esparams);
+	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::ExtraParamsT* esparams);
 
 	/**
 	* GetDataAction : get data
@@ -65,39 +65,25 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::LookupParamsT* esparams
+	*   ::zpds::query::ExtraParamsT* esparams
 	*
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::LookupParamsT* esparams);
-
-	/**
-	* GetIndexDataAction : get data for ES Index
-	*
-	* @param stptr
-	*   ::zpds::utils::SharedTable::pointer stptr
-	*
-	* @param esparams
-	*   ::zpds::query::LookupParamsT* esparams
-	*
-	* @return
-	*   none throws if not ok
-	*/
-	void GetIndexDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::LookupParamsT* esparams);
+	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::ExtraParamsT* esparams);
 
 private:
 	::zpds::remote::GeoHashHelper gh;
 
 	/**
-	* UpsertLookupRecord : LookupRecord data addition
+	* UpsertExtraAttrib : ExtraAttrib data addition
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::LookupRecordT* data type LookupRecord
+	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib
 	*
 	* @param trans
 	*   ::zpds::store::TransactionT* trans
@@ -105,16 +91,16 @@ private:
 	* @return
 	*   bool
 	*/
-	bool UpsertLookupRecord(::zpds::utils::SharedTable::pointer stptr, LookupRecordT* data, TransactionT* trans);
+	bool UpsertExtraAttrib(::zpds::utils::SharedTable::pointer stptr, ExtraAttribT* data, TransactionT* trans);
 
 	/**
-	* MergeLookupRecord : LookupRecord data merging
+	* MergeExtraAttrib : ExtraAttrib data merging
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::LookupRecordT* data type LookupRecord
+	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib
 	*
 	* @param trans
 	*   ::zpds::store::TransactionT* trans
@@ -122,24 +108,24 @@ private:
 	* @return
 	*   bool
 	*/
-	bool MergeLookupRecord(::zpds::utils::SharedTable::pointer stptr, LookupRecordT* data, TransactionT* trans);
+	bool MergeExtraAttrib(::zpds::utils::SharedTable::pointer stptr, ExtraAttribT* data, TransactionT* trans);
 
 	/**
-	* MergeOne : LookupRecord data merging for one record
+	* MergeOne : ExtraAttrib data merging for one record
 	*
 	* @param mto
-	*   ::zpds::store::LookupRecordT* data type LookupRecord merged to
+	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib merged to
 	*
 	* @param mfrom
-	*   ::zpds::store::LookupRecordT* data type LookupRecord merged from
+	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib merged from
 	*
 	* @return
 	*   true if changed
 	*/
-	bool MergeOne(LookupRecordT* mto, LookupRecordT* mfrom);
+	bool MergeOne(ExtraAttribT* mto, ExtraAttribT* mfrom);
 
 
 };
 } // namespace store
 } // namespace zpds
-#endif /* _ZPDS_STORE_LOOKUP_RECORD_SERVICE_HPP_ */
+#endif /* _ZPDS_STORE_EXTRA_ATTRIB_SERVICE_HPP_ */

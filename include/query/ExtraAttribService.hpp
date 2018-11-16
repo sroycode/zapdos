@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file include/query/LookupRecordService.hpp
+ * @file include/query/ExtraAttribService.hpp
  * @author  S Roychowdhury <sroycode AT gmail DOT com>
  * @version 1.0.0
  *
@@ -27,16 +27,16 @@
  *
  * @section DESCRIPTION
  *
- *  LookupRecordService.hpp : Data input service header
+ *  ExtraAttribService.hpp : Data input service header
  *
  */
-#ifndef _ZPDS_QUERY_LOOKUP_RECORD_SERVICE_HPP_
-#define _ZPDS_QUERY_LOOKUP_RECORD_SERVICE_HPP_
+#ifndef _ZPDS_QUERY_EXTRA_ATTRIB_SERVICE_HPP_
+#define _ZPDS_QUERY_EXTRA_ATTRIB_SERVICE_HPP_
 
 #include "query/QueryBase.hpp"
 #include "hrpc/HrpcClient.hpp"
 #include "store/ProfileService.hpp"
-#include "store/LookupRecordService.hpp"
+#include "store/ExtraAttribService.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -44,11 +44,11 @@ namespace zpds {
 namespace query {
 
 template <class HttpServerT>
-class LookupRecordService : public zpds::query::ServiceBase<HttpServerT> {
+class ExtraAttribService : public zpds::query::ServiceBase<HttpServerT> {
 public:
 
 	/**
-	* LookupRecordService : constructor
+	* ExtraAttribService : constructor
 	*
 	* @param stptr
 	*   zpds::utils::SharedTable::pointer stptr
@@ -66,7 +66,7 @@ public:
 	*   none
 	*/
 
-	LookupRecordService(
+	ExtraAttribService(
 	    zpds::utils::SharedTable::pointer stptr,
 	    typename std::shared_ptr<HttpServerT> server,
 	    ::zpds::query::HelpQuery::pointer helpquery,
@@ -75,21 +75,21 @@ public:
 	{
 		if (!(this->myscope & scope)) return; // scope mismatch
 
-		// Endpoint : POST _data/api/v1/lookuprecord/upsert
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/upsert", {
+		// Endpoint : POST _data/api/v1/extraattr/upsert
+		helpquery->add({scope, "POST _data/api/v1/extraattr/upsert", {
 				"Update and overwrite",
-				"Parameters: see LookupDataT"
+				"Parameters: see ExtraDataT"
 			}
 		});
 
-		// Endpoint : POST _data/api/v1/lookuprecord/merge
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/merge", {
+		// Endpoint : POST _data/api/v1/extraattr/merge
+		helpquery->add({scope, "POST _data/api/v1/extraattr/merge", {
 				"Update and merge",
-				"Parameters: see LookupDataT"
+				"Parameters: see ExtraDataT"
 			}
 		});
 
-		server->resource["/_data/api/v1/lookuprecord/(upsert|merge)$"]["POST"]
+		server->resource["/_data/api/v1/extraattr/(upsert|merge)$"]["POST"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -99,7 +99,7 @@ public:
 				{
 					bool use_json = this->JsonRequest(request);
 
-					zpds::query::LookupParamsT lparams;
+					zpds::query::ExtraParamsT lparams;
 					auto ldata = lparams.mutable_ldata();
 
 					if (use_json) {
@@ -129,12 +129,12 @@ public:
 					ldata->clear_passkey();
 
 					if (stptr->is_master.Get()) {
-						::zpds::store::LookupRecordService rs;
+						::zpds::store::ExtraAttribService rs;
 						rs.AddDataAction(stptr,&lparams);
 					}
 					else {
 						zpds::hrpc::HrpcClient hclient;
-						hclient.SendToMaster(stptr,::zpds::hrpc::M_ADDDATA_LOCAL,&lparams);
+						hclient.SendToMaster(stptr,::zpds::hrpc::M_ADDDATA_TEXT,&lparams);
 					}
 					// aftermath
 
@@ -162,23 +162,23 @@ public:
 			});
 		};
 
-		// Endpoint : POST _data/api/v1/lookuprecord/get
+		// Endpoint : POST _data/api/v1/extraattr/get
 
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/get", {
+		helpquery->add({scope, "POST _data/api/v1/extraattr/get", {
 				"gets the data as json",
-				"Parameters: see LookupDataT, just need stype lang uniqueid"
+				"Parameters: see ExtraDataT, just need stype lang uniqueid"
 			}
 		});
 
-		// Endpoint : POST _data/api/v1/lookuprecord/getnd
+		// Endpoint : POST _data/api/v1/extraattr/getnd
 
-		helpquery->add({scope, "POST _data/api/v1/lookuprecord/getnd", {
+		helpquery->add({scope, "POST _data/api/v1/extraattr/getnd", {
 				"gets the data as ndjson",
-				"Parameters: see LookupDataT, just need stype lang uniqueid"
+				"Parameters: see ExtraDataT, just need stype lang uniqueid"
 			}
 		});
 
-		server->resource["/_data/api/v1/lookuprecord/get(nd|)$"]["POST"]
+		server->resource["/_data/api/v1/extraattr/get(nd|)$"]["POST"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -189,7 +189,7 @@ public:
 					bool use_json = this->JsonRequest(request);
 					bool use_nd = (request->path_match[1]=="nd");
 
-					zpds::query::LookupParamsT lparams;
+					zpds::query::ExtraParamsT lparams;
 					auto ldata = lparams.mutable_ldata();
 
 					if (use_json) {
@@ -200,14 +200,11 @@ public:
 						throw InitialException("Only Json Format",M_BAD_JSON);
 					}
 
-					// extra
-					lparams.set_extra( ldata->extra() > 0 );
-
 					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
 
 					// action
 
-					::zpds::store::LookupRecordService rs;
+					::zpds::store::ExtraAttribService rs;
 					rs.GetDataAction(stptr,&lparams);
 					// aftermath
 					std::string output;
@@ -244,127 +241,6 @@ public:
 			});
 		};
 
-		// Endpoint : GET _data/api/v1/lookuprecord/esbulk
-
-		helpquery->add({scope, "GET _data/api/v1/lookuprecord/esbulk?{params}", {
-				"this gets the elastic data",
-				"Parameters:",
-				"index: _index to populate",
-				"type: _type to populate",
-				"styp: record type to get",
-				"lang: language type to get",
-				"last_up: updated after",
-				"last_id: id of last updated optional",
-				"limit: limit optional default 1000 ,max 10k"
-			}
-		});
-
-		server->resource["/_data/api/v1/lookuprecord/esbulk$"]["GET"]
-		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
-			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
-				uint64_t currtime = ZPDS_CURRTIME_MS;
-				bool ok=false;
-
-				try
-				{
-					auto params = urldecode( request->query_string );
-					zpds::query::LookupParamsT lparams;
-
-					// index for es
-					if ( params.find("index") == params.end() )
-						throw zpds::InitialException("index variable needed",M_INVALID_PARAM);
-					std::string e_index{params["index"]};
-
-					// type for es
-					if ( params.find("type") == params.end() )
-						throw zpds::InitialException("type variable needed",M_INVALID_PARAM);
-					std::string e_type{params["type"]};
-
-					// styp default S_NONE
-					if ( params.find("styp") == params.end() ) {
-						const google::protobuf::EnumDescriptor *descriptor = zpds::search::SourceTypeE_descriptor();
-						if ( descriptor->FindValueByName( params["styp"] ) )
-							lparams.set_styp( zpds::search::SourceTypeE ( descriptor->FindValueByName( params["styp"])->number() ) );
-					}
-
-					// lang default EN
-					if ( params.find("lang") == params.end() ) {
-
-						std::string lang = params["lang"];
-						boost::algorithm::to_upper(lang);
-						const google::protobuf::EnumDescriptor *descriptor = zpds::search::LangTypeE_descriptor();
-						if ( descriptor->FindValueByName( lang ) )
-							lparams.set_lang( zpds::search::LangTypeE ( descriptor->FindValueByName(lang)->number() ) );
-					}
-
-					// updated_at
-					if ( params.find("last_up") != params.end() ) {
-						if (params["last_up"].length()>0)
-							lparams.set_last_up( boost::lexical_cast<uint64_t>(params["last_up"]) );
-					}
-
-					// last_id
-					if ( params.find("last_id") != params.end() ) {
-						if (params["last_id"].length()>0)
-							lparams.set_last_id( boost::lexical_cast<uint64_t>(params["last_id"]) );
-					}
-
-					// limit
-					lparams.set_limit( 1000 ); // default limit
-					if ( params.find("limit") != params.end() ) {
-						if (params["limit"].length()>0)
-							lparams.set_limit( boost::lexical_cast<uint64_t>(params["limit"]) );
-					}
-
-					// extra
-					if ( params.find("extra") != params.end() ) {
-						if (params["extra"].length()>0)
-							lparams.set_extra( boost::lexical_cast<uint64_t>(params["last_id"]) > 0 );
-					}
-
-					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
-
-					::zpds::store::LookupRecordService rs;
-					rs.GetIndexDataAction(stptr,&lparams);
-					// aftermath
-					auto ldata = lparams.mutable_ldata();
-					std::stringstream ss;
-					for (auto i=0; i<ldata->records_size(); ++i) {
-						if (ldata->records(i).notfound()) continue;
-						if (ldata->records(i).is_deleted()) {
-							ss << "{ \"delete\" : { \"_index\" : \"" << e_index
-							   << "\", \"_type\" : \"" << e_type
-							   << "\", \"_id\" : \"" << ldata->records(i).id() << "\" } }\n";
-						}
-						else {
-							ss << "{ \"index\" : { \"_index\" : \"" << e_index
-							   << "\", \"_type\" : \"" << e_type
-							   << "\", \"_id\" : \"" << ldata->records(i).id() << "\" } }\n"
-							   << pb2json(ldata->mutable_records(i)) << "\n";
-						}
-					}
-					std::string output = ss.str();
-					ok=true;
-					this->HttpOKAction(response,request,200,"OK","application/x-ndjson",output,true);
-				}
-				catch (zpds::BaseException& e)
-				{
-					std::string output = err2json(e.ecode(),e.what());
-					this->HttpOKAction(response,request,200,"OK","application/json",output,true);
-				}
-				catch (std::exception& e)
-				{
-					std::string output = err2json(M_UNKNOWN,e.what());
-					this->HttpOKAction(response,request,200,"OK","application/json",output,true);
-				}
-				catch (...)
-				{
-					this->HttpErrorAction(response,request,500,"INTERNAL SERVER ERROR");
-				}
-				LOG(INFO) << request->path << " ms: " << ZPDS_CURRTIME_MS - currtime;
-			});
-		};
-
 	}
 
 private:
@@ -373,5 +249,5 @@ private:
 } // namespace query
 } // namespace zpds
 
-#endif // _ZPDS_QUERY_LOOKUP_RECORD_SERVICE_HPP_
+#endif // _ZPDS_QUERY_EXTRA_ATTRIB_SERVICE_HPP_
 

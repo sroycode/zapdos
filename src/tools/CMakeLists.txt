@@ -12,14 +12,15 @@ target_link_libraries(zpds_dumpdb
 
 set(TOOL_TARGETS ${TOOL_TARGETS} zpds_dumpdb)
 
-# zpds_addcsv
 
-add_executable(zpds_addcsv
-	AddCsvData.cc
+# zpds_addlocal
+
+add_executable(zpds_addlocal
+	AddLocalData.cc
 	LineReader.cc
 	../query/ProtoJson.cc
 )
-target_link_libraries(zpds_addcsv
+target_link_libraries(zpds_addlocal
 	${CMAKE_THREAD_LIBS_INIT}
 	${GLOG_LIBRARIES}
 	${GFLAGS_LIBRARIES}
@@ -30,7 +31,27 @@ target_link_libraries(zpds_addcsv
 	zpds_cpr
 )
 
-set(TOOL_TARGETS ${TOOL_TARGETS} zpds_addcsv)
+set(TOOL_TARGETS ${TOOL_TARGETS} zpds_addlocal)
+
+# zpds_addtext
+
+add_executable(zpds_addtext
+	AddTextData.cc
+	LineReader.cc
+	../query/ProtoJson.cc
+)
+target_link_libraries(zpds_addtext
+	${CMAKE_THREAD_LIBS_INIT}
+	${GLOG_LIBRARIES}
+	${GFLAGS_LIBRARIES}
+	${Boost_LIBRARIES}
+	${PROTOBUF_LIBRARIES}
+	${CURL_LIBRARIES}
+	zpds_proto
+	zpds_cpr
+)
+
+set(TOOL_TARGETS ${TOOL_TARGETS} zpds_addtext)
 
 # zpds_spell
 

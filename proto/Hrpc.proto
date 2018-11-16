@@ -9,7 +9,9 @@ enum MasterCmdTypeE {
 	M_NEWPROFILE                                                    =  1;
 	M_SETPROFILE                                                    =  2;
 	M_SETSIMPLETEMPLATE                                             =  3;
-	M_LK_ADDDATA                                                    =  4;
+	M_ADDDATA_LOCAL                                                 =  4;
+	M_ADDDATA_TEXT                                                  =  5;
+	M_ADDDATA_EXTRA                                                 =  6;
 
 }
 

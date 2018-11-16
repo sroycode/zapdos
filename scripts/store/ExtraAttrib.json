@@ -1,0 +1,29 @@
+
+{
+	"pkey" : "K_EXTRAATTRIB",
+	"name" : "ExtraAttrib",
+	"namespace" : "zpds::store",
+	"desc" : " extraattrib",
+	"pname" : "extraattrib",
+	"uindex" : [
+		{
+			"keytype" : "U_EXTRAATTRIB_STYP_LANG_UNIQUEID",
+			"keys" : [
+				{ "name" : "styp", "type" : "int32_t" },
+				{ "name" : "lang", "type" : "int32_t" },
+				{ "name" : "uniqueid", "type" : "std::string" }
+			]
+		}
+	],
+	"sindex" : [
+		{
+			"keytype" : "I_EXTRAATTRIB_STYP_LANG_LASTUP",
+			"keys" : [
+				{ "name" : "styp", "type" : "int32_t" },
+				{ "name" : "lang", "type" : "int32_t" },
+				{ "name" : "updated_at", "type" : "uint64_t" }
+			]
+		}
+	],
+	"project" : "zapdos"
+}

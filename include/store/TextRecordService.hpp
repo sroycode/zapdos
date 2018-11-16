@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file include/store/LookupRecordService.hpp
+ * @file include/store/TextRecordService.hpp
  * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
@@ -27,11 +27,11 @@
  *
  * @section DESCRIPTION
  *
- *  LookupRecordService.hpp : Header for es record data service
+ *  TextRecordService.hpp : Header for es record data service
  *
  */
-#ifndef _ZPDS_STORE_LOOKUP_RECORD_SERVICE_HPP_
-#define _ZPDS_STORE_LOOKUP_RECORD_SERVICE_HPP_
+#ifndef _ZPDS_STORE_TEXT_RECORD_SERVICE_HPP_
+#define _ZPDS_STORE_TEXT_RECORD_SERVICE_HPP_
 
 #include "query/QueryBase.hpp"
 #include "store/StoreBase.hpp"
@@ -41,7 +41,7 @@
 namespace zpds {
 namespace store {
 
-class LookupRecordService : public StoreBase  {
+class TextRecordService : public StoreBase  {
 public:
 
 	/**
@@ -51,12 +51,12 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::LookupParamsT* esparams
+	*   ::zpds::query::TextParamsT* esparams
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::LookupParamsT* esparams);
+	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::TextParamsT* esparams);
 
 	/**
 	* GetDataAction : get data
@@ -65,13 +65,13 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::LookupParamsT* esparams
+	*   ::zpds::query::TextParamsT* esparams
 	*
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::LookupParamsT* esparams);
+	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::TextParamsT* esparams);
 
 	/**
 	* GetIndexDataAction : get data for ES Index
@@ -80,24 +80,24 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::LookupParamsT* esparams
+	*   ::zpds::query::TextParamsT* esparams
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void GetIndexDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::LookupParamsT* esparams);
+	void GetIndexDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::TextParamsT* esparams);
 
 private:
 	::zpds::remote::GeoHashHelper gh;
 
 	/**
-	* UpsertLookupRecord : LookupRecord data addition
+	* UpsertTextRecord : TextRecord data addition
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::LookupRecordT* data type LookupRecord
+	*   ::zpds::store::TextRecordT* data type TextRecord
 	*
 	* @param trans
 	*   ::zpds::store::TransactionT* trans
@@ -105,16 +105,16 @@ private:
 	* @return
 	*   bool
 	*/
-	bool UpsertLookupRecord(::zpds::utils::SharedTable::pointer stptr, LookupRecordT* data, TransactionT* trans);
+	bool UpsertTextRecord(::zpds::utils::SharedTable::pointer stptr, TextRecordT* data, TransactionT* trans);
 
 	/**
-	* MergeLookupRecord : LookupRecord data merging
+	* MergeTextRecord : TextRecord data merging
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::LookupRecordT* data type LookupRecord
+	*   ::zpds::store::TextRecordT* data type TextRecord
 	*
 	* @param trans
 	*   ::zpds::store::TransactionT* trans
@@ -122,24 +122,24 @@ private:
 	* @return
 	*   bool
 	*/
-	bool MergeLookupRecord(::zpds::utils::SharedTable::pointer stptr, LookupRecordT* data, TransactionT* trans);
+	bool MergeTextRecord(::zpds::utils::SharedTable::pointer stptr, TextRecordT* data, TransactionT* trans);
 
 	/**
-	* MergeOne : LookupRecord data merging for one record
+	* MergeOne : TextRecord data merging for one record
 	*
 	* @param mto
-	*   ::zpds::store::LookupRecordT* data type LookupRecord merged to
+	*   ::zpds::store::TextRecordT* data type TextRecord merged to
 	*
 	* @param mfrom
-	*   ::zpds::store::LookupRecordT* data type LookupRecord merged from
+	*   ::zpds::store::TextRecordT* data type TextRecord merged from
 	*
 	* @return
 	*   true if changed
 	*/
-	bool MergeOne(LookupRecordT* mto, LookupRecordT* mfrom);
+	bool MergeOne(TextRecordT* mto, TextRecordT* mfrom);
 
 
 };
 } // namespace store
 } // namespace zpds
-#endif /* _ZPDS_STORE_LOOKUP_RECORD_SERVICE_HPP_ */
+#endif /* _ZPDS_STORE_TEXT_RECORD_SERVICE_HPP_ */

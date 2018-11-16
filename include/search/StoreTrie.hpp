@@ -79,18 +79,7 @@ public:
 	virtual ~StoreTrie ();
 
 	/**
-	* DelData : delete
-	*
-	* @param params
-	*   ::zpds::store::LookupRecordT* record
-	*
-	* @return
-	*   none
-	*/
-	void DelData(::zpds::store::LookupRecordT* record);
-
-	/**
-	* AddData : add search data point
+	* AddLocalData : add search data point
 	*
 	* @param params
 	*   ::zpds::store::LookupRecordT* record
@@ -98,7 +87,40 @@ public:
 	* @return
 	*   none throws if not ok
 	*/
-	void AddData(::zpds::store::LookupRecordT* record);
+	void AddLocalData(::zpds::store::LookupRecordT* record);
+
+	/**
+	* AddTextData : add search data point for text records
+	*
+	* @param params
+	*   ::zpds::store::TextRecordT* record
+	*
+	* @return
+	*   none throws if not ok
+	*/
+	void AddTextData(::zpds::store::TextRecordT* record);
+
+	/**
+	* DelLocalData : delete
+	*
+	* @param params
+	*   ::zpds::store::LookupRecordT* record
+	*
+	* @return
+	*   none
+	*/
+	void DelLocalData(::zpds::store::LookupRecordT* record);
+
+	/**
+	* DelTextData : delete
+	*
+	* @param params
+	*   ::zpds::store::TextRecordT* record
+	*
+	* @return
+	*   none
+	*/
+	void DelTextData(::zpds::store::TextRecordT* record);
 
 protected:
 	const std::string dbpath;
@@ -107,13 +129,16 @@ protected:
 	/**
 	* Get: get the storage instance
 	*
+	* @param ltyp
+	*   ::zpds::search::LangTypeE ltyp
+	*
 	* @param dtyp
-	*   ::zpds::search::LangTypeE dtyp
+	*   ::zpds::search::DataTypeE dtyp
 	*
 	* @return
 	*   DatabaseT&
 	*/
-	DatabaseT& Get(::zpds::search::LangTypeE dtyp);
+	DatabaseT& Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp);
 
 };
 
