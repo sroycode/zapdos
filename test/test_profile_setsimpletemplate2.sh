@@ -13,7 +13,7 @@ export qprof='{
 "orders" : [
 	{
 		"rec_styp": "S_NONE", "rec_tagid": "#t001", "rec_count":10, "desc": "one word query for upto 2 chars",
-		"limit_type": "L_NONE", "search_type": "S_FIRSTWORD", "order_type": "O_DEFAULT",
+		"limit_type": "L_NONE", "search_type": "S_BEGINWITH", "order_type": "O_DEFAULT",
 		"input_type": "I_ONEWORD", "oneword_length" : 2, "weight": 100
 	},
 	{

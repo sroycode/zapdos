@@ -63,6 +63,9 @@ message UsedParamsT {
 	string                        query                             = 11; // stemmed query
 	string                        raw_query                         = 12; // INPUT raw query
 
+	bool                          use_tags                          = 13; // use tags field
+	bool                          use_name                          = 14; // use name field 
+
 	bool                          full_words                        = 15; // INPUT flag by space at end
 	bool                          sort_by_dist                      = 16; // INPUT sort by distance
 
@@ -99,10 +102,9 @@ enum LimitTypeE {
 
 enum SearchTypeE {
 	S_DEFAULT                                                       =  0;
-	S_BEGIN                                                         =  1;
+	S_BEGINWITH                                                     =  1;
 	S_PARTIAL                                                       =  2;
 	S_FULLWORD                                                      =  3;
-	S_FIRSTWORD                                                     =  4;
 
 	S_NAME                                                          =  5;
 	S_TAGS                                                          =  6;

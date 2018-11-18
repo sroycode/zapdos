@@ -154,16 +154,7 @@ bool zpds::store::PhotonService::RuleSearch (
 	default:
 	case zpds::search::SearchTypeE::S_DEFAULT:
 		break;
-	case zpds::search::SearchTypeE::S_FULLWORD:
-		mp.set_last_partial( false );
-		break;
-	case zpds::search::SearchTypeE::S_BEGIN:
-		mp.set_begin_with( true );
-		break;
-	case zpds::search::SearchTypeE::S_PARTIAL:
-		mp.set_all_partial( true );
-		break;
-	case zpds::search::SearchTypeE::S_FIRSTWORD: {
+	case zpds::search::SearchTypeE::S_BEGINWITH: {
 		auto ss = Split( mp.query() );
 		if ( ss.size() >0) {
 			extra << XAP_FORMAT_SPPL;
@@ -175,6 +166,19 @@ bool zpds::store::PhotonService::RuleSearch (
 		}
 		break;
 	}
+	case zpds::search::SearchTypeE::S_PARTIAL:
+		mp.set_all_partial( true );
+		break;
+	case zpds::search::SearchTypeE::S_FULLWORD:
+		mp.set_last_partial( false );
+		break;
+	case zpds::search::SearchTypeE::S_NAME:
+		mp.set_use_name( true );
+		break;
+	case zpds::search::SearchTypeE::S_TAGS:
+		mp.set_use_tags( true );
+		break;
+
 		// end switch
 	}
 

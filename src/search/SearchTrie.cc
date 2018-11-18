@@ -96,40 +96,16 @@ size_t zpds::search::SearchTrie::SetQuery(const std::string& query_)
 *
 */
 std::string zpds::search::SearchTrie::GetQueryString(
-    QueryWordsE qtype, const std::string& extra, std::string prefix )
+    QueryWordsE qtype, const std::string& extra,
+    const std::string& full_prefix, const std::string& part_prefix)
 {
 	std::ostringstream xtmp;
 	for (size_t i=0; i<wordstr.size(); ++i) {
 		if ( ( qtype == ALL_PARTIAL ) || ( qtype == LAST_PARTIAL && i==(wordstr.size()-1) ) ) {
-			xtmp << ' ' << prefix << XAP_PARTWORD_PREFIX << wordstr.at(i);
+			xtmp << ' ' << part_prefix << wordstr.at(i);
 		}
 		else {
-			xtmp << ' ' << prefix << wordstr.at(i);
-		}
-	}
-	if (! extra.empty() ) xtmp << ' ' << extra;
-	return xtmp.str();
-}
-
-
-/**
-* GetQueryStringPart: set query
-*
-*/
-std::string zpds::search::SearchTrie::GetQueryStringPart(
-    QueryWordsE qtype, size_t start, size_t end, const std::string& extra, std::string prefix )
-{
-	std::ostringstream xtmp;
-	if ( start >= wordstr.size() )
-		throw ::zpds::BadCodeException("start is wrong");
-	if (end >= wordstr.size() ) end = wordstr.size() -1 ;
-
-	for (size_t i=start; i<=end; ++i) {
-		if ( ( qtype == ALL_PARTIAL ) || ( qtype == LAST_PARTIAL && i==(wordstr.size()-1) ) ) {
-			xtmp << ' ' << prefix << XAP_PARTWORD_PREFIX << wordstr.at(i);
-		}
-		else {
-			xtmp << ' ' << prefix << wordstr.at(i);
+			xtmp << ' ' << full_prefix << wordstr.at(i);
 		}
 	}
 	if (! extra.empty() ) xtmp << ' ' << extra;
@@ -152,19 +128,17 @@ bool zpds::search::SearchTrie::FindNear(::zpds::search::UsedParamsT* qr, bool re
 
 	QueryWordsE qtype = ( qr->all_partial() ) ? ALL_PARTIAL : ( qr->last_partial() ) ? LAST_PARTIAL : FULL_WORDS;
 
-	std::ostringstream xtmp;
-	if ( qr->begin_with() ) {
-		xtmp << "+";
-		if (( qtype == FULL_WORDS ) || (qtype==LAST_PARTIAL && wordstr_size>1))
-			xtmp << XAP_BEGINFULL_PREFIX;
-		else
-			xtmp << XAP_BEGINPART_PREFIX;
-		xtmp << wordstr.at(0) ;
-		if (wordstr_size>1) xtmp << " " + GetQueryStringPart( qtype, 1, wordstr_size-1, qr->extra(), "");
+	std::string full_prefix = std::string("+");
+	std::string part_prefix = std::string("+") + XAP_PARTWORD_PREFIX;
+	if ( qr->use_name() ) {
+		full_prefix = std::string("+") + XAP_NAMEFULL_PREFIX;
+		part_prefix = std::string("+") + XAP_NAMEPART_PREFIX;
 	}
-	else {
-		xtmp << GetQueryString( qtype, qr->extra() );
+	if ( qr->use_tags() ) {
+		full_prefix = std::string("+") + XAP_TAG_PREFIX;
+		part_prefix = std::string("+") + XAP_TAG_PREFIX;
 	}
+	std::string xtmp = GetQueryString( qtype, qr->extra(), full_prefix, part_prefix);
 
 	unsigned int flags =
 	    Xapian::QueryParser::FLAG_LOVEHATE
@@ -175,7 +149,7 @@ bool zpds::search::SearchTrie::FindNear(::zpds::search::UsedParamsT* qr, bool re
 	Xapian::Enquire enquire(db);
 	enquire.set_weighting_scheme(Xapian::BoolWeight());
 
-	Xapian::Query query = queryparser.parse_query(xtmp.str(), flags);
+	Xapian::Query query = queryparser.parse_query(xtmp, flags);
 	enquire.set_query(query);
 
 	Xapian::LatLongCoord centre( qr->cur().lat(), qr->cur().lon() );
@@ -207,19 +181,17 @@ bool zpds::search::SearchTrie::FindFull(::zpds::search::UsedParamsT* qr,bool res
 
 	QueryWordsE qtype = ( qr->all_partial() ) ? ALL_PARTIAL : ( qr->last_partial() ) ? LAST_PARTIAL : FULL_WORDS;
 
-	std::ostringstream xtmp;
-	if ( qr->begin_with() ) {
-		xtmp << "+";
-		if (( qtype == FULL_WORDS ) || (qtype==LAST_PARTIAL && wordstr_size>1))
-			xtmp << XAP_BEGINFULL_PREFIX;
-		else
-			xtmp << XAP_BEGINPART_PREFIX;
-		xtmp << wordstr.at(0) ;
-		if (wordstr_size>1) xtmp << " " + GetQueryStringPart( qtype, 1, wordstr_size-1, qr->extra(), "");
+	std::string full_prefix = std::string("+");
+	std::string part_prefix = std::string("+") + XAP_PARTWORD_PREFIX;
+	if ( qr->use_name() ) {
+		full_prefix = std::string("+") + XAP_NAMEFULL_PREFIX;
+		part_prefix = std::string("+") + XAP_NAMEPART_PREFIX;
 	}
-	else {
-		xtmp << GetQueryString( qtype, qr->extra() );
+	if ( qr->use_tags() ) {
+		full_prefix = std::string("+") + XAP_TAG_PREFIX;
+		part_prefix = std::string("+") + XAP_TAG_PREFIX;
 	}
+	std::string xtmp = GetQueryString( qtype, qr->extra(), full_prefix, part_prefix);
 
 	unsigned int flags =
 	    Xapian::QueryParser::FLAG_LOVEHATE
@@ -230,7 +202,7 @@ bool zpds::search::SearchTrie::FindFull(::zpds::search::UsedParamsT* qr,bool res
 	Xapian::Enquire enquire(db);
 	enquire.set_weighting_scheme(Xapian::BoolWeight());
 
-	Xapian::Query query = queryparser.parse_query(xtmp.str(), flags);
+	Xapian::Query query = queryparser.parse_query(xtmp, flags);
 	enquire.set_query(query);
 	enquire.set_sort_by_value(XAP_IMPORTANCE_POS,true);
 

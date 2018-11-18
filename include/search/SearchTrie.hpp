@@ -52,7 +52,7 @@ class SearchTrie : virtual public ::zpds::store::StoreBase, virtual public TrieB
 
 public:
 	using DatabaseT = Xapian::Database;
-	using TrieMapT = std::unordered_map< int , DatabaseT >;
+	using TrieMapT = std::unordered_map< int, DatabaseT >;
 
 	using WordPairT = TrieBase::WordPairT;
 	using WordVecT = TrieBase::WordVecT;
@@ -181,37 +181,17 @@ protected:
 	* @param extra
 	*   const std::string& extra input
 	*
-	* @param prefix
-	*   std::string lovehate char or logic operator default +
+	* @param full_prefix
+	*   const std::string& full prefix
+	*
+	* @param part_prefix
+	*   const std::string& part prefix
 	*
 	* @return
 	*   std::string
 	*/
-	std::string GetQueryString(QueryWordsE qtype, const std::string& extra, std::string prefix="+" );
-
-	/**
-	* GetQueryStringPart: set query
-	*
-	* @param qtype
-	*   QueryWordsE enum type
-	*
-	* @param start
-	*   size_t start
-	*
-	* @param end
-	*   size_t end
-	*
-	* @param extra
-	*   const std::string& extra input
-	*
-	* @param prefix
-	*   std::string lovehate char or logic operator default +
-	*
-	* @return
-	*   std::string
-	*/
-	std::string GetQueryStringPart(QueryWordsE qtype, size_t start, size_t end, const std::string& extra, std::string prefix="+" );
-
+	std::string GetQueryString(QueryWordsE qtype, const std::string& extra,
+	                           const std::string& full_prefix, const std::string& part_prefix);
 
 	/**
 	* EstimateExec: estimate time based on keyword freq
