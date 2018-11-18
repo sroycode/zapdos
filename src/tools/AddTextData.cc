@@ -57,7 +57,7 @@ DEFINE_bool(update, false, "update data");
 // local url
 DEFINE_string(jurl, "http://localhost:9091", "local url");
 DEFINE_validator(jurl, &IsNonEmptyMessage);
-DEFINE_uint64(chunk, 10000, "chunk size");
+DEFINE_uint64(chunk, 5000, "chunk size");
 /* GFlags Settings End */
 
 #include <iostream>
