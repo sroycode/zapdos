@@ -7,7 +7,7 @@ export SRCFIL=$(basename $(cd ${0%/*} 2>>/dev/null ; echo `pwd`/${0##*/}))
 
 export name=${name:="shreos"};
 export passkey=${passkey:="shreos123"};
-export qtyp=${qtyp:="QRY_COMPLETION_PHOTON"};
+export qtyp=${qtyp:="QRY_COMPLETION_TEXTDATA"};
 if [ -z "${qprof}" ] ; then
 export qprof='{
 "orders" : [
@@ -17,12 +17,12 @@ export qprof='{
 		"input_type": "I_ONEWORD", "oneword_length" : 2, "weight": 100
 	},
 	{
-		"rec_styp": "S_NONE", "rec_tagid": "#t002", "rec_count":10, "desc": "by distance 1km bands",
-		"limit_type": "L_NONE", "search_type": "S_DEFAULT", "order_type": "O_DIST_BAND", "input_type": "I_DEFAULT",
-		"distance_band": 1000, "weight": 90
+		"rec_styp": "S_NONE", "rec_tagid": "#t002", "rec_count":10, "desc": "find in name",
+		"limit_type": "L_NONE", "search_type": "S_NAME", "order_type": "O_DEFAULT",
+		"input_type": "I_DEFAULT", "weight": 90
 	},
 	{
-		"rec_styp": "S_NONE", "rec_tagid": "#t003", "rec_count":10, "desc": "if not local",
+		"rec_styp": "S_NONE", "rec_tagid": "#t003", "rec_count":10, "desc": "if not name",
 		"limit_type": "L_NONE", "search_type": "S_DEFAULT", "order_type": "O_DEFAULT",
 		"input_type": "I_DEFAULT", "weight": 80
 	}
