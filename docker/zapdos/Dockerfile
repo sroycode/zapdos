@@ -39,11 +39,12 @@ RUN bash ${ZAPDOS_SOURCE}/build_env.sh
 
 ### MAIN 
 
-ENV MVERSION 1.0.0
+ENV MVERSION 0.4.0
 ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
 
 RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
 	&& cd zapdos-${MVERSION} \
+	&& git checkout v${MVERSION} \
 	&& ln -s ${ZAPDOS_DEPS}/thirdparty ${MWORKDIR}/thirdparty \
 	&& mkdir -p ${MWORKDIR}/build \
 	&& cd ${MWORKDIR}/build \
