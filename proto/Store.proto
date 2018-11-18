@@ -186,11 +186,16 @@ message TextRecordT {
 	string                        country                           = 14; // INPUT country
 	string                        state                             = 15; // INPUT state
 
-	string                        title                             = 17; // INPUT title field
-	string                        summary                           = 18; // INPUT summary field
-	string                        details                           = 19; // INPUT details
+	double                        accuracy                          = 22; // INPUT accuracy of lat lon in m
+	double                        lat                               = 23; // INPUT latitude
+	double                        lon                               = 24; // INPUT longitude
+	string                        geohash9                          = 25; // geohash 9 chars
 
 	double                        rating                            = 26; // INPUT average rating of place
+	string                        title                             = 27; // INPUT title field
+	string                        summary                           = 28; // INPUT summary field
+	string                        details                           = 29; // INPUT details
+
 
 	string                        tags                              = 35; // INPUT keywords
 

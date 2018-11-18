@@ -73,8 +73,8 @@
 #define XAP_TAG_PREFIX       "t_"
 #define XAP_ISINP_PREFIX     "ii_"
 
-#define XAP_TITLEFULL_PREFIX "a1_"
-#define XAP_TITLEPART_PREFIX "a2_"
+#define XAP_NAMEFULL_PREFIX  "a1_"
+#define XAP_NAMEPART_PREFIX  "a2_"
 
 #define XAP_MERGE_LIMIT   1
 #define XAP_MIN_STEM_LEN  4

@@ -44,6 +44,7 @@
 #include "query/TextRecordService.hpp"
 #include "query/ExtraAttribService.hpp"
 #include "query/PhotonService.hpp"
+#include "query/TextDataService.hpp"
 
 #define ZPDS_WEBSERVICELIST_SCOPE_HTTP \
 		zpds::query::NotFoundService<HttpServerT> {sharedtable,server,ZPDS_SERVICE_SCOPE_HTTP}; \
@@ -54,6 +55,7 @@
 		zpds::query::LookupRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::TextRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::ExtraAttribService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::PhotonService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); 
+		zpds::query::PhotonService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::TextDataService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); 
 
 #endif // _ZPDS_QUERY_WEBSERVICELIST_HPP_

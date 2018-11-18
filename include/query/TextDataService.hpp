@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file include/query/PhotonService.hpp
+ * @file include/query/TextDataService.hpp
  * @author  S Roychowdhury < sroycode at gmail dot com>
  * @version 1.0.0
  *
@@ -27,25 +27,25 @@
  *
  * @section DESCRIPTION
  *
- *  PhotonService.hpp : Competion query for photon local data
+ *  TextDataService.hpp : Competion query endpoints for text data
  *
  */
-#ifndef _ZPDS_QUERY_PHOTON_SERVICE_HPP_
-#define _ZPDS_QUERY_PHOTON_SERVICE_HPP_
+#ifndef _ZPDS_QUERY_TEXTDATA_SERVICE_HPP_
+#define _ZPDS_QUERY_TEXTDATA_SERVICE_HPP_
 
 #include "query/QueryBase.hpp"
-#include "store/PhotonService.hpp"
+#include "store/TextDataService.hpp"
 #include <xapian.h>
 
 namespace zpds {
 namespace query {
 
 template <class HttpServerT>
-class PhotonService : public zpds::query::ServiceBase<HttpServerT> {
+class TextDataService : public zpds::query::ServiceBase<HttpServerT> {
 public:
 
 	/**
-	* PhotonService : constructor
+	* TextDataService : constructor
 	*
 	* @param stptr
 	*   zpds::utils::SharedTable::pointer stptr
@@ -63,7 +63,7 @@ public:
 	*   none
 	*/
 
-	PhotonService(
+	TextDataService(
 	    zpds::utils::SharedTable::pointer stptr,
 	    typename std::shared_ptr<HttpServerT> server,
 	    ::zpds::query::HelpQuery::pointer helpquery,
@@ -72,7 +72,7 @@ public:
 	{
 		if (!(this->myscope & scope)) return; // scope mismatch
 
-		helpquery->add({scope, "GET _query/api/v1/photon/{profile}?{params}", {
+		helpquery->add({scope, "GET _query/api/v1/textdata/{profile}?{params}", {
 				"for completion local by profile ",
 				"Parameters:",
 				"q : query text",
@@ -86,7 +86,7 @@ public:
 			}
 		});
 
-		server->resource["/_query/api/v1/photon/(.*)$"]["GET"]
+		server->resource["/_query/api/v1/textdata/(.*)$"]["GET"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -95,7 +95,7 @@ public:
 				try
 				{
 					auto params = urldecode( request->query_string );
-					zpds::query::PhotonParamsT localparams;
+					zpds::query::TextDataParamsT localparams;
 					auto cdata = localparams.mutable_cdata();
 
 					// check profile
@@ -149,7 +149,7 @@ public:
 					if (!stptr->is_ready.Get()) throw zpds::BadDataException("System Not Ready");
 
 					// action
-					zpds::store::PhotonService rs(stptr);
+					zpds::store::TextDataService rs(stptr);
 					rs.GetCompleteAction(&localparams);
 
 					// aftermath
@@ -186,5 +186,5 @@ private:
 } // namespace query
 } // namespace zpds
 
-#endif // _ZPDS_QUERY_PHOTON_SERVICE_HPP_
+#endif // _ZPDS_QUERY_TEXTDATA_SERVICE_HPP_
 

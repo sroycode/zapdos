@@ -17,6 +17,7 @@ set(ZPDS_STORE_SOURCES
 		TextRecordService.cc
 		ExtraAttribService.cc
 		PhotonService.cc
+		TextDataService.cc
    )
 
 add_library(zpds_store STATIC ${ZPDS_STORE_SOURCES})

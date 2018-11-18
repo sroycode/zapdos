@@ -207,3 +207,13 @@ message PhotonParamsT {
 
 }
 
+// TextDataService
+
+// record for search text type interface
+
+message TextDataParamsT {
+	search.UsedParamsT            cdata                             =  1;
+	store.TextRecordListT         cresp                             =  2;
+
+}
+

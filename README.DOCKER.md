@@ -1,6 +1,9 @@
 # Running with Docker
 
 There is a convenience script to do most of the work as outlined in the Summary section. 
+Prebuilt images exist 
+`sroycode/zapdos_build` : for build environment for zapdos
+`sroycode/nominatim` : for nominatim
 
 
 # Summary 

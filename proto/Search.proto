@@ -17,12 +17,15 @@ enum DataTypeE {
 
 // Lookup Record Source Types
 enum SourceTypeE {
-	S_NONE                                                          =  0;
-	S_OSM                                                           =  1; // openstreetmaps
-	S_LOCAL                                                         =  2; // your own data
+	S_NONE                                                          =  0; // placeholder ignored
 
-	// for wiki
-	S_TEXT                                                          =  3; // wiki data
+	// local data type
+	S_OSM                                                           =  1; // openstreetmaps
+	S_MYLOCAL                                                       =  2; // your own local data
+
+	// for text data
+	S_WIKI                                                          = 11; // wiki data
+	S_MYTEXT                                                        = 12; // your own text data
 }
 
 // Query DS
@@ -42,6 +45,7 @@ message PointLocT {
 enum QueryTypeE {
 	QRY_UNKNOWN                                                     =  0; 
 	QRY_COMPLETION_PHOTON                                           =  1; 
+	QRY_COMPLETION_TEXTDATA                                         =  2; 
 }
 
 message UsedParamsT {
@@ -99,6 +103,9 @@ enum SearchTypeE {
 	S_PARTIAL                                                       =  2;
 	S_FULLWORD                                                      =  3;
 	S_FIRSTWORD                                                     =  4;
+
+	S_NAME                                                          =  5;
+	S_TAGS                                                          =  6;
 }
 
 enum OrderTypeE {

@@ -365,6 +365,18 @@ bool zpds::store::TextRecordService::MergeOne(zpds::store::TextRecordT* mto, zpd
 		++change;
 	}
 
+	// lat
+	if ( (mfrom->lat() !=0 ) && (mto->lat() != mfrom->lat()) ) {
+		mto->set_lat( mfrom->lat() ); ;
+		++change;
+	}
+
+	// lon
+	if ( (mfrom->lon() !=0 ) && (mto->lon() != mfrom->lon()) ) {
+		mto->set_lon( mfrom->lon() ); ;
+		++change;
+	}
+
 	// is_deleted
 	if ( (mfrom->is_deleted() ) && (mto->is_deleted() != mfrom->is_deleted()) ) {
 		mto->set_is_deleted( mfrom->is_deleted() ); ;

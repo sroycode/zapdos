@@ -220,15 +220,21 @@ void zpds::tools::LineReader::ReadTextRecord(
 		if ( descriptor->FindValueByName( lang ) )
 			record->set_lang( zpds::search::LangTypeE ( descriptor->FindValueByName(lang)->number() ) );
 	}
-	// SourceTypeE     alias_styp      = 14 ( INPUT record alias source type )
+	// SourceTypeE     alias_styp     = 14 ( INPUT record alias source type )
 	if (! strvec[14].empty()) {
 		const google::protobuf::EnumDescriptor *descriptor = zpds::search::SourceTypeE_descriptor();
 		if ( descriptor->FindValueByName( strvec[14] ) )
 			record->set_alias_styp( zpds::search::SourceTypeE ( descriptor->FindValueByName( strvec[14] )->number() ) );
 	}
-	// string          alias_uniqueid   = 15 ( INPUT alias unique id )
+	// string          alias_uniqueid = 15 ( INPUT alias unique id )
 	record->set_alias_uniqueid( strvec[15] );
 
+	// double          lat            = 16 ( INPUT lat )
+	if (!strvec[16].empty())
+		record->set_lat( boost::lexical_cast<double> (strvec[16]) );
+	// double          lon            = 17 ( INPUT lon )
+	if (!strvec[17].empty())
+		record->set_lon( boost::lexical_cast<double> (strvec[17]) );
 }
 
 
@@ -245,7 +251,7 @@ void zpds::tools::LineReader::ReadToText(
 			break;
 		case 1: // UPSERT
 		case 2: // UPDATE
-			if (strvec.size()<16) {
+			if (strvec.size()<18) {
 				LOG(INFO) << "Rejected Line no due to size " << counter ;
 				break;
 			}

@@ -49,7 +49,7 @@ class StoreTrie : virtual public ::zpds::store::StoreBase, virtual public TrieBa
 
 public:
 	using DatabaseT = Xapian::WritableDatabase;
-	using TrieMapT = std::unordered_map< int , DatabaseT >;
+	using TrieMapT = std::unordered_map< int, DatabaseT >;
 
 	using pointer = std::shared_ptr<StoreTrie>;
 
@@ -139,6 +139,73 @@ protected:
 	*   DatabaseT&
 	*/
 	DatabaseT& Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp);
+
+	/**
+	* IndexFullWords : index items with part
+	*
+	* @param doc
+	*   Xapian::Document& doc
+	*
+	* @param item
+	*   const std::string item to index
+	*
+	* @param full_prefix
+	*   const std::string full prefix
+	*
+	* @param with_stem
+	*   bool if with stem
+	*
+	* @param zero_pos
+	*   bool if with pos0
+	*
+	* @return
+	*   none
+	*/
+	void IndexFullWords(Xapian::Document& doc, const std::string item, const std::string full_prefix, bool with_stem, bool zero_pos);
+
+	/**
+	* IndexWithPart : index items with part
+	*
+	* @param doc
+	*   Xapian::Document& doc
+	*
+	* @param item
+	*   const std::string item to index
+	*
+	* @param full_prefix
+	*   const std::string full prefix
+	*
+	* @param part_prefix
+	*   const std::string part prefix
+	*
+	* @param with_stem
+	*   bool if with stem
+	*
+	* @param zero_pos
+	*   bool if with pos0
+	*
+	* @return
+	*   none
+	*/
+	void IndexWithPart(Xapian::Document& doc, const std::string item,
+	                   const std::string full_prefix, const std::string part_prefix, bool with_stem, bool zero_pos);
+
+	/**
+	* IndexGeo : index geo
+	*
+	* @param doc
+	*   Xapian::Document& doc
+	*
+	* @param double lat
+	*   const double latitude
+	*
+	* @param double lon
+	*   const double longitude
+	*
+	* @return
+	*   none
+	*/
+	void IndexGeo ( Xapian::Document& doc, const double lat, const double lon );
 
 };
 
