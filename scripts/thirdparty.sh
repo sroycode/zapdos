@@ -437,6 +437,26 @@ PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${ZAPDOS_SOURCE}/thirdparty/lib/pkgconfig \
 ..  && make && make install
 }
 
+# Building stxxl git  0a80a8c 
+
+function build_stxxl () {
+local MVERSION=0a80a8c
+local MWORKDIR=${ZAPDOS_TEMP}/stxxl
+if [ -f ${ZAPDOS_SOURCE}/thirdparty/include/stxxl.h ] ; then echo "stxxl already installed"; return ; fi
+if [ ! -d ${ZAPDOS_TEMP}/stxxl ] ; then
+	cd ${ZAPDOS_TEMP}
+	git clone https://github.com/stxxl/stxxl.git stxxl
+	cd stxxl
+	git checkout ${MVERSION}
+	mkdir build
+fi
+cd ${MWORKDIR}/build
+PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${ZAPDOS_SOURCE}/thirdparty/lib/pkgconfig \
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${ZAPDOS_SOURCE}/thirdparty \
+..  && make && make install
+}
+
+
 ### Control ####
 
 build_gperftools
@@ -449,3 +469,4 @@ build_googletest
 build_ctemplate
 build_xapian
 build_cityhash
+build_stxxl

@@ -39,3 +39,21 @@ RUN bash ${ZAPDOS_SOURCE}/build_env.sh
 
 ### MAIN 
 
+ENV MVERSION 0.4.0
+ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
+
+RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
+	&& cd zapdos-${MVERSION} \
+	&& git checkout v${MVERSION} \
+	&& ln -s ${ZAPDOS_DEPS}/thirdparty ${MWORKDIR}/thirdparty \
+	&& mkdir -p ${MWORKDIR}/build \
+	&& cd ${MWORKDIR}/build \
+	&& source /opt/rh/devtoolset-7/enable \
+	&& cmake3 -DBOOST_ROOT=${BOOST_ROOT} -DCMAKE_INSTALL_PREFIX=${ZAPDOS_DEPS}/thirdparty .. && make && make install
+
+COPY run_as_master.sh ${ZAPDOS_SOURCE}/run_as_master.sh
+COPY run_as_slave.sh ${ZAPDOS_SOURCE}/run_as_slave.sh
+COPY zapdos.conf ${ZAPDOS_SOURCE}/zapdos.conf
+
+EXPOSE 9091
+EXPOSE 9092

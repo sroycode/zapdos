@@ -242,6 +242,7 @@ void zpds::store::TextDataService::GetCompleteAction (::zpds::query::TextDataPar
 	auto cur = qr->mutable_cur();
 	qr->set_dtyp( ::zpds::search::DataTypeE::TEXT );
 
+
 	::zpds::store::SimpleTemplateT one_t;
 	one_t.set_qtyp ( ::zpds::search::QRY_COMPLETION_TEXTDATA );
 	one_t.set_name( qr->name() );
@@ -281,7 +282,6 @@ void zpds::store::TextDataService::GetCompleteAction (::zpds::query::TextDataPar
 		}
 		qr->set_no_of_words( wc );
 		qr->set_query( StemQuery( q, (!qr->full_words()) ));
-		DLOG(INFO) << q << " | " << qr->query();
 	}
 
 	if ( qr->no_of_words() == 0 ) return;
@@ -344,6 +344,7 @@ void zpds::store::TextDataService::GetCompleteAction (::zpds::query::TextDataPar
 		}
 
 		if (rule->weight() == 0) continue;
+
 
 		// now populate the main
 		auto& whatlist = recmap[ rule->rec_tagid() ];

@@ -77,6 +77,7 @@ zpds::jamspell::StoreJam::~StoreJam()
 */
 std::string zpds::jamspell::StoreJam::Correct(::zpds::search::LangTypeE lang, std::string input) const
 {
+	if (jammap.find(lang)==jammap.end()) return input;
 	std::wstring wtext = UTF8ToWide(input);
 	std::wstring result = jammap.at(lang).FixFragment(wtext);
 	return WideToUTF8(result);
