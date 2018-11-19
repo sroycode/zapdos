@@ -1,19 +1,9 @@
 # Docker File for Centos based zapdos
 
-FROM centos:centos7
+FROM sroycode/zapdos_build
 MAINTAINER S Roychowdhury <sroycode@gmail.com>
 
 ENV LANG C
-
-# Docker File for Centos based zapdos
-RUN yum install -y deltarpm wget yum-utils centos-release-scl \
-	https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-	&& yum -y update && yum clean all \
-	&& yum -y install devtoolset-7-gcc devtoolset-7-gcc-c++ devtoolset-7-binutils \
-	cmake3 glog-devel libunwind-devel libicu-devel libcurl-devel \
-	wget curl python2-httpie autoconf automake libtool ccache \
-	bzip2 zlib bzip2-devel zlib-devel tbb-devel glog-devel gflags-devel which \
-	file make git libpqxx-devel nginx
 
 # Build environment
 ENV BOOST_ROOT /opt/local/boost
@@ -30,12 +20,23 @@ ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ZAPDOS_DEPS}/thirdparty/lib:${ZAPDOS_DE
 ENV PKG_CONFIG_PATH ${PKG_CONFIG_PATH}:${ZAPDOS_DEPS}/thirdparty/lib/pkgconfig:/usr/local/lib/pkgconfig
 ENV CXXFLAGS -std=c++11
 
-# Dependencies
-
-WORKDIR ${ZAPDOS_TEMP}
-RUN mkdir -p ${ZAPDOS_SOURCE} ${ZAPDOS_TEMP} ${ZAPDOS_DEPS} ${ZAPDOS_TPSRC}
-COPY build_env.sh ${ZAPDOS_SOURCE}/build_env.sh
-RUN bash ${ZAPDOS_SOURCE}/build_env.sh
-
 ### MAIN 
 
+ENV MVERSION 0.4.1
+ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
+
+RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
+	&& cd zapdos-${MVERSION} \
+	&& git checkout v${MVERSION} \
+	&& ln -s ${ZAPDOS_DEPS}/thirdparty ${MWORKDIR}/thirdparty \
+	&& mkdir -p ${MWORKDIR}/build \
+	&& cd ${MWORKDIR}/build \
+	&& source /opt/rh/devtoolset-7/enable \
+	&& cmake3 -DBOOST_ROOT=${BOOST_ROOT} -DCMAKE_INSTALL_PREFIX=${ZAPDOS_DEPS}/thirdparty .. && make && make install
+
+COPY run_as_master.sh ${ZAPDOS_SOURCE}/run_as_master.sh
+COPY run_as_slave.sh ${ZAPDOS_SOURCE}/run_as_slave.sh
+COPY zapdos.conf ${ZAPDOS_SOURCE}/zapdos.conf
+
+EXPOSE 9091
+EXPOSE 9092
