@@ -22,7 +22,7 @@ ENV CXXFLAGS -std=c++11
 
 ### MAIN 
 
-ENV MVERSION 0.4.1
+ENV MVERSION 0.5.0
 ENV MWORKDIR ${ZAPDOS_TEMP}/zapdos-${MVERSION}
 
 RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
