@@ -1,4 +1,14 @@
 ### WIP Backup [ci skip] (HEAD -> devel)
+>Tue, 20 Nov 2018 12:42:21 +0530
+
+>Author: Shreos Roychowdhury (sroycode@gmail.com)
+
+>Commiter: Shreos Roychowdhury (sroycode@gmail.com)
+
+
+
+
+### WIP Backup [ci skip] (origin/devel)
 >Tue, 20 Nov 2018 12:34:00 +0530
 
 >Author: Shreos Roychowdhury (sroycode@gmail.com)
@@ -8,7 +18,7 @@
 
 
 
-### docker files (origin/master, origin/devel, origin/HEAD, master)
+### docker files (origin/master, origin/HEAD, master)
 >Mon, 19 Nov 2018 15:45:22 +0530
 
 >Author: Shreos Roychowdhury (sroycode@gmail.com)
