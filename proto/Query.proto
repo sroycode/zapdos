@@ -105,7 +105,7 @@ message LookupParamsT {
 // TextData
 
 message TextDataT {
-	repeated zpds.store.TextRecordT records                         =  1; // default records
+	repeated zpds.store.LookupRecordT records                       =  1; // default records
 	bool                          merge                             =  3;
 	bool                          delete                            =  4;
 
@@ -138,7 +138,7 @@ message TextParamsT {
 // ExtraData
 
 message ExtraDataT {
-	repeated zpds.store.ExtraAttribT records                        =  1; // default records
+	repeated zpds.store.LookupRecordT   records                     =  1; // default records
 	bool                          merge                             =  3;
 	bool                          delete                            =  4;
 
@@ -213,7 +213,7 @@ message PhotonParamsT {
 
 message TextDataParamsT {
 	search.UsedParamsT            cdata                             =  1;
-	store.TextRecordListT         cresp                             =  2;
+	store.LookupRecordListT       cresp                             =  2;
 
 }
 

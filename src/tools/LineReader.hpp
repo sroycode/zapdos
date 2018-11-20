@@ -39,6 +39,15 @@
 #include "../proto/Query.pb.h"
 
 namespace zpds {
+namespace store {
+using TextRecordT=LookupRecordT;
+using TextRecordListT=LookupRecordListT;
+using ExtraAttribT=LookupRecordT;
+using ExtraAttribListT=LookupRecordListT;
+}
+}
+
+namespace zpds {
 namespace tools {
 class LineReader {
 public:

@@ -44,6 +44,15 @@
 #include <xapian.h>
 
 namespace zpds {
+namespace store {
+using TextRecordT=LookupRecordT;
+using TextRecordListT=LookupRecordListT;
+using ExtraAttribT=LookupRecordT;
+using ExtraAttribListT=LookupRecordListT;
+}
+}
+
+namespace zpds {
 namespace search {
 class StoreTrie : virtual public ::zpds::store::StoreBase, virtual public TrieBase {
 

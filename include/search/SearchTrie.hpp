@@ -47,6 +47,15 @@
 #define XAP_TOLERANCE_CORRECTED_HIGH 1000
 
 namespace zpds {
+namespace store {
+using TextRecordT=LookupRecordT;
+using TextRecordListT=LookupRecordListT;
+using ExtraAttribT=LookupRecordT;
+using ExtraAttribListT=LookupRecordListT;
+}
+}
+
+namespace zpds {
 namespace search {
 class SearchTrie : virtual public ::zpds::store::StoreBase, virtual public TrieBase {
 

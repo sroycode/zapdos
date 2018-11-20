@@ -2,6 +2,7 @@
 {
 	"pkey" : "K_TEXTRECORD",
 	"name" : "TextRecord",
+	"fname" : "LookupRecord",
 	"namespace" : "zpds::store",
 	"desc" : " textrecord",
 	"pname" : "textrecord",

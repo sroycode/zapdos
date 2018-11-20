@@ -20,6 +20,7 @@ enum KeyTypeE {
 	K_LOOKUPRECORD                                                  = 14;
 	K_TEXTRECORD                                                    = 15;
 	K_EXTRAATTRIB                                                   = 16;
+	K_TAG                                                           = 17;
 
 	K_LOGNODE                                                       = 29; // must be before K_MAXNODE
 	K_MAXNODE                                                       = 30;
@@ -39,6 +40,9 @@ enum KeyTypeE {
 
 	U_EXTRAATTRIB_STYP_LANG_UNIQUEID                                = 61;
 	I_EXTRAATTRIB_STYP_LANG_LASTUP                                  = 62;
+
+	U_TAG_STYP_LANG_UNIQUEID                                        = 64;
+	I_TAG_STYP_LANG_LASTUP                                          = 65;
 
 };
 
@@ -147,8 +151,12 @@ message LookupRecordT {
 	string                        osm_key                           = 37; // INPUT osm_key like place
 	string                        osm_value                         = 38; // INPUT osm_value like hamlet
 	string                        osm_type                          = 39; // INPUT osm_type like N
-
 	string                        geometry                          = 40; // INPUT geometry bbox
+
+	string                        title                             = 41; // INPUT title field
+	string                        summary                           = 42; // INPUT summary field
+	string                        details                           = 43; // INPUT details
+
 
 	repeated KeyValueT            attr                              = 47; // key value pairs
 
@@ -169,77 +177,5 @@ message LookupRecordT {
 
 message LookupRecordListT {
 	repeated LookupRecordT        record                            =  1;
-}
-
-// TextRecord
-
-message TextRecordT {
-	uint64                        id                                =  1; // record id  
-	search.SourceTypeE            styp                              =  2; // INPUT record source type
-	string                        uniqueid                          =  3; // INPUT unique id
-
-	double                        importance                        =  4; // INPUT importance or equivalent
-
-	string                        ccode                             =  6; // INPUT country code Alpha 3
-	string                        scode                             =  7; // INPUT state code
-	string                        city                              =  8; // INPUT city name
-	string                        country                           = 14; // INPUT country
-	string                        state                             = 15; // INPUT state
-
-	double                        accuracy                          = 22; // INPUT accuracy of lat lon in m
-	double                        lat                               = 23; // INPUT latitude
-	double                        lon                               = 24; // INPUT longitude
-	string                        geohash9                          = 25; // geohash 9 chars
-
-	double                        rating                            = 26; // INPUT average rating of place
-	string                        title                             = 27; // INPUT title field
-	string                        summary                           = 28; // INPUT summary field
-	string                        details                           = 29; // INPUT details
-
-
-	string                        tags                              = 35; // INPUT keywords
-
-	repeated KeyValueT            attr                              = 47; // key value pairs
-
-	search.SourceTypeE            alias_styp                        = 48; // INPUT alias source type
-	string                        alias_uniqueid                    = 49; // INPUT alias unique id
-
-	search.LangTypeE              lang                              = 50; // INPUT language
-
-	repeated string               matched_queries                   = 51; // fetched from search
-	double                        score                             = 52; // score from search
-
-	bool                          is_deleted                        = 95; // soft delete
-	uint64                        created_at                        = 96; // created
-	uint64                        updated_at                        = 97; // last updated
-	bool                          notfound                          = 99; // return val 
-
-}
-
-message TextRecordListT {
-	repeated TextRecordT          record                            =  1;
-}
-
-// ExtraAttribT
-
-
-message ExtraAttribT {
-	uint64                        id                                =  1; // record id  
-	search.SourceTypeE            styp                              =  2; // INPUT record source type
-	string                        uniqueid                          =  3; // INPUT unique id
-
-	repeated KeyValueT            attr                              = 47; // key value pairs
-
-	search.LangTypeE              lang                              = 50; // INPUT language
-
-	bool                          is_deleted                        = 95; // soft delete
-	uint64                        created_at                        = 96; // created
-	uint64                        updated_at                        = 97; // last updated
-	bool                          notfound                          = 99; // return val 
-
-}
-
-message ExtraAttribListT {
-	repeated ExtraAttribT         record                            =  1;
 }
 

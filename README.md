@@ -9,6 +9,8 @@ Local Search with OSM data
 
 This code is work in progress and is to change frequently.
 
+* Data structrures have changed, so if you upgrade from 0.4.1 to 0.5.0 you need to dump the data again
+
 ## What is it
 
 1.  As of now this is a completion engine . The reverse geocoding and other functions are in the works.
@@ -25,6 +27,8 @@ The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-
 6. Supports rudimentary replication. All write queries go to master, read queries are on slave. If master goes down one slave becomes 
 master. See README.REPLICATION.md for details.
 
+7. There is now support for a separate search store for text data. Basic idea is to have local data queries which will mostly be
+location based in one index and wiki data which will mostly be text based in another.
 
 ## Run using Docker
 

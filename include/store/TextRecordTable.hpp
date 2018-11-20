@@ -37,6 +37,7 @@
 
 namespace zpds {
 namespace store {
+using TextRecordT=LookupRecordT;
 class TextRecordTable : public StoreTable<TextRecordT> {
 public:
 	using StoreTable<TextRecordT>::dbpointer;

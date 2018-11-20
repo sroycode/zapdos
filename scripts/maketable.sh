@@ -10,6 +10,11 @@ local desc=`jq -r '.desc' ${jsfile}`
 local lc_name=`echo $name | awk '{print tolower($0)}'`
 local namespace=`jq -r '.namespace' ${jsfile}`
 local hc_name=`echo "$namespace::$name" | awk 'BEGIN{FS="::"}{R=$3;gsub(/[A-Z]/,"_\&",R); print toupper($1) "_" toupper($2) toupper(R)}'`
+local fname=`jq -r '.fname' ${jsfile}`
+local ALIASLINE=""
+if [ ! -z "$fname" ] ; then
+	ALIASLINE="using ${name}T=${fname}T;"
+fi
 
 cat << SHREOFF
 /**
@@ -51,6 +56,7 @@ cat << SHREOFF
 
 namespace zpds {
 namespace store {
+${ALIASLINE}
 class ${name}Table : public StoreTable<${name}T> {
 public:
 	using StoreTable<${name}T>::dbpointer;

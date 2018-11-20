@@ -37,6 +37,7 @@
 
 namespace zpds {
 namespace store {
+using ExtraAttribT=LookupRecordT;
 class ExtraAttribTable : public StoreTable<ExtraAttribT> {
 public:
 	using StoreTable<ExtraAttribT>::dbpointer;
