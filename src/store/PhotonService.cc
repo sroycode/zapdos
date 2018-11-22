@@ -105,7 +105,6 @@ bool zpds::store::PhotonService::RuleSearch (
 		break;
 	}
 
-
 	// limit_type
 	switch ( rule.limit_type() ) {
 	default:
@@ -243,12 +242,22 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 	qr->set_dtyp( ::zpds::search::DataTypeE::LOCAL );
 
 	::zpds::store::SimpleTemplateT one_t;
-	one_t.set_qtyp ( ::zpds::search::QRY_COMPLETION_PHOTON );
+	std::string tname;
+	
+	if ( qr->noname() ) {
+		tname ="QRY_COMPLETION_NOTOPH";
+		one_t.set_qtyp ( ::zpds::search::QueryTypeE::QRY_COMPLETION_NOTOPH );
+	} else {
+		tname ="QRY_COMPLETION_PHOTON";
+		one_t.set_qtyp ( ::zpds::search::QueryTypeE::QRY_COMPLETION_PHOTON );
+	}
+
 	one_t.set_name( qr->name() );
-	if (! GetSimpleTemplate(stptr, &one_t) )
-		throw ::zpds::BadDataException("No QRY_COMPLETION_PHOTON Template for " + qr->name() );
+	if (! GetSimpleTemplate(stptr, &one_t) ) {
+		throw ::zpds::BadDataException("No " +  tname + " Template for " + qr->name() );
+	}
 	if ( one_t.ignore() )
-		throw ::zpds::BadDataException("Ignored QRY_COMPLETION_PHOTON Template for " + qr->name() );
+		throw ::zpds::BadDataException("Ignored " + tname  + " Template for " + qr->name() );
 
 	// start housekeeping
 	if ( ! cur->dont_use() ) {
@@ -259,13 +268,11 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 	const uint64_t counter = KeepInBound<uint64_t>(qr->items(), 1, 100);
 	qr->set_items( counter );
 
-	// set last partial
-	qr->set_last_partial( qr->raw_query().back() != ' ' );
-	// set full words if not already set
-	if ( ! qr->full_words() ) qr->set_full_words(! qr->last_partial() );
-
-
-	{
+	if ( ! qr->noname() ) {
+		// set last partial
+		qr->set_last_partial( qr->raw_query().back() != ' ' );
+		// set full words if not already set
+		if ( ! qr->full_words() ) qr->set_full_words(! qr->last_partial() );
 		std::string q ;
 		size_t wc =0 ;
 		std::tie(q,wc ) = FlattenCount( qr->raw_query() );
@@ -282,9 +289,9 @@ void zpds::store::PhotonService::GetCompleteAction (::zpds::query::PhotonParamsT
 		qr->set_no_of_words( wc );
 		qr->set_query( StemQuery( q, (!qr->full_words()) ));
 		DLOG(INFO) << q << " | " << qr->query();
+		if ( qr->no_of_words() == 0 ) return;
 	}
 
-	if ( qr->no_of_words() == 0 ) return;
 
 	using TagOrderMapT = std::map< uint64_t, ::zpds::search::QueryOrderT* >;
 	using RecordListMapT = std::unordered_map< std::string, ::zpds::store::LookupRecordListT >;

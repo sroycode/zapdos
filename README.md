@@ -9,26 +9,29 @@ Local Search with OSM data
 
 This code is work in progress and is to change frequently.
 
-* Data structrures have changed, so if you upgrade from 0.4.1 to 0.5.0 you need to dump the data again
+* Data structrures have changed, so if you upgrade from 0.4.1 to 0.5.0 or higher you need to dump the data again
 
 ## What is it
 
-1.  As of now this is a completion engine . The reverse geocoding and other functions are in the works.
+1.  As of now this is a completion engine for local or data.
 
 2.  This is intended to be a drop-in replacement for the project `https://github.com/komoot/photon`.
 The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-compatible endpoint. 
 
-3. Adaptor for importing Nominatim is provided. You can also use your own data. Other adaptors are wip.
+3.  The reverse geocoder is with identical syntax at endpoint `_query/api/v1/notoph/{profile}` .
 
-4. Profile based search . You can create several profiles , each with different set of rules for the same endpoint. 
+4. Adaptor for importing Nominatim is provided. You can also use your own data. Other adaptors are wip.
 
-5. Traine-able spellchecker . The spellchecker can be trained from a file containing training data.
+5. Profile based search . You can create several profiles , each with different set of rules for the same endpoint. 
 
-6. Supports rudimentary replication. All write queries go to master, read queries are on slave. If master goes down one slave becomes 
+6. Traine-able spellchecker . The spellchecker can be trained from a file containing training data.
+
+7. Supports rudimentary replication. All write queries go to master, read queries are on slave. If master goes down one slave becomes 
 master. See README.REPLICATION.md for details.
 
-7. There is now support for a separate search store for text data. Basic idea is to have local data queries which will mostly be
-location based in one index and wiki data which will mostly be text based in another.
+8. There is now support for a separate search store for text data. Basic idea is to have local data queries which will mostly be
+location based in one index and wiki data which will mostly be text based in another. This is with identical syntax as above photon
+at endpoint `_query/api/v1/textdata/{profile}` .
 
 ## Run using Docker
 

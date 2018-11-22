@@ -86,7 +86,22 @@ public:
 			}
 		});
 
-		server->resource["/_query/api/v1/photon/(.*)$"]["GET"]
+		helpquery->add({scope, "GET _query/api/v1/notoph/{profile}?{params}", {
+				"for reverse lookup by profile ",
+				"Parameters:",
+				"q : query text",
+				"lang : language default en",
+				"f : set 1 if fulltext aka no partial",
+				"limit : page size aka no of results",
+				"lon: detected longitude",
+				"lat: detected latitude",
+				"ccode : country code",
+				"city : city "
+			}
+		});
+
+
+		server->resource["/_query/api/v1/(photon|notoph)/(.*)$"]["GET"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
 				uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -98,10 +113,14 @@ public:
 					zpds::query::PhotonParamsT localparams;
 					auto cdata = localparams.mutable_cdata();
 
+					// check forward or reverse
+					if ( request->path_match[1] == "notoph" )
+						cdata->set_noname( true );
+
 					// check profile
-					if ( request->path_match[1].length()== 0 )
+					if ( request->path_match[2].length()== 0 )
 						throw ::zpds::InitialException("Invalid Profile Name");
-					cdata->set_name( request->path_match[1] );
+					cdata->set_name( request->path_match[2] );
 
 					// lang default EN
 					cdata->set_lang(::zpds::search::LangTypeE::EN);
@@ -137,6 +156,10 @@ public:
 					// dont_use lat lon
 					if ( params.find("lon") == params.end() || params.find("lon") == params.end() )
 						cdata->mutable_cur()->set_dont_use( true );
+
+					// check if noname has lat lon
+					if ( cdata->noname() && cdata->mutable_cur()->dont_use() )
+						throw ::zpds::InitialException("notoph needs lat lon");
 
 					// ccode
 					if ( params.find("ccode") != params.end() )

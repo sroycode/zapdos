@@ -122,9 +122,10 @@ bool zpds::search::SearchTrie::FindNear(::zpds::search::UsedParamsT* qr, bool re
 
 	auto db = Get(qr->lang(), qr->dtyp() );
 	auto wordstr_size = wordstr.size();
-	if (reset) wordstr_size = SetQuery(qr->query());
-	if (wordstr_size==0) return false;
 	if (qr->cur().dont_use()) return false;
+	if (reset) wordstr_size = SetQuery(qr->query());
+
+	if ( (! qr->noname() ) && ( wordstr_size==0) ) return false;
 
 	QueryWordsE qtype = ( qr->all_partial() ) ? ALL_PARTIAL : ( qr->last_partial() ) ? LAST_PARTIAL : FULL_WORDS;
 

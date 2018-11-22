@@ -46,6 +46,7 @@ enum QueryTypeE {
 	QRY_UNKNOWN                                                     =  0; 
 	QRY_COMPLETION_PHOTON                                           =  1; 
 	QRY_COMPLETION_TEXTDATA                                         =  2; 
+	QRY_COMPLETION_NOTOPH                                           =  3; 
 }
 
 message UsedParamsT {
@@ -57,6 +58,7 @@ message UsedParamsT {
 	LangTypeE                     lang                              =  5; // INPUT language
 	string                        name                              =  6; // INPUT profile name
 	DataTypeE                     dtyp                              =  7; // data type
+	bool                          noname                            =  8; // reverse lookup no name
 
 	uint64                        no_of_words                       = 10; // no of words
 
@@ -108,6 +110,7 @@ enum SearchTypeE {
 
 	S_NAME                                                          =  5;
 	S_TAGS                                                          =  6;
+
 }
 
 enum OrderTypeE {
