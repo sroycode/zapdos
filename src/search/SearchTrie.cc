@@ -104,7 +104,7 @@ std::string zpds::search::SearchTrie::GetQueryString(
 	if (end >= wordstr.size() )
 		throw zpds::BadCodeException("bad start end to getquersystring");
 	std::ostringstream xtmp;
-	for (size_t i=start; i<end; ++i) {
+	for (size_t i=start; i<=end; ++i) {
 		if ( ( qtype == ALL_PARTIAL ) || ( qtype == LAST_PARTIAL && i==(wordstr.size()-1) ) ) {
 			xtmp << ' ' << part_prefix << wordstr.at(i);
 		}
@@ -112,7 +112,9 @@ std::string zpds::search::SearchTrie::GetQueryString(
 			xtmp << ' ' << full_prefix << wordstr.at(i);
 		}
 	}
+
 	if (! extra.empty() ) xtmp << ' ' << extra;
+	DLOG(INFO) << xtmp.str();
 	return xtmp.str();
 }
 
