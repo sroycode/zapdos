@@ -98,8 +98,9 @@ size_t zpds::search::SearchTrie::SetQuery(const std::string& query_)
 std::string zpds::search::SearchTrie::GetQueryString(
     QueryWordsE qtype, const std::string& extra,
     const std::string& full_prefix, const std::string& part_prefix,
-    const size_t start , const size_t end )
+    const size_t start , size_t end )
 {
+	if (end==XAP_VERY_BIG_NO_HACK) end= wordstr.size()-1; // hack due to compiler support
 	if (end >= wordstr.size() )
 		throw zpds::BadCodeException("bad start end to getquersystring");
 	std::ostringstream xtmp;

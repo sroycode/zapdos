@@ -24,7 +24,8 @@ The ones below can be compiled from source if you need,there is a helper `script
 - libosmium 2.14.2 ( requires protozero and sparsehash )
 
 Items marked with asterix (*) should preferably be compiled from source
-On mac+homebrew and ubuntu+apt default versions work fine.  For Centos 7 see section below.
+On mac +homebrew and ubuntu-18 +apt default versions work fine.  For Centos 7 see section below.
+( Ubuntu 16 is not supported )
 
 
 ### For Centos 7

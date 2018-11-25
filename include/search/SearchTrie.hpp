@@ -33,6 +33,7 @@
 #ifndef _ZPDS_SEARCH_SEARCH_TRIE_HPP_
 #define _ZPDS_SEARCH_SEARCH_TRIE_HPP_
 
+
 #include "search/TrieBase.hpp"
 #include "store/StoreBase.hpp"
 #include "../proto/Search.pb.h"
@@ -45,6 +46,8 @@
 #define XAP_TOLERANCE_ORIGINAL 10
 #define XAP_TOLERANCE_CORRECTED_LOW 50
 #define XAP_TOLERANCE_CORRECTED_HIGH 1000
+
+#define XAP_VERY_BIG_NO_HACK 10200
 
 namespace zpds {
 namespace store {
@@ -200,7 +203,7 @@ protected:
 	*   const size_t start default 0
 	*
 	* @param end
-	*   const size_t end default whole
+	*   size_t end default XAP_VERY_BIG_NO_HACK
 	*
 	* @return
 	*   std::string
@@ -208,8 +211,7 @@ protected:
 	std::string GetQueryString(
 	    QueryWordsE qtype, const std::string& extra,
 	    const std::string& full_prefix, const std::string& part_prefix,
-	    const size_t start=0,
-	    const size_t end = (wordstr.size() > 0 ) ? wordstr.size()-1, 0
+	    const size_t start=0, size_t end = XAP_VERY_BIG_NO_HACK
 	);
 
 	/**
