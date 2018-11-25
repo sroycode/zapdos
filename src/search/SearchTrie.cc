@@ -114,7 +114,6 @@ std::string zpds::search::SearchTrie::GetQueryString(
 	}
 
 	if (! extra.empty() ) xtmp << ' ' << extra;
-	DLOG(INFO) << xtmp.str();
 	return xtmp.str();
 }
 
