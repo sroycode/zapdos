@@ -20,7 +20,7 @@ enum KeyTypeE {
 	K_LOOKUPRECORD                                                  = 14;
 	K_TEXTRECORD                                                    = 15;
 	K_EXTRAATTRIB                                                   = 16;
-	K_TAG                                                           = 17;
+	K_CATEGORY                                                      = 17;
 
 	K_LOGNODE                                                       = 29; // must be before K_MAXNODE
 	K_MAXNODE                                                       = 30;
@@ -41,8 +41,8 @@ enum KeyTypeE {
 	U_EXTRAATTRIB_STYP_LANG_UNIQUEID                                = 61;
 	I_EXTRAATTRIB_STYP_LANG_LASTUP                                  = 62;
 
-	U_TAG_STYP_LANG_UNIQUEID                                        = 64;
-	I_TAG_STYP_LANG_LASTUP                                          = 65;
+	U_CATEGORY_STYP_LANG_UNIQUEID                                   = 64;
+	I_CATEGORY_STYP_LANG_LASTUP                                     = 65;
 
 };
 

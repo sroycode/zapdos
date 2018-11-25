@@ -1,6 +1,6 @@
 /**
  * @project zapdos
- * @file include/store/ExtraAttribService.hpp
+ * @file include/store/CategoryService.hpp
  * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
@@ -27,11 +27,11 @@
  *
  * @section DESCRIPTION
  *
- *  ExtraAttribService.hpp : Header for es record data service
+ *  CategoryService.hpp : Header for es record data service
  *
  */
-#ifndef _ZPDS_STORE_EXTRA_ATTRIB_SERVICE_HPP_
-#define _ZPDS_STORE_EXTRA_ATTRIB_SERVICE_HPP_
+#ifndef _ZPDS_STORE_CATEGORY_SERVICE_HPP_
+#define _ZPDS_STORE_CATEGORY_SERVICE_HPP_
 
 #include "query/QueryBase.hpp"
 #include "store/StoreBase.hpp"
@@ -41,9 +41,9 @@
 namespace zpds {
 namespace store {
 
-using ExtraAttribT = LookupRecordT;
+using CategoryT = LookupRecordT;
 
-class ExtraAttribService : public StoreBase  {
+class CategoryService : public StoreBase  {
 public:
 
 	/**
@@ -53,12 +53,12 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::ExtraParamsT* esparams
+	*   ::zpds::query::CatParamsT* esparams
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::ExtraParamsT* esparams);
+	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams);
 
 	/**
 	* GetDataAction : get data
@@ -67,25 +67,39 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param esparams
-	*   ::zpds::query::ExtraParamsT* esparams
+	*   ::zpds::query::CatParamsT* esparams
 	*
 	*
 	* @return
 	*   none throws if not ok
 	*/
-	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::ExtraParamsT* esparams);
+	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams);
+
+	/**
+	* GetIndexDataAction : get data for ES Index
+	*
+	* @param stptr
+	*   ::zpds::utils::SharedTable::pointer stptr
+	*
+	* @param esparams
+	*   ::zpds::query::CatParamsT* esparams
+	*
+	* @return
+	*   none throws if not ok
+	*/
+	void GetIndexDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams);
 
 private:
 	::zpds::remote::GeoHashHelper gh;
 
 	/**
-	* UpsertExtraAttrib : ExtraAttrib data addition
+	* UpsertCategory : Category data addition
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib
+	*   ::zpds::store::CategoryT* data type Category
 	*
 	* @param trans
 	*   ::zpds::store::TransactionT* trans
@@ -93,16 +107,16 @@ private:
 	* @return
 	*   bool
 	*/
-	bool UpsertExtraAttrib(::zpds::utils::SharedTable::pointer stptr, ExtraAttribT* data, TransactionT* trans);
+	bool UpsertCategory(::zpds::utils::SharedTable::pointer stptr, CategoryT* data, TransactionT* trans);
 
 	/**
-	* MergeExtraAttrib : ExtraAttrib data merging
+	* MergeCategory : Category data merging
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib
+	*   ::zpds::store::CategoryT* data type Category
 	*
 	* @param trans
 	*   ::zpds::store::TransactionT* trans
@@ -110,24 +124,24 @@ private:
 	* @return
 	*   bool
 	*/
-	bool MergeExtraAttrib(::zpds::utils::SharedTable::pointer stptr, ExtraAttribT* data, TransactionT* trans);
+	bool MergeCategory(::zpds::utils::SharedTable::pointer stptr, CategoryT* data, TransactionT* trans);
 
 	/**
-	* MergeOne : ExtraAttrib data merging for one record
+	* MergeOne : Category data merging for one record
 	*
 	* @param mto
-	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib merged to
+	*   ::zpds::store::CategoryT* data type Category merged to
 	*
 	* @param mfrom
-	*   ::zpds::store::ExtraAttribT* data type ExtraAttrib merged from
+	*   ::zpds::store::CategoryT* data type Category merged from
 	*
 	* @return
 	*   true if changed
 	*/
-	bool MergeOne(ExtraAttribT* mto, ExtraAttribT* mfrom);
+	bool MergeOne(CategoryT* mto, CategoryT* mfrom);
 
 
 };
 } // namespace store
 } // namespace zpds
-#endif /* _ZPDS_STORE_EXTRA_ATTRIB_SERVICE_HPP_ */
+#endif /* _ZPDS_STORE_CATEGORY_SERVICE_HPP_ */

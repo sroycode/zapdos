@@ -12,6 +12,7 @@ enum MasterCmdTypeE {
 	M_ADDDATA_LOCAL                                                 =  4;
 	M_ADDDATA_TEXT                                                  =  5;
 	M_ADDDATA_EXTRA                                                 =  6;
+	M_ADDDATA_CAT                                                   =  7;
 
 }
 

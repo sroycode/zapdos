@@ -42,6 +42,7 @@
 #include "store/LookupRecordService.hpp"
 #include "store/TextRecordService.hpp"
 #include "store/ExtraAttribService.hpp"
+#include "store/CategoryService.hpp"
 
 namespace zpds {
 namespace hrpc {
@@ -173,6 +174,18 @@ public:
 							throw zpds::BadDataException("Bad Protobuf Format");
 						// action
 						zpds::store::ExtraAttribService service; //AddData
+						service.AddDataAction(stptr, &data);
+						// aftermath
+						data.SerializeToString(&output);
+						DLOG(INFO) << request->path;
+						break;
+					}
+					case ::zpds::hrpc::M_ADDDATA_CAT : {
+						zpds::query::CatParamsT data;
+						if (!data.ParseFromString( b64_decode(request->content.string()) ))
+							throw zpds::BadDataException("Bad Protobuf Format");
+						// action
+						zpds::store::CategoryService service; //AddData
 						service.AddDataAction(stptr, &data);
 						// aftermath
 						data.SerializeToString(&output);

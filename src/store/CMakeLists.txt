@@ -11,6 +11,7 @@ set(ZPDS_STORE_SOURCES
 		LookupRecordTable.cc
 		TextRecordTable.cc
 		ExtraAttribTable.cc
+		CategoryTable.cc
 
 		ProfileService.cc
 		LookupRecordService.cc
@@ -18,6 +19,7 @@ set(ZPDS_STORE_SOURCES
 		ExtraAttribService.cc
 		PhotonService.cc
 		TextDataService.cc
+		CategoryService.cc
    )
 
 add_library(zpds_store STATIC ${ZPDS_STORE_SOURCES})

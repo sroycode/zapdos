@@ -38,8 +38,10 @@ message PointLocT {
 	double lon                                                      =  5; // longitude
 	string geohash                                                  =  6; // for geo
 	string pincode                                                  =  7; // pincode
+	string region                                                   =  8; // city region
 
-	bool dont_use                                                   =  8; // dont use this 
+	bool dont_use                                                   = 11; // dont use this 
+	bool preferred                                                  = 12; // preferred
 }
 
 enum QueryTypeE {
@@ -50,9 +52,10 @@ enum QueryTypeE {
 }
 
 message UsedParamsT {
-	PointLocT                     cur                               =  1; // detected coords INPUT lat lon
-	PointLocT                     top_right                         =  2; // for geo bounded
-	PointLocT                     bottom_left                       =  3; // for geo bounded
+	PointLocT                     cur                               =  1; // INPUT detected coords
+	PointLocT                     sel                               =  2; // INPUT selected coords
+	PointLocT                     qry                               =  3; // query derived coords
+
 	uint64                        items                             =  4; // INPUT no of results to return
 
 	LangTypeE                     lang                              =  5; // INPUT language
@@ -125,7 +128,7 @@ enum InputTypeE {
 }
 
 message QueryOrderT {
-	string                        rec_tagid                          =  1; // INPUT this tag id for merge needs
+	string                        rec_tagid                          =  1; // INPUT this tag id 
 	uint64                        weight                             =  2; // INPUT order descending
 	SourceTypeE                   rec_styp                           =  3; // INPUT query record styp
 	uint64                        rec_count                          =  4; // INPUT  max records
@@ -140,6 +143,8 @@ message QueryOrderT {
 	SearchTypeE                   search_type                        = 12; // INPUT search text for
 	OrderTypeE                    order_type                         = 13; // INPUT order by
 	InputTypeE                    input_type                         = 14; // INPUT input type
+
+	string                        mrg_tagid                          = 15; // INPUT merge with this tag id
 
 }
 

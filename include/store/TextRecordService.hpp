@@ -41,6 +41,8 @@
 namespace zpds {
 namespace store {
 
+using TextRecordT = LookupRecordT;
+
 class TextRecordService : public StoreBase  {
 public:
 

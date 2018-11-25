@@ -157,7 +157,7 @@ cat << SHREOFF
  *  ${name}Table.cc :   Implementation for ${name}Table ${desc}
  *
  */
-#include <store/${name}Table.hpp>
+#include "store/${name}Table.hpp"
 // template class zpds::store::StoreTable<zpds::store::${name}T>;
 SHREOFF
 

@@ -196,11 +196,21 @@ protected:
 	* @param part_prefix
 	*   const std::string& part prefix
 	*
+	* @param start
+	*   const size_t start default 0
+	*
+	* @param end
+	*   const size_t end default whole
+	*
 	* @return
 	*   std::string
 	*/
-	std::string GetQueryString(QueryWordsE qtype, const std::string& extra,
-	                           const std::string& full_prefix, const std::string& part_prefix);
+	std::string GetQueryString(
+	    QueryWordsE qtype, const std::string& extra,
+	    const std::string& full_prefix, const std::string& part_prefix,
+	    const size_t start=0,
+	    const size_t end = (wordstr.size() > 0 ) ? wordstr.size()-1, 0
+	);
 
 	/**
 	* EstimateExec: estimate time based on keyword freq

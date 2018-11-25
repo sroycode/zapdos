@@ -33,10 +33,17 @@ POST _data/api/v1/extrattrib/delete
 POST _data/api/v1/extrattrib/get
 POST _data/api/v1/extrattrib/getnd
 
+POST _data/api/v1/category/upsert
+POST _data/api/v1/category/merge
+POST _data/api/v1/category/get
+POST _data/api/v1/category/getnd
+GET _data/api/v1/category/esbulk?{params}
+
 GET _query/api/v1/photon/{profile}?{params}
 GET _query/api/v1/notoph/{profile}?{params}
 GET _query/api/v1/textdata/{profile}?{params}
 
 POST _zpds/master/v1/endpoint
 POST _zpds/remote/v1/endpoint
+
 
