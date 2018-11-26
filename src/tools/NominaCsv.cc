@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 					d.Print();
 				}
 				catch(std::exception& e) {
-					std::cerr << "Error in data : " << row[0] << " : " << e.what() << std::endl;
+					std::cerr << "Error in data : " << row[0].as<uint64_t>() << " : " << e.what() << std::endl;
 				}
 			}
 		}
