@@ -123,8 +123,13 @@ int main(int argc, char *argv[])
 				std::cout << row[1].c_str() << std::endl;
 			}
 			else {
-				::zpds::tools::DataFieldT d { pgconn2, row[0].as<uint64_t>() };
-				d.Print();
+				try {
+					::zpds::tools::DataFieldT d { pgconn2, row[0].as<uint64_t>() };
+					d.Print();
+				}
+				catch(std::exception& e) {
+					std::cerr << "Error in data : " << row[0] << " : " << e.what() << std::endl;
+				}
 			}
 		}
 
