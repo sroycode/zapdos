@@ -213,7 +213,7 @@ void zpds::tools::LineReader::ReadTextRecord(
 	// string          tags           = 12 ( INPUT keywords comma sep )
 	record->set_tags(strvec[12]);
 	// string          lang           = 13 ( INPUT language )
-	if (!strvec[19].empty()) {
+	if (!strvec[13].empty()) {
 		std::string lang = strvec.at(13);
 		boost::algorithm::to_upper(lang);
 		const google::protobuf::EnumDescriptor *descriptor = zpds::search::LangTypeE_descriptor();

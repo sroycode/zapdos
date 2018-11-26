@@ -290,7 +290,7 @@ if [ ! -d ${MWORKDIR} ] ; then
 fi
 cd ${MWORKDIR}
 CFLAGS="-O2 -I ${ZAPDOS_SOURCE}/thirdparty/include -L${ZAPDOS_SOURCE}/thirdparty/lib" \
-./configure --enable-static=yes –enable-64bit-docid=yes --prefix=${ZAPDOS_SOURCE}/thirdparty && make && make install
+./configure --enable-static=yes -enable-64bit-docid=yes --prefix=${ZAPDOS_SOURCE}/thirdparty && make && make install
 }
 
 # Building Libsodium 1.0.16
