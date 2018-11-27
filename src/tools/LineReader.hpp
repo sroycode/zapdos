@@ -48,6 +48,17 @@ using ExtraAttribListT=LookupRecordListT;
 }
 
 namespace zpds {
+namespace query {
+using TextParamsT = LookupParamsT;
+using TextDataT = LookupDataT;
+using TextRespT = LookupRespT;
+using ExtraParamsT = LookupParamsT;
+using ExtraDataT = LookupDataT;
+using ExtraRespT = LookupRespT;
+}
+}
+
+namespace zpds {
 namespace tools {
 class LineReader {
 public:

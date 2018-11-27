@@ -68,6 +68,7 @@ DEFINE_uint64(chunk, 5000, "chunk size");
 #include "LineReader.hpp"
 #include "cpr/cpr.h"
 
+
 std::unordered_map<std::string,int> ActionMap = {
 	{ "UPSERT",  1 },
 	{ "UPDATE",  2 }

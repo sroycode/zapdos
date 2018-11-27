@@ -39,6 +39,14 @@
 #include "remote/GeoHashHelper.hpp"
 
 namespace zpds {
+namespace query {
+using CatParamsT = LookupParamsT;
+using CatDataT = LookupDataT;
+using CatRespT = LookupRespT;
+}
+}
+
+namespace zpds {
 namespace store {
 
 using CategoryT = LookupRecordT;
