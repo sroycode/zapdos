@@ -135,6 +135,7 @@ message LookupRecordT {
 	string                        fld_area                          = 18; // INPUT area field
 	string                        address                           = 19; // INPUT address
 	string                        pincode                           = 20; // INPUT pin code
+	string                        region                            = 21; // INPUT region 
 
 	double                        accuracy                          = 22; // INPUT accuracy of lat lon in m
 	double                        lat                               = 23; // INPUT latitude
