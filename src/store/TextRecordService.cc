@@ -143,7 +143,7 @@ void zpds::store::TextRecordService::GetDataAction(
 			att.set_styp( sth->styp() );
 			att.set_lang( sth->lang() );
 			att.set_uniqueid( sth->uniqueid() );
-			if (att_table.GetOne(&att,U_TEXTRECORD_STYP_LANG_UNIQUEID) ) {
+			if (att_table.GetOne(&att,U_EXTRAATTRIB_STYP_LANG_UNIQUEID) ) {
 				sth->mutable_attr()->Swap( att.mutable_attr() );
 			}
 		}
@@ -206,7 +206,7 @@ void zpds::store::TextRecordService::GetIndexDataAction(
 			att.set_styp( sth->styp() );
 			att.set_lang( sth->lang() );
 			att.set_uniqueid( sth->uniqueid() );
-			if (att_table.GetOne(&att,U_TEXTRECORD_STYP_LANG_UNIQUEID) ) {
+			if (att_table.GetOne(&att,U_EXTRAATTRIB_STYP_LANG_UNIQUEID) ) {
 				sth->mutable_attr()->Swap( att.mutable_attr() );
 			}
 		}
