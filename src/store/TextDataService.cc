@@ -240,7 +240,7 @@ void zpds::store::TextDataService::GetCompleteAction (::zpds::query::TextDataPar
 
 	auto qr = params->mutable_cdata();
 	auto cur = qr->mutable_cur();
-	qr->set_dtyp( ::zpds::search::DataTypeE::TEXT );
+	qr->set_dtyp( ::zpds::search::IndexTypeE::TEXT );
 
 
 	::zpds::store::SimpleTemplateT one_t;

@@ -58,10 +58,10 @@ zpds::search::SearchTrie::~SearchTrie () {}
 * Get: get the storage instance
 *
 */
-zpds::search::SearchTrie::DatabaseT& zpds::search::SearchTrie::Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp)
+zpds::search::SearchTrie::DatabaseT& zpds::search::SearchTrie::Get(::zpds::search::LangTypeE ltyp, ::zpds::search::IndexTypeE dtyp)
 {
 	const google::protobuf::EnumDescriptor *l = zpds::search::LangTypeE_descriptor();
-	const google::protobuf::EnumDescriptor *d = zpds::search::DataTypeE_descriptor();
+	const google::protobuf::EnumDescriptor *d = zpds::search::IndexTypeE_descriptor();
 	int f = ltyp * 1000 + dtyp;
 	if ( triemap.find(f) == triemap.end() ) {
 		const std::string xapath{dbpath + "/" + l->FindValueByNumber(ltyp)->name() + "_" + d->FindValueByNumber(dtyp)->name()};
@@ -244,7 +244,7 @@ uint64_t zpds::search::SearchTrie::EstimateExec(::zpds::search::SearchTrie::Data
 * WarmCache : warms up cache for db
 *
 */
-void zpds::search::SearchTrie::WarmCache(::zpds::search::LangTypeE lang, ::zpds::search::DataTypeE dtyp, size_t modno, size_t outof)
+void zpds::search::SearchTrie::WarmCache(::zpds::search::LangTypeE lang, ::zpds::search::IndexTypeE dtyp, size_t modno, size_t outof)
 {
 
 	auto db = Get(lang, dtyp );

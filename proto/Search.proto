@@ -10,7 +10,7 @@ enum LangTypeE {
 }
 
 // Search Types
-enum DataTypeE {
+enum IndexTypeE {
 	LOCAL                                                           =  0; // local data
 	TEXT                                                            =  1; // wiki data
 }
@@ -60,7 +60,7 @@ message UsedParamsT {
 
 	LangTypeE                     lang                              =  5; // INPUT language
 	string                        name                              =  6; // INPUT profile name
-	DataTypeE                     dtyp                              =  7; // data type
+	IndexTypeE                     dtyp                             =  7; // data type
 	bool                          noname                            =  8; // reverse lookup no name
 
 	uint64                        no_of_words                       = 10; // no of words

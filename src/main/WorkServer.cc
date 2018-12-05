@@ -153,13 +153,13 @@ void zpds::work::WorkServer::init(zpds::utils::ServerBase::ParamsListT params)
 
 				// collect the ids from index
 				const google::protobuf::EnumDescriptor *l = ::zpds::search::LangTypeE_descriptor();
-				const google::protobuf::EnumDescriptor *d = ::zpds::search::DataTypeE_descriptor();
+				const google::protobuf::EnumDescriptor *d = ::zpds::search::IndexTypeE_descriptor();
 				for (auto i=0 ; i < l->value_count() ; ++i ) {
 					for (auto j=0 ; j < d->value_count() ; ++j ) {
 						LOG(INFO) << "Warming cache : " << l->value(i)->name() << "_" << d->value(j)->name() ;
 						async::parallel_for(async::irange(0, 9), [xapath,i,j](size_t k) {
 							::zpds::search::SearchTrie trie( xapath );
-							trie.WarmCache( ::zpds::search::LangTypeE(i),::zpds::search::DataTypeE(j),k,10);
+							trie.WarmCache( ::zpds::search::LangTypeE(i),::zpds::search::IndexTypeE(j),k,10);
 						});
 					}
 				}

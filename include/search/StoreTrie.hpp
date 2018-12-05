@@ -142,12 +142,12 @@ protected:
 	*   ::zpds::search::LangTypeE ltyp
 	*
 	* @param dtyp
-	*   ::zpds::search::DataTypeE dtyp
+	*   ::zpds::search::IndexTypeE dtyp
 	*
 	* @return
 	*   DatabaseT&
 	*/
-	DatabaseT& Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp);
+	DatabaseT& Get(::zpds::search::LangTypeE ltyp, ::zpds::search::IndexTypeE dtyp);
 
 	/**
 	* IndexFullWords : index items with part

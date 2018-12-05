@@ -48,10 +48,10 @@ zpds::search::StoreTrie::StoreTrie(std::string dbpath_) : dbpath(dbpath_)
 {
 	if (dbpath.empty()) throw zpds::InitialException("dbpath cannot be blank");
 	const google::protobuf::EnumDescriptor *l = zpds::search::LangTypeE_descriptor();
-	const google::protobuf::EnumDescriptor *d = zpds::search::DataTypeE_descriptor();
+	const google::protobuf::EnumDescriptor *d = zpds::search::IndexTypeE_descriptor();
 	for (auto i=0 ; i < l->value_count() ; ++i ) {
 		for (auto j=0 ; j < d->value_count() ; ++j ) {
-			Get(::zpds::search::LangTypeE(i), ::zpds::search::DataTypeE(j) );
+			Get(::zpds::search::LangTypeE(i), ::zpds::search::IndexTypeE(j) );
 			LOG(INFO) << "Created xap index : " << l->value(i)->name() << "_" << d->value(j)->name();
 		}
 	}
@@ -73,10 +73,10 @@ zpds::search::StoreTrie::~StoreTrie()
 * Get: get the storage instance
 *
 */
-zpds::search::StoreTrie::DatabaseT& zpds::search::StoreTrie::Get(::zpds::search::LangTypeE ltyp, ::zpds::search::DataTypeE dtyp)
+zpds::search::StoreTrie::DatabaseT& zpds::search::StoreTrie::Get(::zpds::search::LangTypeE ltyp, ::zpds::search::IndexTypeE dtyp)
 {
 	const google::protobuf::EnumDescriptor *l = zpds::search::LangTypeE_descriptor();
-	const google::protobuf::EnumDescriptor *d = zpds::search::DataTypeE_descriptor();
+	const google::protobuf::EnumDescriptor *d = zpds::search::IndexTypeE_descriptor();
 	int f = (ltyp * 1000) + dtyp;
 	if ( triemap.find(f) == triemap.end() ) {
 		const std::string xapath{dbpath + "/" + l->FindValueByNumber(ltyp)->name() + "_" + d->FindValueByNumber(dtyp)->name()};
@@ -274,7 +274,7 @@ void zpds::search::StoreTrie::AddLocalData(::zpds::store::LookupRecordT* record)
 	// for (auto it = doc.termlist_begin() ; it != doc.termlist_end() ; ++it ) LOG(INFO) << *it;
 
 	// write
-	Get(record->lang(), ::zpds::search::DataTypeE::LOCAL).replace_document(idterm, doc);
+	Get(record->lang(), ::zpds::search::IndexTypeE::LOCAL).replace_document(idterm, doc);
 }
 
 /**
@@ -334,5 +334,5 @@ void zpds::search::StoreTrie::AddTextData(::zpds::store::TextRecordT* record)
 	doc.add_value(XAP_ROCKSID_POS, std::to_string(record->id()));
 
 	// write
-	Get(record->lang(), ::zpds::search::DataTypeE::TEXT).replace_document(idterm, doc);
+	Get(record->lang(), ::zpds::search::IndexTypeE::TEXT).replace_document(idterm, doc);
 }
