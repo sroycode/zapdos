@@ -93,6 +93,8 @@ message ProfileT {
 	string                        name                              =  2; // profile name
 	string                        passkey                           =  3; // profile password
 
+	uint64                        update                            =  4; // profile can update
+
 	uint64                        created_at                        = 49; // created
 	uint64                        updated_at                        = 50; // last updated
 	bool                          notfound                          = 51;

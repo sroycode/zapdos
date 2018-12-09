@@ -93,13 +93,16 @@ public:
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
-	* @param resp
-	*   ::zpds::store::ProfileT* prof
+	* @param stptr
+	*   ::zpds::utils::SharedTable::pointer stptr
+	*
+	* @param update
+	*   bool is this profile allowed update
 	*
 	* @return
 	*   bool if verified
 	*/
-	bool VerifyProfile(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::ProfileT* prof);
+	bool VerifyProfile(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::ProfileT* prof, bool update=false);
 
 
 	/**

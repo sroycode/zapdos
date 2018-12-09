@@ -139,12 +139,14 @@ void zpds::store::ProfileService::NewProfileAction(
 *
 */
 bool zpds::store::ProfileService::VerifyProfile(
-    ::zpds::utils::SharedTable::pointer stptr, ::zpds::store::ProfileT* prof)
+    ::zpds::utils::SharedTable::pointer stptr, ::zpds::store::ProfileT* prof, bool update)
 {
 	::zpds::store::ProfileT prt;
 	prt.set_name( prof->name() );
-	if ( GetProfile(stptr,&prt) )
+	if ( GetProfile(stptr,&prt) ) {
+		if (update && prt.update()==0) return false; 
 		return ( prt.passkey() == prof->passkey() );
+	}
 	return false;
 }
 
