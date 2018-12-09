@@ -212,7 +212,8 @@ public:
 				"this creates a new profile, needs shared-secret and resets if exists",
 				"Parameters:",
 				"name : name of profile",
-				"newpass: new password"
+				"newpass: new password",
+				"update: can update "
 			}
 		});
 
@@ -241,6 +242,9 @@ public:
 					if ( params.find("newpass") == params.end() )
 						throw zpds::InitialException("newpass variable needed",M_INVALID_PARAM);
 					getp.set_newpass( params["newpass"]);
+
+					if ( params.find("update") != params.end() )
+						getp.set_update( std::strtoul ( params["update"].c_str(), nullptr, 0) );
 
 					getp.set_updated_at( currtime );
 
@@ -290,7 +294,8 @@ public:
 				"Parameters:",
 				"name : name of profile",
 				"oldpass: old password",
-				"newpass: new password"
+				"newpass: new password",
+				"update : update flag"
 			}
 		});
 
@@ -360,7 +365,8 @@ public:
 				"this creates a new profile, needs shared-secret and resets if exists",
 				"Parameters:",
 				"name : name of profile",
-				"newpass: new password"
+				"newpass: new password",
+				"update : update flag"
 			}
 		});
 

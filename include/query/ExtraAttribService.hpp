@@ -123,8 +123,8 @@ public:
 						::zpds::store::ProfileT prof;
 						prof.set_name( ldata->name() );
 						prof.set_passkey( ldata->passkey() );
-						if (!pf.VerifyProfile(stptr,&prof) )
-							throw zpds::BadDataException("No such user or Invalid passkey",M_INVALID_PARAM);
+						if (!pf.VerifyProfile(stptr,&prof,true) )
+							throw zpds::BadDataException("No such user or Invalid passkey or user cannot update",M_INVALID_PARAM);
 					}
 					ldata->clear_passkey();
 
