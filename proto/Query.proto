@@ -33,6 +33,8 @@ message ProfileRespT {
 	string   oldpass                                                =  2; // old password
 	string   newpass                                                =  3; // new password
 
+	uint64   update                                                 =  4; // can update
+
 	uint64   updated_at                                             = 20; // profile last updated
 	bool     not_found                                              = 21;
 }
