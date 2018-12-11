@@ -88,6 +88,14 @@ public:
 	virtual ~StoreTrie ();
 
 	/**
+	* CommitData : commits data 
+	*
+	* @return
+	*   none throws if not ok
+	*/
+	void CommitData();
+
+	/**
 	* AddLocalData : add search data point
 	*
 	* @param params

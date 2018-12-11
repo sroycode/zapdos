@@ -70,6 +70,21 @@ zpds::search::StoreTrie::~StoreTrie()
 }
 
 /**
+* CommitData : commits data 
+*
+*/
+void zpds::search::StoreTrie::CommitData()
+{
+	const google::protobuf::EnumDescriptor *l = zpds::search::LangTypeE_descriptor();
+	const google::protobuf::EnumDescriptor *d = zpds::search::IndexTypeE_descriptor();
+	for (auto i=0 ; i < l->value_count() ; ++i ) {
+		for (auto j=0 ; j < d->value_count() ; ++j ) {
+			Get(::zpds::search::LangTypeE(i), ::zpds::search::IndexTypeE(j) ).commit();
+		}
+	}
+}
+
+/**
 * Get: get the storage instance
 *
 */

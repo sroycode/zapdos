@@ -39,6 +39,7 @@
 #include "query/InfoService.hpp"
 #include "query/StaticFileService.hpp"
 
+#include "query/CommandService.hpp"
 #include "query/ProfileService.hpp"
 #include "query/LookupRecordService.hpp"
 #include "query/TextRecordService.hpp"
@@ -52,6 +53,7 @@
 		zpds::query::HelpQuery::pointer helpquery = std::make_shared<zpds::query::HelpQuery>(); \
 		zpds::query::InfoService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::StaticFileService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::CommandService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::ProfileService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::LookupRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::TextRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \

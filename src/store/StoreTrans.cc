@@ -209,4 +209,8 @@ void zpds::store::StoreTrans::AddToCache(::zpds::utils::SharedTable::pointer stp
 
 		}
 	}
+	if (stptr->force_commit.Get()) {
+		stptr->force_commit.Set(false);
+		stptr->xapdb->CommitData();
+	}
 }

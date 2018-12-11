@@ -111,6 +111,8 @@ public:
 	SharedBool allow_free_update;
 	SharedBool use_local_whatwhere;
 
+	SharedBool force_commit;
+
 	// lockers
 	LockT update_lock;
 
