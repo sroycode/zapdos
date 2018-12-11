@@ -13,6 +13,8 @@ GET _admin/api/v1/check_simpletemplates?{params}
 POST _admin/api/v1/set_simpletemplate
 POST _admin/api/v1/get_profileformat
 
+GET _admin/api/v1/local_command/commit
+
 POST _data/api/v1/lookuprecord/upsert
 POST _data/api/v1/lookuprecord/merge
 POST _data/api/v1/lookuprecord/delete
