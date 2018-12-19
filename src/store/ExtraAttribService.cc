@@ -68,7 +68,7 @@ void zpds::store::ExtraAttribService::AddDataAction(
 		DLOG(INFO) << " Merge : " << data->records_size();
 		for (auto i=0; i<data->records_size(); ++i) {
 			std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(
-			                       U_TEXTRECORD_STYP_LANG_UNIQUEID,
+			                       U_EXTRAATTRIB_STYP_LANG_UNIQUEID,
 			                       data->records(i).styp(), data->records(i).lang(), data->records(i).uniqueid()  );
 			auto it = IsDoneMap.find(hash);
 			if (it!=IsDoneMap.end()) {
@@ -82,7 +82,7 @@ void zpds::store::ExtraAttribService::AddDataAction(
 		IsDoneMap.clear();
 		for (auto i=0; i<data->records_size(); ++i) {
 			std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(
-			                       U_TEXTRECORD_STYP_LANG_UNIQUEID,
+			                       U_EXTRAATTRIB_STYP_LANG_UNIQUEID,
 			                       data->records(i).styp(), data->records(i).lang(), data->records(i).uniqueid()  );
 			auto it = IsDoneMap.find(hash);
 			if (it!=IsDoneMap.end()) continue; // duplicate already merged
@@ -98,7 +98,7 @@ void zpds::store::ExtraAttribService::AddDataAction(
 		// go from bottom hence upper duplicates are discarded
 		for (auto i=data->records_size()-1; i>=0; --i) {
 			std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(
-			                       U_TEXTRECORD_STYP_LANG_UNIQUEID,
+			                       U_EXTRAATTRIB_STYP_LANG_UNIQUEID,
 			                       data->records(i).styp(), data->records(i).lang(), data->records(i).uniqueid()  );
 			auto it = IsDoneMap.find(hash);
 			if (it!=IsDoneMap.end()) continue; // duplicate
@@ -127,7 +127,7 @@ void zpds::store::ExtraAttribService::GetDataAction(
 	::zpds::store::ExtraAttribTable sth_table{stptr->maindb.Get()};
 	for (auto i=0; i<data->records_size(); ++i) {
 		::zpds::store::ExtraAttribT* sth = data->mutable_records(i);
-		if (! sth_table.GetOne(sth,U_TEXTRECORD_STYP_LANG_UNIQUEID) )
+		if (! sth_table.GetOne(sth,U_EXTRAATTRIB_STYP_LANG_UNIQUEID) )
 			sth->set_notfound(true);
 	}
 }
@@ -140,7 +140,7 @@ bool zpds::store::ExtraAttribService::UpsertExtraAttrib(::zpds::utils::SharedTab
         zpds::store::ExtraAttribT* data, zpds::store::TransactionT* trans)
 {
 	std::string hash = EncodeSecondaryKey<int32_t,uint32_t,std::string>(
-	                       U_TEXTRECORD_STYP_LANG_UNIQUEID,
+	                       U_EXTRAATTRIB_STYP_LANG_UNIQUEID,
 	                       data->styp(), data->lang(), data->uniqueid()
 	                   );
 
@@ -150,7 +150,7 @@ bool zpds::store::ExtraAttribService::UpsertExtraAttrib(::zpds::utils::SharedTab
 	sth.set_lang ( data->lang() );
 	sth.set_uniqueid ( data->uniqueid() );
 	::zpds::store::ExtraAttribTable sth_table{stptr->maindb.Get()};
-	bool hash_found = sth_table.GetOne(&sth,U_TEXTRECORD_STYP_LANG_UNIQUEID);
+	bool hash_found = sth_table.GetOne(&sth,U_EXTRAATTRIB_STYP_LANG_UNIQUEID);
 	data->set_id( hash_found ? sth.id() : stptr->maincounter.GetNext() );
 	data->set_updated_at( currtime );
 	data->set_created_at( hash_found ? sth.created_at() : currtime );
@@ -168,7 +168,7 @@ bool zpds::store::ExtraAttribService::UpsertExtraAttrib(::zpds::utils::SharedTab
 bool zpds::store::ExtraAttribService::MergeExtraAttrib(::zpds::utils::SharedTable::pointer stptr,
         zpds::store::ExtraAttribT* data, zpds::store::TransactionT* trans)
 {
-	std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(U_TEXTRECORD_STYP_LANG_UNIQUEID,
+	std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(U_EXTRAATTRIB_STYP_LANG_UNIQUEID,
 	                   data->styp(), data->lang(), data->uniqueid()
 	                                                                  );
 	uint64_t currtime = ZPDS_CURRTIME_MS;
@@ -177,7 +177,7 @@ bool zpds::store::ExtraAttribService::MergeExtraAttrib(::zpds::utils::SharedTabl
 	sth.set_lang ( data->lang() );
 	sth.set_uniqueid ( data->uniqueid() );
 	::zpds::store::ExtraAttribTable sth_table{stptr->maindb.Get()};
-	bool hash_found = sth_table.GetOne(&sth,U_TEXTRECORD_STYP_LANG_UNIQUEID);
+	bool hash_found = sth_table.GetOne(&sth,U_EXTRAATTRIB_STYP_LANG_UNIQUEID);
 	if (hash_found) {
 		// merge to original and swap
 		bool stat = MergeOne( &sth, data );
