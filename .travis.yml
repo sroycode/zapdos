@@ -2,11 +2,8 @@ dist: bionic
 
 addons:
   apt:
-    sources:
-      - ppa:exonum/rocksdb 
-      - ppa:maarten-fonville/protobuf 
-      - ppa:xapian-backports/ppa 
     packages:
+      - software-properties-common
       - ccache
       - cmake
       - make
@@ -15,12 +12,10 @@ addons:
       - g++
       - gcc
       - lcov
-      - protobuf-compiler
       - libboost-all-dev
       - libcurl4-openssl-dev
       - zlib1g-dev
       - liblz4-dev
-      - libprotobuf-dev
       - libgoogle-glog-dev
       - libgflags-dev
       - libgoogle-perftools-dev
@@ -30,7 +25,6 @@ addons:
       - libctemplate-dev
       - libtbb-dev
       - libzstd-dev
-      - libxapian-dev
       - libsodium-dev
       - libosmium-dev
       - librocksdb-dev
@@ -45,6 +39,11 @@ branches:
 before_install:
 - locale-gen en_US.UTF-8 
 - update-locale LANG=en_US.UTF-8 
+- sudo apt-add-repository ppa:exonum/rocksdb 
+- sudo apt-add-repository ppa:maarten-fonville/protobuf 
+- sudo apt-add-repository ppa:xapian-backports/ppa 
+- sudo apt-get update -y -qq
+- sudo apt-get install -y protobuf-compiler librocksdb-dev libprotobuf-dev libxapian-dev
 
 script:
 - mkdir -p build
