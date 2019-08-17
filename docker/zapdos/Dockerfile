@@ -8,19 +8,20 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LANG C.UTF-8
 
 RUN apt-get -y update -qq && \
-    apt-get -y install locales && \
+    apt-get -y install locales apt-utils software-properties-common && \
     locale-gen en_US.UTF-8 && \
     update-locale LANG=en_US.UTF-8 && \
     add-apt-repository ppa:exonum/rocksdb && \
     add-apt-repository ppa:maarten-fonville/protobuf && \
     add-apt-repository ppa:xapian-backports/ppa && \
-    apt-get update -y && \
+    apt-get update -y -qq && \
     apt-get install -y \
+    --no-install-recommends \
     git wget ccache cmake make libtool pkg-config g++ gcc autoconf automake curl jq lcov \
     protobuf-compiler vim-common libboost-all-dev libboost-all-dev \
     libcurl4-openssl-dev zlib1g-dev liblz4-dev libprotobuf-dev \
     libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev libctemplate-dev \
-    libtbb-dev libzstd-dev libxapian-dev libsodium-dev libosmium-dev \
+    libtbb-dev libzstd-dev libxapian-dev libsodium-dev libosmium-dev librocksdb-dev libpqxx-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/* /var/tmp/*
@@ -28,18 +29,19 @@ RUN apt-get -y update -qq && \
 WORKDIR /app
 
 ENV MVERSION devel
+#ENV MVERSION 0.8.0
 ENV MWORKDIR zapdos-${MVERSION}
 
 RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
 	&& cd zapdos-${MVERSION} \
-	&& git checkout v${MVERSION} \
+	&& git checkout ${MVERSION} \
 	&& mkdir -p build \
 	&& cd build \
-	&& cmake .. && make && make install
+	&& cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make && make install
 
-COPY run_as_master.sh ${ZAPDOS_SOURCE}/run_as_master.sh
-COPY run_as_slave.sh ${ZAPDOS_SOURCE}/run_as_slave.sh
-COPY zapdos.conf ${ZAPDOS_SOURCE}/zapdos.conf
+COPY run_as_master.sh /usr/local/bin/run_as_master.sh
+COPY run_as_slave.sh /usr/local/bin/run_as_slave.sh
+COPY zapdos.conf /usr/local/etc/zapdos.conf
 
 EXPOSE 9091
 EXPOSE 9092

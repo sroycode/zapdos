@@ -24,7 +24,7 @@ zpds_nomina -pgparams "dbname=nominatim user=nominatim host=${NOMINA_IP} port=54
 
 function load_spell_data () {
 docker run -v ${RHOME}:/data -v ${THOME}:/data1 --network=my_zapdos \
--t zapdos zpds_server -config=/app/zapdos/zapdos.conf -jinpath=/data1 -dryrun 
+-t zapdos zpds_server -config=/usr/local/etc/zapdos.conf -jinpath=/data1 -dryrun 
 }
 
 function run () {

@@ -1,16 +1,53 @@
-sudo: required
+dist: bionic
+
+addons:
+  apt:
+    sources:
+      - ppa:exonum/rocksdb 
+      - ppa:maarten-fonville/protobuf 
+      - ppa:xapian-backports/ppa 
+    packages:
+      - ccache
+      - cmake
+      - make
+      - libtool
+      - pkg-config
+      - g++
+      - gcc
+      - lcov
+      - protobuf-compiler
+      - libboost-all-dev
+      - libcurl4-openssl-dev
+      - zlib1g-dev
+      - liblz4-dev
+      - libprotobuf-dev
+      - libgoogle-glog-dev
+      - libgflags-dev
+      - libgoogle-perftools-dev
+      - libsnappy-dev
+      - libbz2-dev
+      - libz-dev
+      - libctemplate-dev
+      - libtbb-dev
+      - libzstd-dev
+      - libxapian-dev
+      - libsodium-dev
+      - libosmium-dev
+      - librocksdb-dev
+      - libpqxx-dev
 
 language: cpp
-
-services:
-  - docker
 
 branches:
   only:
   - master
 
 before_install:
-- docker pull sroycode/zapdos_build
+- locale-gen en_US.UTF-8 
+- update-locale LANG=en_US.UTF-8 
 
 script:
-- docker run -v /home/travis/build/sroycode/zapdos:/app/zapdos sroycode/zapdos_build /bin/bash -c "cd /app/zapdos && ln -s /opt/local/zapdos/thirdparty . && mkdir -p build && cd build && source /opt/rh/devtoolset-7/enable && cmake3 -DBOOST_ROOT=/opt/local/boost .. && make"
+- mkdir -p build
+- cd build
+- cmake ..
+- make

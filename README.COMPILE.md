@@ -37,10 +37,11 @@ brew install libsodium libicu icu4c curl-openssl rocksdb protobuf gperf snappy x
 sudo add-apt-repository ppa:exonum/rocksdb
 sudo add-apt-repository ppa:maarten-fonville/protobuf
 sudo add-apt-repository ppa:xapian-backports/ppa
+sudo add-apt-repository ppa:jtv/ppa
 sudo apt update -y
 sudo apt install -y \
 	wget ccache cmake make libtool pkg-config g++ gcc autoconf automake curl jq lcov \
 	protobuf-compiler vim-common libboost-all-dev libboost-all-dev libcurl4-openssl-dev zlib1g-dev liblz4-dev libprotobuf-dev \
 	libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev libctemplate-dev \
-	libtbb-dev libzstd-dev libxapian-dev libsodium-dev libosmium-dev
+	libtbb-dev libzstd-dev libxapian-dev libsodium-dev libosmium-dev librocksdb-dev libpqxx-dev
 ```
