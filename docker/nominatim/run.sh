@@ -1,8 +1,7 @@
 #!/bin/bash
 
-NHOME=/Users/shreos/Docker/nomina
-OSMFIL=koramangala-sample.osm
-OSMFIL=bangalore-20181026.osm.pbf
+if [ -z "$NHOME" ] ; then echo "Please set NHOME for nominatim data" ; exit 1; fi
+if [ -z "$OSMFIL" ] ; then echo "Please set OSMFIL osm file" ; exit 1; fi
 
 function build() {
 docker network create my_zapdos

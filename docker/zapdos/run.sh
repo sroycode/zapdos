@@ -1,10 +1,11 @@
 #!/bin/bash
 
-RHOME=/Users/shreos/Docker/zapdos
-THOME=/Users/shreos/Docker/zapdos_data
+if [ -z "$RHOME" ] ; then echo "Please set RHOME for data storage" ; exit 1; fi
+if [ -z "$THOME" ] ; then echo "Please set THOME where spell and search data resides" ; exit 1; fi
+if [ -z "$SHARED_SECRET" ] ; then echo "Please set SHARED_SECRET from zapdos.conf" ; exit 1; fi
+
 mkdir -p ${RHOME} ${THOME}
 NOMINA_IP="`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my_nomina`"
-SHARED_SECRET="PLEASE_REPLACE_THIS_BY_YOUR_SHARED_SECRET"
 
 function build () {
 docker build -t zapdos . \

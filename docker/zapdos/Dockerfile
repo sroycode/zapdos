@@ -29,11 +29,10 @@ RUN apt-get -y update -qq && \
 WORKDIR /app
 
 #ENV MVERSION devel
-ENV MVERSION 0.8.0
-ENV MWORKDIR zapdos-${MVERSION}
+ENV MVERSION v0.8.0
 
-RUN git clone https://github.com/sroycode/zapdos.git ${MWORKDIR} \
-	&& cd zapdos-${MVERSION} \
+RUN git clone https://github.com/sroycode/zapdos.git \
+	&& cd zapdos \
 	&& git checkout ${MVERSION} \
 	&& mkdir -p build \
 	&& cd build \
