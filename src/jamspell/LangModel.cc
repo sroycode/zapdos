@@ -39,8 +39,7 @@
 #include <cstring>
 #include <algorithm>
 #include "jamspell/LangModel.hpp"
-
-#include "city.h"
+#include "jamspell/city.h"
 
 #ifndef ssize_t
 #define ssize_t int

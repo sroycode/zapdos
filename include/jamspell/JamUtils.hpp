@@ -99,4 +99,5 @@ uint16_t CityHash16(const char* str, size_t size);
 
 } // jamspell
 } // zpds
+
 #endif // _ZPDS_JAMSPELL_JAM_UTILS_HPP_

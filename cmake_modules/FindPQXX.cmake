@@ -18,6 +18,7 @@ if ( NOT PQXX_INCLUDE_DIRECTORIES OR NOT PQXX_LIBRARIES )
         ${CMAKE_INSTALL_PREFIX}/lib
           ${CMAKE_INSTALL_PREFIX}/bin
         /usr/local/pgsql/lib
+				/usr/lib/x86_64-linux-gnu/
         /usr/local/lib
         /usr/lib
       DOC "Location of libpqxx library"

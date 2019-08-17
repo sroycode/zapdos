@@ -70,7 +70,6 @@ private:
     size_t MaxCandiatesToCheck = 14;
 };
 
-
 } // jamspell
 } // zpds
 #endif // _ZPDS_JAMSPELL_SPELL_CORRECTOR_HPP_

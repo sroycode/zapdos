@@ -1,6 +1,7 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(ZPDS_JAMSPELL_SOURCES
+	city.cc
 	phf.cc
 	JamUtils.cc
 	BloomFilter.cc

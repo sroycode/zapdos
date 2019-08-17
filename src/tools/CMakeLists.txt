@@ -58,6 +58,7 @@ set(TOOL_TARGETS ${TOOL_TARGETS} zpds_addtext)
 add_executable(zpds_spell
 	TestSpell.cc
 	../jamspell/phf.cc
+	../jamspell/city.cc
 	../jamspell/JamUtils.cc
 	../jamspell/BloomFilter.cc
 	../jamspell/LangModel.cc
@@ -67,7 +68,6 @@ add_executable(zpds_spell
 target_link_libraries(zpds_spell
 	${CMAKE_THREAD_LIBS_INIT}
 	${GLOG_LIBRARIES}
-	${CITYHASH_LIBRARIES}
 )
 
 set(TOOL_TARGETS ${TOOL_TARGETS} zpds_spell)

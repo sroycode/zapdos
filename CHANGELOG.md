@@ -1,3 +1,11 @@
+### v0.6.0
+
+> Fri Aug 16 18:55:52 IST 2019
+
+> changed mainly the compilation on ubuntu 
+
+> changed mainly the compilation
+
 ### v0.5.0
 
 > Tue, 20 Nov 2018 12:45:57 +0530

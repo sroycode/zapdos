@@ -12,52 +12,35 @@ You need to install these tools using standard utils.
 - libcurl 7.0+ 
 - httpie for testing
 
-
 The ones below can be compiled from source if you need,there is a helper `scripts/thirdparty.sh`
 - gperftools 2.5
 - protobuf 3.5.0
 - snappy 1.1.7
-- rocksdb compression libs zlib , bzip2 , lz4 - preferably static (*)
-- rocksdb 5.8  ( script installs above headers ) (*)
+- rocksdb 5.6
 - libsodium 1.0.16
-- cityhash from git
+- xapian
 - libosmium 2.14.2 ( requires protozero and sparsehash )
+- libpqxx ( for import tool )
 
-Items marked with asterix (*) should preferably be compiled from source
-On mac +homebrew and ubuntu-18 +apt default versions work fine.  For Centos 7 see section below.
-( Ubuntu 16 is not supported )
+On mac +homebrew and ubuntu-18 +apt default versions work fine.
 
 
-### For Centos 7
-
-- On Centos 7 you will need devtoolset-7 , cmake3 and boost
-
-Set up the the compiler environment
+### For Mac +homebrew
 
 ```
-. .profile.centos7
-mkdir -p $ZAPDOS_TEMP
-sudo yum install centos-release-scl
-sudo yum install devtoolset-7-gcc devtoolset-7-gcc-c++ cmake3 glog-devel libunwind-devel libicu-devel libcurl-devel
-# Build boost 1.67 from source
-. /opt/rh/devtoolset-7/enable
-wget -q -O boost_1_67_0.tar.bz2 "https://sourceforge.net/projects/boost/files/boost/1.62.0/boost_1_62_0.tar.bz2/download"
-tar -jxf boost_1_67_0.tar.bz2
-cd boost_1_67_0
-sh bootstrap.sh --prefix=/opt/local/boost
-sudo ./b2 install --prefix=/opt/local/boost
+brew install libsodium libicu icu4c curl-openssl rocksdb protobuf gperf snappy xapian ctemplate libpqxx 
 ```
 
-Before setting up the thirdparty libraries and compiling this sets the path and alias for cmake
+### For Ubuntu 18
 
 ```
-. .profile.centos7
+sudo add-apt-repository ppa:exonum/rocksdb
+sudo add-apt-repository ppa:maarten-fonville/protobuf
+sudo add-apt-repository ppa:xapian-backports/ppa
+sudo apt update -y
+sudo apt install -y \
+	wget ccache cmake make libtool pkg-config g++ gcc autoconf automake curl jq lcov \
+	protobuf-compiler vim-common libboost-all-dev libboost-all-dev libcurl4-openssl-dev zlib1g-dev liblz4-dev libprotobuf-dev \
+	libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev libctemplate-dev \
+	libtbb-dev libzstd-dev libxapian-dev libsodium-dev libosmium-dev
 ```
-
-## Installing thirdparty packages using scripts/thirdparty.sh
-
-Please set the environment ( See .profile.centos7/ubuntu/mac ). There are two environment variables
-`ZAPDOS_SOURCE` should be set to the top level directory of the package. 
-`ZAPDOS_TPSRC` is where the source code packages are downloaded ( defaults to /opt/backup ).
-Order is important since rocksdb needs snappy.
-

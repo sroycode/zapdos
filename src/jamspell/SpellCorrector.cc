@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  SpellCorrector.cc : 
+ *  SpellCorrector.cc :  spell corrector impl
  *
  */
 #include <algorithm>
@@ -37,7 +37,6 @@
 
 namespace zpds {
 namespace jamspell {
-
 
 static std::vector<std::wstring> GetDeletes1(const std::wstring& w) {
     std::vector<std::wstring> results;
@@ -503,7 +502,6 @@ bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
     ::zpds::handypack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
     return true;
 }
-
 
 } // jamspell
 } // zpds

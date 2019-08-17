@@ -3,7 +3,9 @@ add_subdirectory(cpr)
 
 add_subdirectory(remote)
 add_subdirectory(search)
+
 add_subdirectory(jamspell)
+
 add_subdirectory(utils)
 add_subdirectory(store)
 add_subdirectory(hrpc)

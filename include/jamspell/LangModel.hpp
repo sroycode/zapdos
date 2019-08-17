@@ -44,10 +44,8 @@
 #include "jamspell/JamUtils.hpp"
 #include "jamspell/PerfectHash.hpp"
 
-
 namespace zpds {
 namespace jamspell {
-
 
 constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
 constexpr uint16_t LANG_MODEL_VERSION = 9;
@@ -137,7 +135,6 @@ private:
     TPerfectHash PerfectHash;
     uint64_t CheckSum;
 };
-
 
 } // jamspell
 } // zpds

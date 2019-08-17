@@ -24,7 +24,7 @@ else (CTEMPLATE_INCLUDE_DIR AND CTEMPLATE_LIBRARIES)
   find_path(CTEMPLATE_INCLUDE_DIR ctemplate/template.h
      HINTS ${PROJECT_SOURCE_DIR}/thirdparty/include /opt/local/include /usr/local/include )
   find_library(CTEMPLATE_LIBRARIES NAMES ctemplate
-       HINTS ${PROJECT_SOURCE_DIR}/thirdparty/lib /opt/local/lib /usr/local/lib64 /usr/local/lib)
+       HINTS ${PROJECT_SOURCE_DIR}/thirdparty/lib /opt/local/lib /usr/local/lib64 /usr/local/lib /usr/lib/x86_64-linux-gnu)
   find_program(CTEMPLATE_COMPILER make_tpl_varnames_h
        HINTS ${PROJECT_SOURCE_DIR}/thirdparty/bin /opt/local/bin /usr/local/bin)
 

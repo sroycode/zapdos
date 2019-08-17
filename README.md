@@ -9,8 +9,6 @@ Local Search with OSM data
 
 This code is work in progress and is to change frequently.
 
-* Data structrures have changed, so if you upgrade from 0.4.1 to 0.5.0 or higher you need to dump the data again
-
 ## What is it
 
 1.  As of now this is a completion engine for local or data.
@@ -135,6 +133,7 @@ This project uses code from
 
 - https://github.com/eidheim/Simple-Web-Server ( web server )
 - https://github.com/yinqiwen/ardb ( Geohash )
+- https://github.com/google/cityhash
 - https://github.com/bakwc/JamSpell ( Spell checker )
 
 ## Sorry

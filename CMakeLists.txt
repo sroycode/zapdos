@@ -124,7 +124,6 @@ find_package(SNAPPY 1.1.0 REQUIRED)
 find_package(Protobuf 3.1.0 REQUIRED)
 find_package(CURL 7.29 REQUIRED)
 find_package(Xapian 1.4 REQUIRED)
-find_package(CITYHASH REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${GLOG_INCLUDE_DIRS})
@@ -135,7 +134,6 @@ include_directories(${SNAPPY_INCLUDE_DIRS})
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CURL_INCLUDE_DIRS})
 include_directories(${XAPIAN_INCLUDE_DIRS})
-include_directories(${CITYHASH_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -152,7 +150,6 @@ set(ZPDS_LIB_DEPS
 	${PROTOBUF_LIBRARIES}
 	${XAPIAN_LIBRARIES}
 	${CURL_LIBRARIES}
-	${CITYHASH_LIBRARIES}
 	)
 
 # Libunwind Linux only

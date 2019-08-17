@@ -30,6 +30,7 @@
  *  JamUtils.cc : Jamspell utils impl
  *
  */
+
 #include <fstream>
 #include <sstream>
 #include <chrono>
@@ -45,9 +46,7 @@
 #endif
 
 #include "jamspell/JamUtils.hpp"
-
-#include "city.h" // cityhash
-
+#include "jamspell/city.h" // cityhash
 
 namespace zpds {
 namespace jamspell {
@@ -192,3 +191,4 @@ uint16_t CityHash16(const char* str, size_t size) {
 
 } // jamspell
 } // zpds
+
