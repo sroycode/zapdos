@@ -58,6 +58,7 @@ DEFINE_string(pgparams, "dbname=nominatim user=nominatim host=127.0.0.1 port=643
 DEFINE_validator(pgparams, &IsNonEmptyMessage);
 /* GFlags Settings End */
 
+#include <async++.h>
 #include "utils/BaseUtils.hpp"
 #include <iomanip>
 #include <iostream>
@@ -73,6 +74,7 @@ DEFINE_validator(pgparams, &IsNonEmptyMessage);
 #include "DataField.hpp"
 
 #define TRY_CATCH_LOOP(X) try { X } catch(...){}
+
 
 /** main */
 int main(int argc, char *argv[])
@@ -111,6 +113,7 @@ int main(int argc, char *argv[])
 
 		pqxx::connection pgconn(FLAGS_pgparams.c_str());
 		pqxx::connection pgconn2(FLAGS_pgparams.c_str());
+		const auto pgparams2 = FLAGS_pgparams.c_str();
 		std::vector<uint64_t> ids;
 		// from placex get ids and then only extract those that have name one by one
 		std::ostringstream xtmp;
@@ -123,13 +126,19 @@ int main(int argc, char *argv[])
 				std::cout << row[1].c_str() << std::endl;
 			}
 			else {
-				try {
-					::zpds::tools::DataFieldT d { pgconn2, row[0].as<uint64_t>() };
-					d.Print();
-				}
-				catch(std::exception& e) {
-					std::cerr << "Error in data : " << row[0].as<uint64_t>() << " : " << e.what() << std::endl;
-				}
+				uint64_t rowdata = row[0].as<uint64_t>();
+				auto task1 = async::spawn([rowdata] {
+					try
+					{
+						thread_local pqxx::connection pgconn3(FLAGS_pgparams.c_str());
+						::zpds::tools::DataFieldT d { pgconn3, rowdata };
+						d.Print(true);
+					}
+					catch(std::exception& e)
+					{
+						std::cerr << "Error in data : " << rowdata << " : " << e.what() << std::endl;
+					}
+				});
 			}
 		}
 

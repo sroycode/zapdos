@@ -39,8 +39,11 @@
 #include <unordered_map>
 #include <pqxx/pqxx>
 #include <limits>
+#include <mutex>
 
 #define TRY_CATCH_LOOP(X) try { X } catch(...){}
+
+std::mutex lock_m;
 
 namespace zpds {
 namespace tools {
@@ -108,11 +111,15 @@ struct DataFieldT {
 	/**
 	* PrintDebug : debug print
 	*
+	* @param do_lock
+	*   bool if lock should be used
+	*
 	* @return
 	*   none
 	*/
-	void PrintDebug()
+	void PrintDebug(bool do_lock=false)
 	{
+		if (do_lock) std::lock_guard<std::mutex> lk(lock_m);
 		std::cout.precision(std::numeric_limits< double >::max_digits10);
 		std::cout
 		        << "styp= "<< styp << "\n"
@@ -149,11 +156,15 @@ struct DataFieldT {
 	/**
 	* PrintName : name fields for spellchecker
 	*
+	* @param do_lock
+	*   bool if lock should be used
+	*
 	* @return
 	*   none
 	*/
-	void PrintName()
+	void PrintName(bool do_lock=false)
 	{
+		if (do_lock) std::lock_guard<std::mutex> lk(lock_m);
 		// if (! is_useful_for_context() ) return;
 		std::cout << fld_name << " , " << fld_area << std::endl;
 	}
@@ -161,11 +172,15 @@ struct DataFieldT {
 	/**
 	* Print : fields for search
 	*
+	* @param do_lock
+	*   bool if lock should be used
+	*
 	* @return
 	*   none
 	*/
-	void Print()
+	void Print(bool do_lock=false)
 	{
+		if (do_lock) std::lock_guard<std::mutex> lk(lock_m);
 		// if (! is_useful_for_context() ) return;
 		// std::cout.precision(std::numeric_limits< double >::max_digits10);
 		// << (double)((int)(lat*1000000))/(double)1000000 << "\t"

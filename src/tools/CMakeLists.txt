@@ -82,6 +82,7 @@ find_package(PQXX REQUIRED)
 include_directories(${PQXX_INCLUDE_DIRS})
 
 target_link_libraries(zpds_nomina
+	zpds_async
 	${CMAKE_THREAD_LIBS_INIT}
 	${GLOG_LIBRARIES}
 	${GFLAGS_LIBRARIES}

@@ -3,6 +3,8 @@
 if [ -z "$NHOME" ] ; then echo "Please set NHOME for nominatim data" ; exit 1; fi
 if [ -z "$OSMFIL" ] ; then echo "Please set OSMFIL osm file" ; exit 1; fi
 
+mkdir -p ${NHOME}
+
 function build() {
 docker network create my_zapdos
 docker build -t nominatim .
