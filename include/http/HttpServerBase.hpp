@@ -436,7 +436,7 @@ public:
 	std::function<void(std::unique_ptr<socket_type> &, std::shared_ptr<typename HttpServerBase<socket_type>::Request>)> on_upgrade;
 
 	/// If you want to reuse an already created asio::io_service, store its pointer here before calling start().
-	std::shared_ptr<io_whatever> io_whatever;
+	std::shared_ptr<::zpds::http::io_whatever> io_whatever;
 
 	/// If you know the server port in advance, use start() instead.
 	/// Returns assigned port.

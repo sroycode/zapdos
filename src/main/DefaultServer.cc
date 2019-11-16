@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 	auto wbs_section = zpds::http::WebServer::GetSection();
 	auto wbs_params = zpds::http::WebServer::GetRequire();
 
-	std::shared_ptr<::zpds::http::io_whatever> m_io_whatever = std::make_shared<::zpds::http::io_whatever>();
+	std::shared_ptr<::zpds::http::io_whatever> m_io_whatever = std::make_shared<typename ::zpds::http::io_whatever>();
 	auto stptr = zpds::utils::SharedTable::create();
 
 	struct InterruptException{};
