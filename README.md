@@ -1,6 +1,6 @@
 # Project Zapdos 
 
-[![Build Status](https://travis-ci.com/sroycode/zapdos.svg?branch=master)](https://travis-ci.com/sroycode/zapdos)
+[![Build Status](https://travis-ci.org/sroycode/zapdos.svg?branch=master)](https://travis-ci.org/sroycode/zapdos)
 [![GitHub (pre-)release](https://img.shields.io/github/release-pre/sroycode/zapdos.svg)](https://github.com/sroycode/zapdos)
 
 Local Search with OSM data
