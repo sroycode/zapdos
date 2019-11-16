@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 	auto wbs_section = zpds::http::WebServer::GetSection();
 	auto wbs_params = zpds::http::WebServer::GetRequire();
 
-	std::shared_ptr<boost::asio::io_service> m_io_service = std::make_shared<boost::asio::io_service>();
+	std::shared_ptr<::zpds::http::io_whatever> m_io_whatever = std::make_shared<::zpds::http::io_whatever>();
 	auto stptr = zpds::utils::SharedTable::create();
 
 	struct InterruptException{};
@@ -241,27 +241,27 @@ int main(int argc, char *argv[])
 		auto wks = zpds::work::WorkServer::create(stptr->share());
 		wks->init(wks_params);
 
-		auto wcs = zpds::hrpc::SyncServer::create(m_io_service,stptr->share());
+		auto wcs = zpds::hrpc::SyncServer::create(m_io_whatever,stptr->share());
 		wcs->init(wcs_params);
 
-		auto wbs = zpds::http::WebServer::create(m_io_service,stptr->share());
+		auto wbs = zpds::http::WebServer::create(m_io_whatever,stptr->share());
 		wbs->init(wbs_params);
 
 		DLOG(INFO) << "STARTING" << std::endl;
-		boost::asio::io_service::work m_work(*m_io_service);
-		boost::asio::signal_set m_signals(*m_io_service,SIGINT,SIGTERM,SIGHUP);
-		// m_signals.async_wait(std::bind(&boost::asio::io_service::stop, m_io_service));
+		::zpds::http::io_whatever::work m_work(*m_io_whatever);
+		boost::asio::signal_set m_signals(*m_io_whatever,SIGINT,SIGTERM,SIGHUP);
+		// m_signals.async_wait(std::bind(&boost::asio::io_service::stop, m_io_whatever));
 		m_signals.async_wait(
 		[&] (const boost::system::error_code& e, int signal_no) {
 			// wks->stop();
 			LOG(INFO) << "Interrupted: " << e.value() << " signal " << signal_no;
 			wcs->stop();
 			wbs->stop();
-			m_io_service->stop();
+			m_io_whatever->stop();
 		}
 		);
 		stptr->is_ready.Set( true );
-		m_io_service->run();
+		m_io_whatever->run();
 		/** Interrupted */
 		DLOG(INFO) << "IO Stopped" << std::endl;
 

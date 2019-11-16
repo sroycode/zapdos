@@ -8,7 +8,7 @@ project(ZPDS_DIM LANGUAGES CXX)
 
 # ZPDS version string
 set(ZPDS_VERSION_MAJOR "0")
-set(ZPDS_VERSION_MINOR "8")
+set(ZPDS_VERSION_MINOR "9")
 set(ZPDS_VERSION_PATCH "0")
 set(ZPDS_VERSION_STRING "${ZPDS_VERSION_MAJOR}.${ZPDS_VERSION_MINOR}.${ZPDS_VERSION_PATCH}")
 set(ZPDS_VERSION_PHASE "prerelease/${CMAKE_BUILD_TYPE}")
@@ -113,6 +113,12 @@ set( ENV{CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/thirdparty:$ENV{CMAKE_PREFIX_
 include_directories(${PROJECT_SOURCE_DIR}/proto)
 
 # Required Packages
+
+set(Boost_USE_MULTITHREADED ON)
+# hack to disable broken cmake for boost-1.71
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(Boost_NO_BOOST_CMAKE ON)
+endif()
 
 #find_package(threads REQUIRED)
 find_package(Boost 1.59.0 COMPONENTS coroutine chrono system thread context date_time filesystem REQUIRED)

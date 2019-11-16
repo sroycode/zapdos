@@ -1,7 +1,7 @@
 /**
  * @project zapdos
  * @file include/http/StatusCode.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
@@ -27,12 +27,13 @@
  *
  * @section DESCRIPTION
  *
- *  StatusCode.hpp :
+ *  StatusCode.hpp :  status codes http for Web Server ( Modified from eidheim/Simple-Web-Server )
  *
  */
 #ifndef _ZPDS_HTTP_STATUS_CODE_HPP_
 #define _ZPDS_HTTP_STATUS_CODE_HPP_
 
+#include <cstdlib>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -177,18 +178,26 @@ inline const std::map<StatusCode, std::string> &status_code_strings()
 
 inline StatusCode status_code(const std::string &status_code_string) noexcept
 {
-	class StringToStatusCode : public std::unordered_map<std::string, ::zpds::http::StatusCode> {
+	if(status_code_string.size() < 3)
+		return StatusCode::unknown;
+
+	auto number = status_code_string.substr(0, 3);
+	if(number[0] < '0' || number[0] > '9' || number[1] < '0' || number[1] > '9' || number[2] < '0' || number[2] > '9')
+		return StatusCode::unknown;
+
+	class StringToStatusCode : public std::unordered_map<std::string, zpds::http::StatusCode> {
 	public:
 		StringToStatusCode()
 		{
 			for(auto &status_code : status_code_strings())
-				emplace(status_code.second, status_code.first);
+				emplace(status_code.second.substr(0, 3), status_code.first);
 		}
 	};
 	static StringToStatusCode string_to_status_code;
-	auto pos = string_to_status_code.find(status_code_string);
+
+	auto pos = string_to_status_code.find(number);
 	if(pos == string_to_status_code.end())
-		return StatusCode::unknown;
+		return static_cast<StatusCode>(atoi(number.c_str()));
 	return pos->second;
 }
 
@@ -201,9 +210,8 @@ inline const std::string &status_code(StatusCode status_code_enum) noexcept
 	}
 	return pos->second;
 }
-
-
 } // namespace http
 } // namespace zpds
 
 #endif /* _ZPDS_HTTP_STATUS_CODE_HPP_ */
+

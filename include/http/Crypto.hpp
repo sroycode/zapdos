@@ -1,7 +1,7 @@
 /**
  * @project zapdos
  * @file include/http/Crypto.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  Crypto.hpp :  for WS Server ( Modified from https
+ *  Crypto.hpp :  crypto utils for Web Server ( Modified from eidheim/Simple-Web-Server )
  *
  */
 #ifndef _ZPDS_HTTP_CRYPTO_HPP_
@@ -39,6 +39,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 #include <openssl/md5.h>
@@ -47,13 +48,22 @@
 namespace zpds {
 namespace http {
 
+// TODO 2017: remove workaround for MSVS 2012
+#if _MSC_VER == 1700                       // MSVS 2012 has no definition for round()
+inline double round(double x) noexcept   // Custom definition of round() for positive numbers
+{
+	return floor(x + 0.5);
+}
+#endif
+
 class Crypto {
 	const static std::size_t buffer_size = 131072;
 
 public:
 	class Base64 {
 	public:
-		static std::string encode(const std::string &ascii) noexcept
+		/// Returns Base64 encoded string from input string.
+		static std::string encode(const std::string &input) noexcept
 		{
 			std::string base64;
 
@@ -67,13 +77,13 @@ public:
 			BIO_set_mem_buf(b64, bptr, BIO_CLOSE);
 
 			// Write directly to base64-buffer to avoid copy
-			auto base64_length = static_cast<std::size_t>(round(4 * ceil(static_cast<double>(ascii.size()) / 3.0)));
+			auto base64_length = static_cast<std::size_t>(round(4 * ceil(static_cast<double>(input.size()) / 3.0)));
 			base64.resize(base64_length);
 			bptr->length = 0;
 			bptr->max = base64_length + 1;
 			bptr->data = &base64[0];
 
-			if(BIO_write(b64, &ascii[0], static_cast<int>(ascii.size())) <= 0 || BIO_flush(b64) <= 0)
+			if(BIO_write(b64, &input[0], static_cast<int>(input.size())) <= 0 || BIO_flush(b64) <= 0)
 				base64.clear();
 
 			// To keep &base64[0] through BIO_free_all(b64)
@@ -86,6 +96,7 @@ public:
 			return base64;
 		}
 
+		/// Returns Base64 decoded string from base64 input.
 		static std::string decode(const std::string &base64) noexcept
 		{
 			std::string ascii;
@@ -116,7 +127,7 @@ public:
 		}
 	};
 
-	/// Return hex string from bytes in input string.
+	/// Returns hex string from bytes in input string.
 	static std::string to_hex_string(const std::string &input) noexcept
 	{
 		std::stringstream hex_stream;
@@ -126,6 +137,7 @@ public:
 		return hex_stream.str();
 	}
 
+	/// Returns md5 hash value from input string.
 	static std::string md5(const std::string &input, std::size_t iterations = 1) noexcept
 	{
 		std::string hash;
@@ -139,6 +151,7 @@ public:
 		return hash;
 	}
 
+	/// Returns md5 hash value from input stream.
 	static std::string md5(std::istream &stream, std::size_t iterations = 1) noexcept
 	{
 		MD5_CTX context;
@@ -157,6 +170,7 @@ public:
 		return hash;
 	}
 
+	/// Returns sha1 hash value from input string.
 	static std::string sha1(const std::string &input, std::size_t iterations = 1) noexcept
 	{
 		std::string hash;
@@ -170,6 +184,7 @@ public:
 		return hash;
 	}
 
+	/// Returns sha1 hash value from input stream.
 	static std::string sha1(std::istream &stream, std::size_t iterations = 1) noexcept
 	{
 		SHA_CTX context;
@@ -188,6 +203,7 @@ public:
 		return hash;
 	}
 
+	/// Returns sha256 hash value from input string.
 	static std::string sha256(const std::string &input, std::size_t iterations = 1) noexcept
 	{
 		std::string hash;
@@ -201,6 +217,7 @@ public:
 		return hash;
 	}
 
+	/// Returns sha256 hash value from input stream.
 	static std::string sha256(std::istream &stream, std::size_t iterations = 1) noexcept
 	{
 		SHA256_CTX context;
@@ -219,6 +236,7 @@ public:
 		return hash;
 	}
 
+	/// Returns sha512 hash value from input string.
 	static std::string sha512(const std::string &input, std::size_t iterations = 1) noexcept
 	{
 		std::string hash;
@@ -232,6 +250,7 @@ public:
 		return hash;
 	}
 
+	/// Returns sha512 hash value from input stream.
 	static std::string sha512(std::istream &stream, std::size_t iterations = 1) noexcept
 	{
 		SHA512_CTX context;
@@ -250,7 +269,19 @@ public:
 		return hash;
 	}
 
-	/// key_size is number of bytes of the returned key.
+	/// Returns PBKDF2 hash value from the given password
+	/// Input parameter key_size  number of bytes of the returned key.
+
+	/**
+	 * Returns PBKDF2 derived key from the given password.
+	 *
+	 * @param password   The password to derive key from.
+	 * @param salt       The salt to be used in the algorithm.
+	 * @param iterations Number of iterations to be used in the algorithm.
+	 * @param key_size   Number of bytes of the returned key.
+	 *
+	 * @return The PBKDF2 derived key.
+	 */
 	static std::string pbkdf2(const std::string &password, const std::string &salt, int iterations, int key_size) noexcept
 	{
 		std::string key;

@@ -1,7 +1,7 @@
 /**
  * @project zapdos
  * @file src/hrpc/SyncServer.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
@@ -44,16 +44,16 @@
 #include <hrpc/HrpcClient.hpp>
 #include <hrpc/RemoteKeeper.hpp>
 
-#define ZPDS_SYNC_FIRST_CHUNK_SIZE 10
-#define ZPDS_SYNC_CHUNK_SIZE 10
+#define ZPDS_SYNC_FIRST_CHUNK_SIZE 1000
+#define ZPDS_SYNC_CHUNK_SIZE 1000
 
 /**
 * Constructor : private default Constructor
 *
 */
 
-zpds::hrpc::SyncServer::SyncServer(std::shared_ptr<boost::asio::io_service> io_service_, zpds::utils::SharedTable::pointer stptr)
-	: zpds::utils::ServerBase(stptr),io_service(io_service_),is_init(false)
+zpds::hrpc::SyncServer::SyncServer(std::shared_ptr<::zpds::http::io_whatever> io_whatever_, zpds::utils::SharedTable::pointer stptr)
+	: zpds::utils::ServerBase(stptr),io_whatever(io_whatever_),is_init(false)
 {
 	DLOG(INFO) << "SyncServer Created" << std::endl;
 }
@@ -114,7 +114,7 @@ void zpds::hrpc::SyncServer::init(zpds::utils::ServerBase::ParamsListT params)
 		}
 
 		server = std::make_shared<HttpServerT>(port);
-		server->io_service = io_service;
+		server->io_whatever = io_whatever;
 		server->config.address=host;
 
 		is_init=true;

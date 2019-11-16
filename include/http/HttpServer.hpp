@@ -1,7 +1,7 @@
 /**
  * @project zapdos
  * @file include/http/HttpServer.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
@@ -28,7 +28,6 @@
  * @section DESCRIPTION
  *
  *  HttpServer.hpp :  HTTP Server  ( Modified from https://github.com/eidheim/Simple-Web-Server )
- *  - webservice is single threaded
  *
  */
 #ifndef _ZPDS_HTTP_SERVER_HPP_
@@ -42,18 +41,18 @@ namespace http {
 template <class socket_type>
 class HttpServer : public HttpServerBase<socket_type> {};
 
-using HTTP = boost::asio::ip::tcp::socket;
+using HTTP = asio::ip::tcp::socket;
 
 template <>
 class HttpServer<HTTP> : public HttpServerBase<HTTP> {
 public:
-	HttpServer(unsigned short port) noexcept 
-	: HttpServerBase<HTTP>::HttpServerBase(port) {}
+	HttpServer(unsigned short port) noexcept
+		: HttpServerBase<HTTP>::HttpServerBase(port) {}
 
 protected:
 	void accept() override
 	{
-		auto connection = create_connection(*io_service);
+		auto connection = create_connection(*io_whatever);
 
 		acceptor->async_accept(*connection->socket, [this, connection](const error_code &ec) {
 			auto lock = connection->handler_runner->continue_lock();
@@ -61,13 +60,13 @@ protected:
 				return;
 
 			// Immediately start accepting a new connection (unless io_service has been stopped)
-			if(ec != boost::asio::error::operation_aborted)
+			if(ec != error::operation_aborted)
 				this->accept();
 
 			auto session = std::make_shared<Session>(config.max_request_streambuf_size, connection);
 
 			if(!ec) {
-				boost::asio::ip::tcp::no_delay option(true);
+				asio::ip::tcp::no_delay option(true);
 				error_code ec;
 				session->connection->socket->set_option(option, ec);
 

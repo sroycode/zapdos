@@ -1,7 +1,7 @@
 /**
  * @project zapdos
  * @file src/http/WebServer.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
@@ -37,8 +37,8 @@
 #include "WebServer.hpp"
 #include <query/WebServiceList.hpp>
 
-zpds::http::WebServer::WebServer(std::shared_ptr<boost::asio::io_service> io_service, zpds::utils::SharedTable::pointer stptr)
-	: zpds::utils::ServerBase(stptr), io_service(io_service), is_init(false)
+zpds::http::WebServer::WebServer(std::shared_ptr<::zpds::http::io_whatever> io_whatever, zpds::utils::SharedTable::pointer stptr)
+	: zpds::utils::ServerBase(stptr), io_whatever(io_whatever), is_init(false)
 {
 	DLOG(INFO) << "WebServer Created" << std::endl;
 }
@@ -64,7 +64,7 @@ void zpds::http::WebServer::init(zpds::utils::ServerBase::ParamsListT params)
 		throw zpds::ConfigException("WebServer: params and required size mismatch");
 	server = std::make_shared<HttpServerT>( std::stoul(params[1]) );
 	server->config.address=params[0];
-	server->io_service = io_service;
+	server->io_whatever = io_whatever;
 	is_init=true;
 	DLOG(INFO) << "WebServer init 1 here" << std::endl;
 	{

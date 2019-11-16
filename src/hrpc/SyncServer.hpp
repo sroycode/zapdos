@@ -1,7 +1,7 @@
 /**
  * @project zapdos
  * @file src/hrpc/SyncServer.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
@@ -61,8 +61,8 @@ public:
 	/**
 	* create : static construction creates new first time
 	*
-	* @param io_service_
-	*   std::shared_ptr<boost::asio::io_service> io service pointer
+	* @param io_whatever_
+	*   std::shared_ptr<::zpds::http::io_whatever> ::zpds::http::io_whatever pointer
 	*
 	* @param stptr
 	*   zpds::utils::SharedTable::pointer sharedtable pointer
@@ -70,9 +70,9 @@ public:
 	* @return
 	*   none
 	*/
-	static pointer create(std::shared_ptr<boost::asio::io_service> io_service_, zpds::utils::SharedTable::pointer stptr)
+	static pointer create(std::shared_ptr<::zpds::http::io_whatever> io_whatever_, zpds::utils::SharedTable::pointer stptr)
 	{
-		pointer p(new SyncServer(io_service_,stptr));
+		pointer p(new SyncServer(io_whatever_,stptr));
 		return p;
 	}
 
@@ -130,7 +130,7 @@ public:
 
 protected:
 	std::shared_ptr<HttpServerT> server;
-	std::shared_ptr<boost::asio::io_service> io_service;
+	std::shared_ptr<::zpds::http::io_whatever> io_whatever;
 
 private:
 	bool is_init;
@@ -139,14 +139,14 @@ private:
 	/**
 	* Constructor : private used Constructor
 	*
-	* @param io_service_
-	*   std::shared_ptr<boost::asio::io_service> io service pointer
+	* @param io_whatever_
+	*   std::shared_ptr<::zpds::http::io_whatever> io service pointer
 	*
 	* @param stptr
 	*   zpds::utils::SharedTable::pointer sharedtable pointer
 	*
 	*/
-	SyncServer(std::shared_ptr<boost::asio::io_service> io_service_, zpds::utils::SharedTable::pointer stptr);
+	SyncServer(std::shared_ptr<::zpds::http::io_whatever> io_whatever_, zpds::utils::SharedTable::pointer stptr);
 
 	/**
 	* SyncFirst : sync data from master first time
