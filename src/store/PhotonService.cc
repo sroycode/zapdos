@@ -67,8 +67,6 @@ zpds::store::PhotonService::~PhotonService()
 {
 }
 
-// shreos wip
-
 /**
 * RuleSearch : do the search from rule
 *

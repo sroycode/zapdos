@@ -6,6 +6,6 @@ export SRCFIL=$(basename $(cd ${0%/*} 2>>/dev/null ; echo `pwd`/${0##*/}))
 ## ---- variables
 
 
-bash ${SRCDIR}/test_profile_setprotontemplate.sh
+bash ${SRCDIR}/test_profile_setphotontemplate.sh
 bash ${SRCDIR}/test_profile_setnotophtemplate.sh
 bash ${SRCDIR}/test_profile_settextdatatemplate.sh

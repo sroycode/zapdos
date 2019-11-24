@@ -39,8 +39,10 @@ DECLARE_bool(warmcache);
 #include "store/StoreLevel.hpp"
 #include "query/bin2ascii.h"
 
+
 #include "store/ProfileTable.hpp"
 #include "store/SimpleTemplateTable.hpp"
+#include "store/ProfileService.hpp"
 
 #include "search/SearchTrie.hpp"
 
@@ -107,6 +109,9 @@ void zpds::work::WorkServer::init(zpds::utils::ServerBase::ParamsListT params)
 
 		// if resets last_lkey
 		sharedtable->logcounter.Set ( (last_lkey>0) ? last_lkey : 1 );
+
+		// first use create default
+
 
 		// populate cache
 		if ( ! sharedtable->dont_use_cache.Get() ) {

@@ -164,6 +164,20 @@ protected:
 	bool GetProfile(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::ProfileT* prof);
 
 	/**
+	* GetDefaultTemplate : get simple profile template for default by qtyp
+	*
+	* @param stptr
+	*   ::zpds::utils::SharedTable::pointer stptr
+	*
+	* @param resp
+	*   ::zpds::store::SimpleTemplateT* pt
+	*
+	* @return
+	*   bool if found
+	*/
+	bool GetDefaultTemplate(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::SimpleTemplateT* ptt);
+
+	/**
 	* GetSimpleTemplate : get simple profile template by name , qtyp
 	*
 	* @param stptr

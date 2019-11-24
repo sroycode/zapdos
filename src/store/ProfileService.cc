@@ -116,6 +116,8 @@ void zpds::store::ProfileService::SetProfileAction(
 void zpds::store::ProfileService::NewProfileAction(
     ::zpds::utils::SharedTable::pointer stptr, ::zpds::query::ProfileRespT* prof)
 {
+	if (prof->name() == "default" )
+		throw ::zpds::BadDataException("This profile is reserved");
 	::zpds::store::ProfileT prt;
 	prt.set_name( prof->name() );
 	::zpds::store::ProfileTable prt_table{stptr->maindb.Get()};
@@ -153,12 +155,126 @@ bool zpds::store::ProfileService::VerifyProfile(
 }
 
 /**
+* GetDefaultTemplate : get profile template for default by qtyp
+*
+*/
+bool zpds::store::ProfileService::GetDefaultTemplate(
+    ::zpds::utils::SharedTable::pointer stptr, ::zpds::store::SimpleTemplateT* ptt)
+{
+
+	switch ( ptt->qtyp() ) {
+	default:
+		return false;
+		break;
+	case zpds::search::QueryTypeE::QRY_COMPLETION_PHOTON: {
+
+		auto order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "one word query for upto 2 chars");
+		order->set_rec_tagid( "#t001");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(10);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NONE);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_BEGINWITH);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DEFAULT);
+		order->set_input_type( ::zpds::search::InputTypeE::I_ONEWORD);
+		order->set_oneword_length(2);
+		order->set_weight( 100);
+
+		order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "by distance 1km bands");
+		order->set_rec_tagid( "#t002");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(10);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NONE);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_DEFAULT);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DIST_BAND);
+		order->set_input_type( ::zpds::search::InputTypeE::I_DEFAULT);
+		order->set_distance_band( 1000);
+		order->set_weight( 90);
+
+		order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "if not local");
+		order->set_rec_tagid( "#t003");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(10);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NONE);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_DEFAULT);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DEFAULT);
+		order->set_input_type( ::zpds::search::InputTypeE::I_DEFAULT);
+		order->set_weight( 80);
+	}
+	case zpds::search::QueryTypeE::QRY_COMPLETION_TEXTDATA: {
+
+		auto order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "one word query for upto 2 chars");
+		order->set_rec_tagid( "#t001");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(10);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NONE);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_BEGINWITH);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DEFAULT);
+		order->set_input_type( ::zpds::search::InputTypeE::I_ONEWORD);
+		order->set_oneword_length( 2);
+		order->set_weight( 100);
+
+		order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "find in name");
+		order->set_rec_tagid( "#t002");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(10);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NONE);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_NAME);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DEFAULT);
+		order->set_input_type( ::zpds::search::InputTypeE::I_DEFAULT);
+		order->set_weight( 90);
+
+		order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "if not name");
+		order->set_rec_tagid( "#t003");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(10);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NONE);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_DEFAULT);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DEFAULT);
+		order->set_input_type( ::zpds::search::InputTypeE::I_DEFAULT);
+		order->set_weight( 80);
+	}
+	case zpds::search::QueryTypeE::QRY_COMPLETION_NOTOPH: {
+
+		auto order = ptt->mutable_qprof()->add_orders();
+
+		order->set_desc( "by distance only so band is small");
+		order->set_rec_tagid( "#t001");
+		order->set_rec_styp( ::zpds::search::SourceTypeE::S_NONE);
+		order->set_rec_count(5);
+		order->set_limit_type( ::zpds::search::LimitTypeE::L_NBRHASH5);
+		order->set_search_type( ::zpds::search::SearchTypeE::S_DEFAULT);
+		order->set_order_type( ::zpds::search::OrderTypeE::O_DIST_BAND);
+		order->set_input_type( ::zpds::search::InputTypeE::I_DEFAULT);
+		order->set_distance_band( 10);
+		order->set_weight( 100);
+	}
+	}
+	return true;
+}
+
+/**
 * GetSimpleTemplate : get profile template by name , qtyp
 *
 */
 bool zpds::store::ProfileService::GetSimpleTemplate(
     ::zpds::utils::SharedTable::pointer stptr, ::zpds::store::SimpleTemplateT* ptt)
 {
+	
+	if (ptt->name() == "default" )
+		return GetDefaultTemplate(stptr,ptt);
+
 	bool prof_found=false;
 	if (stptr->dont_use_cache.Get()) {
 		::zpds::store::SimpleTemplateTable ptt_table{stptr->maindb.Get()};
