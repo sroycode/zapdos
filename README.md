@@ -21,6 +21,7 @@ The endpoint `_query/api/v1/photon/{profile}` is the currently available photon-
 4. Adaptor for importing Nominatim is provided. You can also use your own data. Other adaptors are wip.
 
 5. Profile based search . You can create several profiles , each with different set of rules for the same endpoint. 
+There is a `default` profile for all searches which uses a pre-set .
 
 6. Traine-able spellchecker . The spellchecker can be trained from a file containing training data.
 
