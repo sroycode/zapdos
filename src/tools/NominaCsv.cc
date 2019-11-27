@@ -115,12 +115,29 @@ int main(int argc, char *argv[])
 		pqxx::connection pgconn2(FLAGS_pgparams.c_str());
 		const auto pgparams2 = FLAGS_pgparams.c_str();
 		std::vector<uint64_t> ids;
-		// from placex get ids and then only extract those that have name one by one
-		std::ostringstream xtmp;
-		xtmp << "SELECT place_id, name->'name' as name FROM placex WHERE " << FLAGS_where << ";";
 		pqxx::work txn(pgconn);
+
+		// from placex get no of ids
+		uint64_t expected=0;
+		std::ostringstream xtmp;
+		// xtmp << "SELECT COUNT(place_id) as pcount  FROM placex WHERE " << FLAGS_where << ";";
+		xtmp << "SELECT CAST (reltuples AS bigint)  FROM pg_class WHERE relname = 'placex';";
+		auto cres = txn.exec(xtmp.str());
+		for (auto row : cres ) {
+			expected = row[0].as<uint64_t>();
+			break;
+		}
+
+		LOG(INFO) << "Expecting " << expected << " records" << std::endl;
+
+		// from placex get ids and then only extract those that have name one by one
+		xtmp.str();
+		xtmp << "SELECT place_id, name->'name' as name FROM placex WHERE " << FLAGS_where << ";";
 		auto res = txn.exec(xtmp.str());
+		uint64_t count=0;
 		for (auto row : res ) {
+			if (++count % 10000==1)
+				LOG(INFO) << "Doing " << count << "/" << expected << std::endl;
 			if ( row[1].is_null() ) continue;
 			if (FLAGS_onlyname) {
 				std::cout << row[1].c_str() << std::endl;

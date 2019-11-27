@@ -28,6 +28,7 @@
  * @section DESCRIPTION
  *
  *  DataField.hpp : data field
+ *                  - added the removal of tags from name
  *
  */
 
@@ -40,6 +41,7 @@
 #include <pqxx/pqxx>
 #include <limits>
 #include <mutex>
+#include "utils/StringHelpers.hpp"
 
 #define TRY_CATCH_LOOP(X) try { X } catch(...){}
 
@@ -165,8 +167,10 @@ struct DataFieldT {
 	void PrintName(bool do_lock=false)
 	{
 		if (do_lock) std::lock_guard<std::mutex> lk(lock_m);
-		// if (! is_useful_for_context() ) return;
-		std::cout << fld_name << " , " << fld_area << std::endl;
+		if (! is_useful_for_search() ) return;
+		std::ostringstream xtmp;
+		xtmp << CleanStr(fld_name) << " , " << CleanStr(fld_area) << std::endl;
+		std::cout << xtmp.str() << std::flush;
 	}
 
 	/**
@@ -181,38 +185,41 @@ struct DataFieldT {
 	void Print(bool do_lock=false)
 	{
 		if (do_lock) std::lock_guard<std::mutex> lk(lock_m);
-		// if (! is_useful_for_context() ) return;
+		if (! is_useful_for_search() ) return;
 		// std::cout.precision(std::numeric_limits< double >::max_digits10);
 		// << (double)((int)(lat*1000000))/(double)1000000 << "\t"
-		std::cout.precision(10);
-		std::cout
+		std::ostringstream xtmp;
+		xtmp.precision(10);
+		xtmp
 		        << styp << "\t"
 		        << placeid << "\t"
 		        << importance << "\t"
-		        << ccode << "\t"
-		        << scode << "\t"
-		        << city << "\t"
-		        << country << "\t"
-		        << state << "\t"
-		        << fld_name << "\t"
-		        << fld_area << "\t"
-		        << address << "\t"
-		        << pincode << "\t"
+		        << CleanStr(ccode) << "\t"
+		        << CleanStr(scode) << "\t"
+		        << CleanStr(city) << "\t"
+		        << CleanStr(country) << "\t"
+		        << CleanStr(state) << "\t"
+		        << CleanStr(fld_name) << "\t"
+		        << CleanStr(fld_area) << "\t"
+		        << CleanStr(address) << "\t"
+		        << CleanStr(pincode) << "\t"
 		        << accuracy << "\t"
 		        << lat << "\t"
 		        << lon << "\t"
 		        << rating << "\t"
-		        << landmark << "\t"
-		        << is_in_place << "\t"
-		        << tags << "\t"
-		        << lang << "\t"
+		        << CleanStr(landmark) << "\t"
+		        << CleanStr(is_in_place) << "\t"
+		        << CleanStr(tags) << "\t"
+		        << CleanStr(lang) << "\t"
 		        << osm_id << "\t"
-		        << osm_type << "\t"
-		        << osm_key << "\t"
-		        << osm_value << "\t"
+		        << CleanStr(osm_type) << "\t"
+		        << CleanStr(osm_key) << "\t"
+		        << CleanStr(osm_value) << "\t"
 		        << "" << "\t"
 		        << "" << "\t"
-		        << my_geom << std::endl;
+		        << CleanStr(my_geom)
+		        << std::endl;
+		std::cout << xtmp.str() << std::flush;
 	}
 
 	/**
@@ -300,6 +307,20 @@ struct DataFieldT {
 	}
 
 	/**
+	* is_useful_for_search : is it useful for search
+	*
+	* @return
+	*   bool
+	*/
+	bool is_useful_for_search()
+	{
+		if (fld_name.empty()) return false;
+		if (is_curated_city()) return false; // was already added to city
+		if (rank_address < 4) return false; // continent, sea , etc
+		return true;
+	}
+
+	/**
 	* is_useful_for_context : is it useful for context
 	*
 	* @return
@@ -311,8 +332,7 @@ struct DataFieldT {
 		if (is_postcode()) return false;
 		if (is_curated_city()) return false; // was already added to city
 		if (rank_address < 4) return false; // continent, sea , etc
-		if ( useful_context_keys.find(osm_key) != useful_context_keys.end() ) return true;
-		return false;
+		return ( useful_context_keys.find(osm_key) != useful_context_keys.end() );
 	}
 
 	/**
@@ -377,15 +397,15 @@ struct DataFieldT {
 
 			osm_key=row.at("class").c_str();
 			osm_value=row.at("type").c_str();
-			fld_name=row.at("name").c_str();
-			pincode = row.at("a_pincode").is_null() ?  row.at("postcode").c_str() : row.at("a_pincode").c_str();
-			ccode = row.at("a_ccode").is_null() ?  row.at("country_code").c_str() : row.at("a_ccode").c_str();
-			if ( !row.at("a_street").is_null() ) address = row.at("a_street").c_str();
+			fld_name= row.at("name").c_str();
+			pincode =  row.at("a_pincode").is_null() ?  row.at("postcode").c_str() : row.at("a_pincode").c_str();
+			ccode =  row.at("a_ccode").is_null() ?  row.at("country_code").c_str() : row.at("a_ccode").c_str();
+			if ( !row.at("a_street").is_null() ) address =  row.at("a_street").c_str();
 			TRY_CATCH_LOOP( lat=row.at("lat").as<double>(); )
 			TRY_CATCH_LOOP( lon=row.at("lon").as<double>(); )
 			TRY_CATCH_LOOP( importance=row.at("importance").as<double>(); )
 			// extra
-			housenumber = row.at("a_house").is_null() ?  row.at("housenumber").c_str() : row.at("a_house").c_str();
+			housenumber =  row.at("a_house").is_null() ?  row.at("housenumber").c_str() : row.at("a_house").c_str();
 			my_geom = row.at("my_geom").c_str();
 
 		}
@@ -417,7 +437,7 @@ struct DataFieldT {
 			if ( row.at("name").is_null() ) continue;
 			bool isaddress = row.at("isaddress").is_null() ? 0 : row.at("isaddress").as<bool>() ;
 
-			std::string name = row.at("name").c_str() ;
+			std::string name =  row.at("name").c_str();
 			int admin_level = row.at("admin_level").is_null() ? 0 : row.at("admin_level").as<int>() ;
 			int rank_address = row.at("rank_address").is_null() ? 0 : row.at("rank_address").as<int>() ;
 

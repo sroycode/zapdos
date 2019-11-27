@@ -159,7 +159,7 @@ static std::pair<std::string,size_t> FlattenCount(const std::string& input)
 	}
 	if (last_is_char) ++wc;
 	// parsing end
-	return std::make_pair( xtmp.str() , wc );
+	return std::make_pair( xtmp.str(), wc );
 }
 
 /**
@@ -218,7 +218,8 @@ static std::vector<std::string> SplitBySpace(const std::string& input)
 		if (std::isspace(c)) {
 			if (xtmp.str().length()>0) arr.push_back(xtmp.str());
 			xtmp.str(std::string());
-		} else {
+		}
+		else {
 			xtmp << c;
 		}
 	}
@@ -263,6 +264,27 @@ static std::vector<std::string> Split(const std::string& input)
 		output.push_back(xtmp.str());
 	}
 	return output;
+}
+
+/**
+* CleanStr : clean up tab etc characters
+*
+* @param input
+*   std::string& input
+*
+* @return
+*   std::string to be initialized
+*/
+static std::string CleanStr(const std::string& input)
+{
+	std::ostringstream xtmp;
+	for (auto i = input.cbegin(), n = input.cend(); i != n; ++i) {
+		auto c = (*i);
+		if (std::isspace(c)) xtmp << ' ';
+		else xtmp << c;
+	}
+	// parsing end
+	return xtmp.str();
 }
 
 #endif // _ZPDS_UTILS_STRING_HELPERS_HPP_
