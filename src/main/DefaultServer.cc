@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
 {
 
 
+	int Z_EXIT_STATUS=0;
 	/** GFlags **/
 	std::string usage("Usage:\n");
 	usage += std::string(argv[0]) + " -config my.conf # starts as master\n" ;
@@ -270,17 +271,20 @@ int main(int argc, char *argv[])
 		LOG(INFO) << "Exited Dryrun";
 	}
 	catch(zpds::BaseException& e) {
+		Z_EXIT_STATUS=1;
 		LOG(INFO) << "Error : " << e.what();
 	}
 	catch(std::exception& e) {
+		Z_EXIT_STATUS=1;
 		LOG(INFO) << "Error (sys) : " << e.what();
 	}
 	catch(...) {
+		Z_EXIT_STATUS=1;
 		LOG(INFO) << "Error (unknown) ";
 	}
 
 	gflags::ShutDownCommandLineFlags();
 	LOG(INFO) << "EXITING" << std::endl;
-	return 0;
+	return Z_EXIT_STATUS;
 }
 

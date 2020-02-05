@@ -194,7 +194,7 @@ void DoAction(::zpds::query::LookupDataT* data, int qtyp)
 		             cpr::Body{out},
 		cpr::Header{ {"Content-Type", "application/json"}}
 		         );
-		std::cout << "Query Result: " << r.text << std::endl;
+		LOG(INFO) << "Query Result: " << r.text << std::endl;
 	}
 }
 

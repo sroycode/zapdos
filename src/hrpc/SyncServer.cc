@@ -30,6 +30,7 @@
  *  SyncServer.cc :  Sync Service
  *
  */
+#include "async++.h"
 #include <future>
 #include <chrono>
 #include <thread>
@@ -106,7 +107,7 @@ void zpds::hrpc::SyncServer::init(zpds::utils::ServerBase::ParamsListT params)
 			this->SyncFirst();
 
 			// set this in async loop
-			std::async( std::launch::async, [this] {
+			async::spawn(async::thread_scheduler(),[this] {
 				this->SyncFromMaster();
 				// if upgraded to master
 				this->MasterLoop();

@@ -54,7 +54,7 @@ void zpds::store::CategoryService::AddDataAction(
 
 	boost::unique_lock< boost::shared_mutex > lock {stptr->update_lock, boost::try_to_lock};
 	if (!lock.owns_lock()) {
-		throw ::zpds::BadDataException("Cannot Insert data in more than one query");
+		throw ::zpds::BadDataException("Cannot Insert category data in more than one query");
 	}
 	DLOG(INFO) << "Owns Lock" ;
 
@@ -117,6 +117,7 @@ void zpds::store::CategoryService::AddDataAction(
 	storetrans.Commit(stptr,&trans,true); // as master
 	resp->set_count( upcount );
 	resp->set_success( true );
+	lock.unlock();
 }
 
 /**
