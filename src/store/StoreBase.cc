@@ -102,15 +102,26 @@ std::string zpds::store::StoreBase::EncodePrimaryKey(zpds::store::KeyTypeE keyty
 }
 
 /**
-* DecodePrimaryKey : get keytype and id from primary key
+* CheckPrimaryKey : check if this is primary key
+*
+*/
+bool zpds::store::StoreBase::CheckPrimaryKey (std::string& key)
+{
+	if (key.length() != ( ZPDS_KEYID_LEN + ZPDS_NODE_LEN )) return false;
+	::zpds::store::KeyTypeE x = (::zpds::store::KeyTypeE) std::stoi(key.substr(0,ZPDS_KEYID_LEN),0,16);
+	return (x >= ::zpds::store::K_NONODE && x <= ::zpds::store::K_MAXNODE);
+	
+}
+
+/**
+* DecodePrimaryKey : get keytype and id from primary key, 
 *
 */
 std::pair<zpds::store::KeyTypeE,uint64_t> zpds::store::StoreBase::DecodePrimaryKey (std::string& key)
 {
-
-	if (key.length() < ( ZPDS_KEYID_LEN + ZPDS_NODE_LEN ))
+	if (!CheckPrimaryKey(key))
 		throw zpds::BadDataException("Invalid Key probed");
-	zpds::store::KeyTypeE x = (zpds::store::KeyTypeE) std::stoull(key.substr(0,ZPDS_KEYID_LEN),0,16);
+	::zpds::store::KeyTypeE x = (::zpds::store::KeyTypeE) std::stoi(key.substr(0,ZPDS_KEYID_LEN),0,16);
 	uint64_t y = std::stoull(key.substr(ZPDS_KEYID_LEN,ZPDS_NODE_LEN),0,16);
 	return std::make_pair(x,y);
 }

@@ -113,6 +113,17 @@ public:
 	std::string EncodePrimaryKey (KeyTypeE keytype, ::google::protobuf::uint64 id);
 
 	/**
+	* CheckPrimaryKey : check if this is primary key
+	*
+	* @param key
+	*   std::string& key
+	*
+	* @return
+	*   bool if yes
+	*/
+	bool CheckPrimaryKey (std::string& key);
+
+	/**
 	* DecodePrimaryKey : get keytype and id from primary key
 	*
 	* @param

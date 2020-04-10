@@ -164,7 +164,7 @@ void zpds::store::StoreTrans::AddToCache(::zpds::utils::SharedTable::pointer stp
 	for (auto i=0; i<trans->item_size(); ++i) {
 		std::string key = trans->mutable_item(i)->key();
 		bool to_del = trans->mutable_item(i)->to_del() ;
-		if (key.length() != ( ZPDS_KEYID_LEN + ZPDS_NODE_LEN )) continue;
+		if (!CheckPrimaryKey(key)) continue;
 		auto kp = DecodePrimaryKey( key );
 
 		switch(kp.first) {
