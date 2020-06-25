@@ -14,38 +14,62 @@ enum KeyTypeE {
 // Primary 
 	K_NONODE                                                        = 10;
 
-	K_PROFILE                                                       = 11;
-	K_SIMPLETEMPLATE                                                = 12;
+	K_TAGDATA                                                       = 11; // tags uses TagDataT
+	K_EXTERDATA                                                     = 12; // external entity uses UserDataT
+	K_USERDATA                                                      = 13; // regular user uses UserDataT
 
-	K_LOOKUPRECORD                                                  = 14;
-	K_TEXTRECORD                                                    = 15;
-	K_EXTRAATTRIB                                                   = 16;
-	K_CATEGORY                                                      = 17;
+	K_CATEGORY                                                      = 15; // category uses CategoryT
 
-	K_LOGNODE                                                       = 29; // must be before K_MAXNODE
-	K_MAXNODE                                                       = 30;
+	K_LOCALDATA                                                     = 16; // local data uses ItemDataT
+	K_WIKIDATA                                                      = 17; // wiki data uses ItemDataT
 
-// Indexes
-	I_NOINDEX                                                       = 50;
+// non table
 
-	U_PROFILE_NAME                                                  = 51;
+	KT_ITEMDATA                                                     = 47; // for all ItemDataT  tags only , no table
 
-	U_SIMPLETEMPLATE_NAME_QTYP                                      = 53;
+// end
+	K_LOGNODE                                                       = 49; // must be before K_MAXNODE
+	K_MAXNODE                                                       = 50;
 
-	U_LOOKUPRECORD_STYP_LANG_UNIQUEID                               = 55;
-	I_LOOKUPRECORD_STYP_LANG_LASTUP                                 = 56; // this sequence is for reduced bloom
+// Indexes 
+	I_NOINDEX                                                       = 51;
+	I_LOGNODE_TS                                                    = 52; // reverse index for K_LOGNODE by ts
 
-	U_TEXTRECORD_STYP_LANG_UNIQUEID                                 = 58;
-	I_TEXTRECORD_STYP_LANG_LASTUP                                   = 59;
+	U_TAGDATA_KEYTYPE_NAME                                          = 53;
+	U_EXTERDATA_NAME                                                = 54;
 
-	U_EXTRAATTRIB_STYP_LANG_UNIQUEID                                = 61;
-	I_EXTRAATTRIB_STYP_LANG_LASTUP                                  = 62;
+	U_USERDATA_NAME                                                 = 55;
+	F_USERDATA_NAME_CATEGORY                                        = 56; // for user-category key cache
+	I_USERDATA_PRIMARYMOBILE                                        = 57;
+	I_USERDATA_PRIMARYEMAIL                                         = 58;
 
-	U_CATEGORY_STYP_LANG_UNIQUEID                                   = 64;
-	I_CATEGORY_STYP_LANG_LASTUP                                     = 65;
+	U_CATEGORY_NAME                                                 = 62;
+
+	U_USERPROF_USERNAME_NAME                                        = 64;
+
+	U_LOCALDATA_UNIQUEID                                            = 71;
+	U_WIKIDATA_UNIQUEID                                             = 72;
 
 };
 
+enum SubscrTypeE {
+	S_BASIC                                                         =  0; // default basic
+	S_PREMIUM                                                       =  1;
+	S_ANAROK                                                        =  2; // can see all
+};
+
+enum CanSeeTypeE {
+	C_BASIC                                                         =  0; // basic free
+	C_PREMIUM                                                       =  1; // premium
+	C_PAID                                                          =  2; // paid data
+};
+
+// in future , add fb etc
+enum VeriTypeE {
+	V_UNKNOWN                                                       =  0;
+	V_MOBILE                                                        =  1; // with isd code
+	V_EMAIL                                                         =  2;
+}
 
 // DONOT TOUCH THIS - START
 message ErrorT {
@@ -72,8 +96,9 @@ message TransactionT {
 	uint64                        id                                =  1;
 	repeated TransItemT           item                              =  2;
 	uint64                        ts                                =  3;
+	string                        updater                           =  4;
 
-	bool                          notfound                          = 51;
+	bool                          notfound                          = 99;
 }
 
 message TransListT {
@@ -86,99 +111,191 @@ message TransListT {
 }
 // DONOT TOUCH THIS - END
 
-// profile start
+// public and private keys , includes symmetric 
+message SignKeyT {
+	string                        pubkey                            =  1; // INPUT public key
+	string                        seckey                            =  2; // INPUT secret key
+	string                        algo                              =  3; // INPUT public key algo
+	string                        identifier                        =  4; // INPUT public key identifier
+}
 
-message ProfileT {
+// verified credentials
+message VerifiedT {
+	VeriTypeE                     vtype                             =  1; // INPUT addresstype
+	string                        data                              =  2; // INPUT data string
+	uint64                        verified_at                       =  3; // last verified
+	string                        countrycode                       =  4; // INPUT country code - US , IN
+	bool                          can_contact                       =  5; // INPUT can contact this
+}
+
+// tag data types
+message TagDataT {
 	uint64                        id                                =  1;
-	string                        name                              =  2; // profile name
-	string                        passkey                           =  3; // profile password
+	KeyTypeE                      keytype                           =  2; // INPUT KeyType
+	string                        name                              =  3; // INPUT tagtype 
+	string                        value                             =  4; // INPUT data string
+	repeated string               values                            =  5; // INPUT data string list
 
-	uint64                        update                            =  4; // profile can update
+	search.LangTypeE              lang                              =  8; // INPUT language
 
-	uint64                        created_at                        = 49; // created
-	uint64                        updated_at                        = 50; // last updated
-	bool                          notfound                          = 51;
+	bool                          is_allowed                        = 11; // INPUT is allowed
+	bool                          is_repeated                       = 12; // INPUT can be repeated
+	bool                          is_searchable                     = 13; // INPUT can be searched
+
+	string                        manager                           = 95; // INPUT admin who inserted this
+	bool                          is_deleted                        = 96; // is deleted flag
+	uint64                        created_at                        = 97; // created
+	uint64                        updated_at                        = 98; // last updated
+	bool                          notfound                          = 99;
 }
 
-message SimpleTemplateT {
+// category data types
+message CategoryT {
 	uint64                        id                                =  1;
-	string                        name                              =  2; // profile name
-	search.QueryTypeE             qtyp                              =  3; // query type id
-	search.QueryProfileT          qprof                             =  4; // query profile xapian
+	string                        name                              =  3; // INPUT tagtype 
+	string                        description                       =  4; // INPUT description
+	string                        original                          =  5; // original entry
 
-	bool                          ignore                            =  6;	 //  ignore this profile
+	search.LangTypeE              lang                              =  8; // INPUT language
 
-	uint64                        created_at                        = 49; // created
-	uint64                        updated_at                        = 50; // last updated
-	bool                          notfound                          = 51;
+	CanSeeTypeE                   cansee_type                       = 15; // INPUT cansee type
+	double                        cansee_price                      = 16; // INPUT cansee price in base points
+
+	string                        manager                           = 95; // INPUT admin who inserted this
+	bool                          is_deleted                        = 96; // is deleted flag
+	uint64                        created_at                        = 97; // created
+	uint64                        updated_at                        = 98; // last updated
+	bool                          notfound                          = 99;
 }
 
-// LookupRecord
+message UserDataT {
+	uint64                        id                                =  1;
+	string                        name                              =  3; // INPUT name
+	SignKeyT                      signkey                           =  4; // INPUT keys
 
-message KeyValueT {
-	string                        key                               =  1;
-	string                        value                             =  2;
+	string                        passkey                           =  5; // INPUT password
+	string                        sessionkey                        =  6; // sessionkey for convenience
+
+	search.LangTypeE              lang                              =  8; // INPUT language
+	string                        description                       =  9; // INPUT description
+	SubscrTypeE                   subscription                      = 10; // INPUT subscription
+
+	string                        last_otp                          = 11; // last otp
+
+	repeated VerifiedT            contacts                          = 12; // INPUT other contacts
+
+	string                        primary_mobile                    = 15; // mobile no primary
+	string                        primary_email                     = 16; // email name primary
+
+	repeated search.QueryProfT    profiles                          = 17; // INPUT profiles
+	string                        given_name                        = 18; // INPUT given name
+
+	bool                          is_invited                        = 19; // INPUT user invited
+
+	repeated TagDataT             tags                              = 21; // INPUT tag items
+	repeated string               categories                        = 22; // INPUT categories paid for
+
+	bool                          is_admin                          = 23; // can alter items set by others
+	bool                          can_add_users                     = 25; // can alter owned users
+	bool                          can_add_tags                      = 26; // can alter tags
+	bool                          can_add_category                  = 28; // can alter category
+	bool                          can_add_items                     = 29; // can alter video data
+	bool                          can_add_profiles                  = 30; // can have search profiles
+
+	bool                          reindex                           = 90; // should be reindexed
+	KeyTypeE                      keytype                           = 91; // keytype reference
+
+	bool                          expired                           = 92; // is expired
+	bool                          locked                            = 94; // is locked
+
+	string                        manager                           = 95; // INPUT admin who inserted this
+	bool                          is_deleted                        = 96; // is deleted flag
+	uint64                        created_at                        = 97; // created
+	uint64                        updated_at                        = 98; // last updated
+	bool                          notfound                          = 99;
 }
 
-message LookupRecordT {
-	uint64                        id                                =  1; // record id  
-	search.SourceTypeE            styp                              =  2; // INPUT record source type
-	string                        uniqueid                          =  3; // INPUT unique id
-
-	double                        importance                        =  4; // INPUT importance or equivalent
-
-	string                        ccode                             =  6; // INPUT country code Alpha 3
-	string                        scode                             =  7; // INPUT state code
-	string                        city                              =  8; // INPUT city name
-	string                        country                           = 14; // INPUT country
-	string                        state                             = 15; // INPUT state
-	string                        suggest                           = 16; // suggest field generated
-	string                        fld_name                          = 17; // INPUT name field
-	string                        fld_area                          = 18; // INPUT area field
-	string                        address                           = 19; // INPUT address
-	string                        pincode                           = 20; // INPUT pin code
-	string                        region                            = 21; // INPUT region 
-
-	double                        accuracy                          = 22; // INPUT accuracy of lat lon in m
-	double                        lat                               = 23; // INPUT latitude
-	double                        lon                               = 24; // INPUT longitude
-	string                        geohash9                          = 25; // geohash 9 chars
-	double                        rating                            = 26; // INPUT average rating of place
-	string                        location                          = 27; // location string for es
-
-	string                        landmark                          = 32; // INPUT landmark
-	string                        is_in_place                       = 34; // INPUT uniqueid of parent place
-	string                        tags                              = 35; // INPUT keywords
-
-	int64                         osm_id                            = 36; // INPUT osm_id
-	string                        osm_key                           = 37; // INPUT osm_key like place
-	string                        osm_value                         = 38; // INPUT osm_value like hamlet
-	string                        osm_type                          = 39; // INPUT osm_type like N
-	string                        geometry                          = 40; // INPUT geometry bbox
-
-	string                        title                             = 41; // INPUT title field
-	string                        summary                           = 42; // INPUT summary field
-	string                        details                           = 43; // INPUT details
-
-
-	repeated KeyValueT            attr                              = 47; // key value pairs
-
-	search.SourceTypeE            alias_styp                        = 48; // INPUT alias source type
-	string                        alias_uniqueid                    = 49; // INPUT alias unique id
-
-	search.LangTypeE              lang                              = 50; // INPUT language
-
-	repeated string               matched_queries                   = 51; // fetched from search
-	double                        score                             = 52; // score from search
-
-	bool                          is_deleted                        = 95; // soft delete
-	uint64                        created_at                        = 96; // created
-	uint64                        updated_at                        = 97; // last updated
-	bool                          notfound                          = 99; // return val 
-
+// reference for old data
+message CatHostT {
+	string                        origin                            =  1; // origin 
+	repeated string               categories                        =  2; // categories
 }
 
-message LookupRecordListT {
-	repeated LookupRecordT        record                            =  1;
+message ItemDataT  {
+	uint64                        id                                =  1;
+	string                        unique_id                         =  2; // INPUT id unique
+
+	CatHostT                      olddata                           =  3; // old data for reference
+
+	string                        origin                            =  4; // INPUT origin 
+	repeated string               categories                        =  5; // INPUT categories this belongs to
+	string                        breadcrumb                        =  6; // INPUT breadcrumb
+	repeated string               breadcrumbs                       =  7; // INPUT breadcrumbs
+
+
+	search.LangTypeE              lang                              =  9; // INPUT language
+
+	string                        title                             = 10; // INPUT display name
+	string                        summary                           = 11; // INPUT summary
+	string                        details                           = 12; // INPUT details
+
+	repeated TagDataT             tags                              = 13; // INPUT extra tags for favourite mapping
+	repeated TagDataT             attr                              = 14; // INPUT tag attributes
+
+	CanSeeTypeE                   cansee_type                       = 15; // INPUT cansee type
+
+	string                        thumbnail                         = 17; // INPUT thumbnail location // 30x45
+	string                        poster                            = 18; // INPUT default poster path // 300x450
+	repeated string               posters                           = 19; // INPUT other posters path // 300x450
+	string                        landscape                         = 20; // INPUT large poster path // 1000x550
+
+	ItemDataT                     alias                             = 21; // INPUT alias of another
+	ItemDataT                     parent                            = 22; // INPUT belongs to another completely
+	double                        importance                        = 23; // INPUT importance or equivalent
+
+	repeated VerifiedT            contacts                          = 25; // INPUT contact data
+
+// Local Data
+	string                        local_name                        = 30; // INPUT name not english
+	string                        ccode                             = 31; // INPUT country code Alpha 3
+	string                        scode                             = 32; // INPUT state code
+	string                        city                              = 33; // INPUT city name
+	string                        country                           = 34; // INPUT country
+	string                        state                             = 35; // INPUT state
+	string                        suggest                           = 36; // suggest field generated
+	string                        fld_name                          = 37; // INPUT name field
+	string                        fld_area                          = 38; // INPUT area field
+	string                        address                           = 39; // INPUT address
+	string                        pincode                           = 40; // INPUT pin code
+	string                        region                            = 41; // INPUT region 
+	double                        accuracy                          = 42; // INPUT accuracy of lat lon in m
+	double                        lat                               = 43; // INPUT latitude
+	double                        lon                               = 44; // INPUT longitude
+	string                        geohash9                          = 45; // geohash 9 chars
+	string                        location                          = 47; // location string for es
+	string                        landmark                          = 48; // INPUT landmark
+
+	int64                         osm_id                            = 51; // INPUT osm_id
+	string                        osm_key                           = 52; // INPUT osm_key like place
+	string                        osm_value                         = 53; // INPUT osm_value like hamlet
+	string                        osm_type                          = 54; // INPUT osm_type like N
+	string                        geometry                          = 55; // INPUT geometry bbox
+
+	double                        rating                            = 56; // INPUT average rating of place
+
+	repeated string               matched_queries                   = 61; // fetched from search
+	double                        score                             = 62; // score from search
+
+	bool                          reindex                           = 90; // should be reindexed
+	KeyTypeE                      keytype                           = 91; // keytype reference
+
+	bool                          expired                           = 92; // is expired
+	bool                          locked                            = 94; // is locked
+
+	string                        manager                           = 95; // INPUT admin who inserted this
+	bool                          is_deleted                        = 96; // is deleted flag
+	uint64                        created_at                        = 97; // created
+	uint64                        updated_at                        = 98; // last updated
+	bool                          notfound                          = 99;
 }
 

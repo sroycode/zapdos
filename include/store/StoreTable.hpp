@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/store/StoreTable.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -35,7 +35,8 @@
 
 #include <set>
 #include <google/protobuf/reflection.h>
-#include <google/protobuf/map.h>
+#include <google/protobuf/repeated_field.h>
+
 #include "store/StoreLevel.hpp"
 
 namespace zpds {
@@ -45,7 +46,7 @@ class StoreTable : public StoreLevel {
 public:
 	using StoreLevel::dbpointer;
 	using KeySetT=std::set<KeyTypeE>;
-	using MapT=google::protobuf::Map<uint64_t,T>;
+	using VecT=google::protobuf::RepeatedPtrField<T>;
 
 	/**
 	* Constructor
@@ -57,13 +58,13 @@ public:
 	*   const KeyTypeE primary key
 	*
 	* @param ukeys
-	*   const KeySetT unique keys to initialize
+	*   KeySetT&& unique keys to initialize
 	*
 	* @param ikeys
-	*   const KeySetT non unique keys to initialize
+	*   KeySetT&& non unique keys to initialize
 	*
 	*/
-	StoreTable(dbpointer trydb, const KeyTypeE pkey, const KeySetT ukeys, const KeySetT ikeys)
+	StoreTable(dbpointer trydb, const KeyTypeE pkey, KeySetT&& ukeys, KeySetT&& ikeys)
 		:
 		StoreLevel(trydb),
 		PrimaryKey(pkey),
@@ -146,7 +147,7 @@ public:
 	*   T* reference record for keys
 	*
 	* @param record map
-	*   MapT* records
+	*   VecT records
 	*
 	* @param keytype
 	*   KeyTypeE key type for index
@@ -160,7 +161,7 @@ public:
 	* @return
 	*   bool if found
 	*/
-	bool GetMany(T* refer, MapT* records, KeyTypeE keytype, size_t skip, size_t limit)
+	bool GetMany(T* refer, VecT records, KeyTypeE keytype, size_t skip, size_t limit)
 	{
 		if (keytype==PrimaryKey) {
 			throw zpds::BadCodeException("This cannot be used for primary key");
@@ -182,7 +183,7 @@ public:
 				throw zpds::BadDataException("Record is missing ");
 			if (!record.ParseFromString(value))
 				throw zpds::BadDataException("Record cannot be parsed");
-			(*records)[record.id()]=record;
+			records->Add(record);
 		}
 
 		return true;
@@ -195,7 +196,7 @@ public:
 	*   TransactionT* transaction to handle
 	*
 	* @param key
-	*   std::string key to populate
+	*   std::string& key to populate
 	*
 	* @param value
 	*   std::string& key to populate
@@ -204,7 +205,7 @@ public:
 	*   bool to delete
 	*
 	*/
-	void AddTrans(TransactionT* trans, std::string key, std::string& value, bool to_del)
+	void AddTrans(TransactionT* trans, std::string& key, std::string& value, bool to_del)
 	{
 		TransItemT* item = trans->add_item();
 		item->set_key(key);
@@ -249,11 +250,27 @@ public:
 	{
 		if ( unique_keys.find(keytype)==unique_keys.end() && index_keys.find(keytype)==index_keys.end() )
 			return false;
-		std::string key = GetKey(record,keytype,false);
+		std::string&& key = GetKey(record,keytype,false);
 		std::string value;
 		usemydb::Status s = getDB()->Get(usemydb::ReadOptions(), key, &value);
 		if (!s.ok()) return false;
 		return node->ParseFromString(value);
+	}
+
+	/**
+	* CheckKeyExists: check if a secondary key exists
+	*
+	* @param key
+	*   std::string& key to check
+	*
+	* @return
+	*   bool if exists
+	*/
+	bool CheckKeyExists(std::string& key)
+	{
+		std::string value;
+		usemydb::Status s = getDB()->Get(usemydb::ReadOptions(), key, &value);
+		return (s.ok());
 	}
 
 	/**
@@ -406,7 +423,7 @@ public:
 	}
 
 	/**
-	* ScanTable : scan by primary key
+	* ScanTable : scan by primary key , break by fn
 	*
 	* @param startid
 	*   size_t first id to fetch
@@ -415,12 +432,12 @@ public:
 	*   size_t records to fetch
 	*
 	* @param Func
-	*   std::function<void(T*)> function to act on each record
+	*   std::function<bool(T*)> function to act on each record
 	*
 	* @return
 	*   none
 	*/
-	void ScanTable(uint64_t startid, size_t limit, std::function<void(T*)> Func)
+	void ScanTable(uint64_t startid, size_t limit, std::function<bool(T*)> Func)
 	{
 		std::shared_ptr<usemydb::Iterator> it(getDB()->NewIterator(usemydb::ReadOptions()));
 		std::string keymatch = EncodeKeyType(PrimaryKey);
@@ -434,13 +451,13 @@ public:
 			T record;
 			if (!record.ParseFromString(it->value().ToString()) )
 				throw zpds::BadDataException("Record cannot be parsed");
-			Func(&record);
+			if (!Func(&record)) break;
 			if (++counter==limit) break;
 		}
 	}
 
 	/**
-	* ScanTable : scan full table 
+	* ScanTable : scan full table
 	*
 	* @param Func
 	*   std::function<void(T*)> function to act on each record
@@ -457,7 +474,7 @@ public:
 
 		size_t counter=0;
 		for (it->Seek(start); it->Valid() && it->key().starts_with(match) ; it->Next()) {
-			
+
 			if (++counter==1) continue; // first record
 
 			T record;
@@ -471,21 +488,21 @@ public:
 	* ScanIndex : scan by secondary key
 	*
 	* @param keystart
-	*   std::string starting with
+	*   std::string& starting with
 	*
 	* @param keymatch
-	*   std::string matching with
+	*   std::string& matching with
 	*
 	* @param limit
 	*   size_t records to fetch
 	*
 	* @param Func
-	*   std::function<bool(T*)> function to act on each record with stop option
+	*   std::function<bool(NodeT*)> function to act on each record with stop option
 	*
 	* @return
 	*   none
 	*/
-	void ScanIndex(std::string keystart, std::string keymatch, size_t limit, std::function<bool(NodeT*)> Func)
+	void ScanIndex(std::string& keystart, std::string& keymatch, size_t limit, std::function<bool(NodeT*)> Func)
 	{
 		std::shared_ptr<usemydb::Iterator> it(getDB()->NewIterator(usemydb::ReadOptions()));
 		usemydb::Slice match = usemydb::Slice ( keymatch );
@@ -497,6 +514,37 @@ public:
 			if (!record.ParseFromString(it->value().ToString()) )
 				throw zpds::BadDataException("Record cannot be parsed");
 			if (! Func(&record)) break;
+			if (++counter==limit) break;
+		}
+	}
+
+	/**
+	* ScanIndexKeyOnly : scan by secondary key , use only key
+	*
+	* @param keystart
+	*   std::string& starting with
+	*
+	* @param keymatch
+	*   std::string& matching with
+	*
+	* @param limit
+	*   size_t records to fetch
+	*
+	* @param Func
+	*   std::function<bool(std::string)> function to act on each record with stop option
+	*
+	* @return
+	*   none
+	*/
+	void ScanIndexKeyOnly(std::string& keystart, std::string& keymatch, size_t limit, std::function<bool(std::string)> Func)
+	{
+		std::shared_ptr<usemydb::Iterator> it(getDB()->NewIterator(usemydb::ReadOptions()));
+		usemydb::Slice match = usemydb::Slice ( keymatch );
+		usemydb::Slice start = usemydb::Slice ( keystart );
+
+		uint64_t counter=0;
+		for (it->Seek(start); it->Valid() && it->key().starts_with(match) ; it->Next()) {
+			if (! Func(it->key().ToString())) break;
 			if (++counter==limit) break;
 		}
 	}

@@ -1,12 +1,12 @@
 /**
  * @project zapdos
- * @file src/work/WorkServer.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @file src/main/WorkServer.hpp
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,14 +27,14 @@
  *
  * @section DESCRIPTION
  *
- *  WorkServer.hpp :   Work Storage Server Headers
+ *  WorkServer.hpp : Work Server Headers
  *
  */
 #ifndef _ZPDS_WORK_WORKSERVER_HPP_
 #define _ZPDS_WORK_WORKSERVER_HPP_
 
-#include <store/StoreBase.hpp>
-#include <utils/ServerBase.hpp>
+#include "store/StoreBase.hpp"
+#include "utils/ServerBase.hpp"
 
 namespace zpds {
 namespace work {

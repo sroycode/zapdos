@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/store/StoreBase.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StoreBase.hpp :   Shared headers for store
+ *  StoreBase.hpp : Store Base Class Headers
  *
  */
 #ifndef _ZPDS_STORE_STOREBASE_HPP_
@@ -63,8 +63,8 @@
 
 #define ZPDS_FMT_NODE_KEY(A,B)  ZPDS_FMT_ID_KEY(A) << ZPDS_FMT_NODE_ONLY(B)
 
-// #define ZPDS_FMT_SEP "\x1E"
-#define ZPDS_FMT_SEP ":"
+#define ZPDS_FMT_SEP "\x1E"
+// #define ZPDS_FMT_SEP ":"
 /* UINT STRN SINT is defined here so can be changed independent of node if needed */
 #define ZPDS_FMT_UINT_ONLY(A)   ZPDS_MACRO_HEX(ZPDS_NODE_LEN) << A
 #define ZPDS_FMT_STRN_ONLY(A)    A
@@ -81,10 +81,35 @@
 #include <sstream>
 #include "utils/BaseUtils.hpp"
 #include "../proto/Store.pb.h"
+#include "store/StoreAlias.hh"
+
+#ifdef ZPDS_USE_BASE80_KEYS
+/**
+* Base80String : Get limited char string
+*  : someone needs to get a faster way for this to be usable
+*  refer http://www.hackersdelight.org/divcMore.pdf
+*
+*/
+template<typename T, size_t N>
+inline std::string Base80String(T dividend)
+{
+	const static char usechars[] = "()+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz";
+	T modulo=0;
+	std::string out(N,' '); // N  (char 32 space)
+	size_t c=N;
+	while (dividend > 0 && c>0) {
+		modulo = (dividend - 1) % 80;
+		dividend = (T)((dividend - modulo) / 80);
+		out[--c] = usechars[modulo];
+	}
+	return out;
+}
+#endif
 
 namespace zpds {
 namespace store {
 class StoreBase {
+
 public:
 
 	/**
@@ -96,7 +121,7 @@ public:
 	* @return
 	*   std::string Key
 	*/
-	std::string EncodeKeyType (KeyTypeE keytype);
+	std::string EncodeKeyType (KeyTypeE keytype) const;
 
 	/**
 	* EncodePrimaryKey : make primary key with id only
@@ -110,7 +135,7 @@ public:
 	* @return
 	*   std::string Key
 	*/
-	std::string EncodePrimaryKey (KeyTypeE keytype, ::google::protobuf::uint64 id);
+	std::string EncodePrimaryKey (KeyTypeE keytype, ::google::protobuf::uint64 id) const;
 
 	/**
 	* CheckPrimaryKey : check if this is primary key
@@ -121,7 +146,7 @@ public:
 	* @return
 	*   bool if yes
 	*/
-	bool CheckPrimaryKey (std::string& key);
+	bool CheckPrimaryKey (std::string& key) const;
 
 	/**
 	* DecodePrimaryKey : get keytype and id from primary key
@@ -132,7 +157,7 @@ public:
 	* @return
 	*   std::pair<KeyType,uint64_t> keytype, id
 	*/
-	std::pair<KeyTypeE,uint64_t> DecodePrimaryKey (std::string& key);
+	std::pair<KeyTypeE,uint64_t> DecodePrimaryKey (std::string& key) const;
 
 	/**
 	* EncodeSecondaryKey : make secondary key with several variables
@@ -147,9 +172,49 @@ public:
 	*   std::string Key
 	*/
 	template<typename... T>
-	std::string EncodeSecondaryKey (KeyTypeE keytype, T... key);
+	std::string EncodeSecondaryKey (KeyTypeE keytype, T... key) const;
 
-private:
+protected:
+
+	/**
+	* SanitNSLower : lowercase , nospace word, only puntcts ( _ - . )
+	*
+	* @param orig
+	*   std::string input
+	*
+	* @return
+	*   std::string to be returned
+	*/
+	std::string SanitNSLower(const std::string& orig) const;
+
+	/**
+	* SanitLower : lowercase , punct and single space 
+	*
+	* @param orig
+	*   std::string& input
+	*
+	* @param notrim
+	*   bool to trim flag default false
+	*
+	* @return
+	*   std::string to be returned
+	*/
+	std::string SanitLower(const std::string& orig, bool notrim=false) const;
+
+	/**
+	* SanitKeepCase : keep alnum, punct and single space 
+	*
+	* @param orig
+	*   std::string& input
+	*
+	* @param notrim
+	*   bool to trim flag default false
+	*
+	* @return
+	*   std::string to be returned
+	*/
+	std::string SanitKeepCase(const std::string& orig, bool notrim=false) const;
+
 };
 } // namespace store
 } // namespace zpds
@@ -157,9 +222,9 @@ private:
 // specializations
 
 /**
-* MakeSuffix : make suffix key for single item default
-*
-*/
+ * MakeSuffix : make suffix key for single item default
+ *
+ */
 template <typename T>
 static void MakeSuffix(std::ostream& o,  T t)
 {
@@ -168,45 +233,45 @@ static void MakeSuffix(std::ostream& o,  T t)
 
 
 /**
-* MakeSuffix : make suffix key for single item string&& specialization
-*
-*/
+ * MakeSuffix : make suffix key for single item string&& specialization
+ *
+ */
 template<> void MakeSuffix(std::ostream& o, std::string&& t)
 {
 	o << ZPDS_FMT_SEP << ZPDS_FMT_STRN_ONLY(t);
 }
 
 /**
-* MakeSuffix : make suffix key for single item string specialization
-*
-*/
+ * MakeSuffix : make suffix key for single item string specialization
+ *
+ */
 template<> void MakeSuffix(std::ostream& o, std::string t)
 {
 	o << ZPDS_FMT_SEP << ZPDS_FMT_STRN_ONLY(t);
 }
 
 /**
-* MakeSuffix : make suffix key for single item uint64_t specialization
-*
-*/
+ * MakeSuffix : make suffix key for single item uint64_t specialization
+ *
+ */
 template<> void MakeSuffix(std::ostream& o, uint64_t t)
 {
 	o << ZPDS_FMT_SEP << ZPDS_FMT_UINT_ONLY(t);
 }
 
 /**
-* MakeSuffix : make suffix key for single item uint32_t specialization
-*
-*/
+ * MakeSuffix : make suffix key for single item uint32_t specialization
+ *
+ */
 template<> void MakeSuffix(std::ostream& o, uint32_t t)
 {
 	MakeSuffix<uint64_t>(o, (uint64_t) t );
 }
 
 /**
-* MakeSuffix : make suffix key for single item int64_t
-*
-*/
+ * MakeSuffix : make suffix key for single item int64_t
+ *
+ */
 template<> void MakeSuffix(std::ostream& o, int64_t t)
 {
 	if (t<0) MakeSuffix<uint64_t>(o, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
@@ -214,9 +279,9 @@ template<> void MakeSuffix(std::ostream& o, int64_t t)
 }
 
 /**
-* MakeSuffix : make suffix key for single item int32_t
-*
-*/
+ * MakeSuffix : make suffix key for single item int32_t
+ *
+ */
 template<> void MakeSuffix(std::ostream& o, int32_t t)
 {
 	if (t<0) MakeSuffix<uint64_t>(o, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
@@ -224,9 +289,9 @@ template<> void MakeSuffix(std::ostream& o, int32_t t)
 }
 
 /**
-* MakeSuffix : variadic recursive for multiple suffix
-*
-*/
+ * MakeSuffix : variadic recursive for multiple suffix
+ *
+ */
 template<typename T, typename... Args>
 static void MakeSuffix(std::ostream& o, T t, Args... args)
 {
@@ -235,9 +300,9 @@ static void MakeSuffix(std::ostream& o, T t, Args... args)
 }
 
 /**
-* MakePrefix : each prefix item default
-*
-*/
+ * MakePrefix : each prefix item default
+ *
+ */
 template <typename T>
 static void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k,  T t)
 {
@@ -245,45 +310,45 @@ static void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k,  T t)
 }
 
 /**
-* MakePrefix : each prefix item type std::string
-*
-*/
+ * MakePrefix : each prefix item type std::string
+ *
+ */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, std::string t)
 {
 	o << ZPDS_FMT_STRN_KEY( (unsigned short)k, t);
 }
 
 /**
-* MakePrefix : each prefix item type std::string&&
-*
-*/
+ * MakePrefix : each prefix item type std::string&&
+ *
+ */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, std::string&& t)
 {
 	o << ZPDS_FMT_STRN_KEY( (unsigned short)k, t);
 }
 
 /**
-* MakePrefix : each prefix item type uint64_t
-*
-*/
+ * MakePrefix : each prefix item type uint64_t
+ *
+ */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, uint64_t t)
 {
 	o << ZPDS_FMT_UINT_KEY( (unsigned short)k, t);
 }
 
 /**
-* MakePrefix : each prefix item type uint32_t
-*
-*/
+ * MakePrefix : each prefix item type uint32_t
+ *
+ */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, uint32_t t)
 {
 	MakePrefix<uint64_t>(o, k, (uint64_t) t );
 }
 
 /**
-* MakePrefix : each prefix item type int64_t
-*
-*/
+ * MakePrefix : each prefix item type int64_t
+ *
+ */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int64_t t)
 {
 	if (t<0) MakePrefix<uint64_t>(o, k, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
@@ -291,9 +356,9 @@ template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int64_t t)
 }
 
 /**
-* MakePrefix : each prefix item type int32_t
-*
-*/
+ * MakePrefix : each prefix item type int32_t
+ *
+ */
 template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int32_t t)
 {
 	if (t<0) MakePrefix<uint64_t>(o, k, (uint64_t) ZPDS_MAX_INTVAL - (uint64_t) std::abs(t) );
@@ -301,9 +366,9 @@ template<> void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, int32_t t)
 }
 
 /**
-* MakePrefix : variadic recursive for multiple prefix and suffix
-*
-*/
+ * MakePrefix : variadic recursive for multiple prefix and suffix
+ *
+ */
 template<typename T, typename... Args>
 static void MakePrefix(std::ostream& o, zpds::store::KeyTypeE k, T t, Args... args)
 {
@@ -315,11 +380,11 @@ namespace zpds {
 namespace store {
 
 /**
-* EncodeSecondaryKey : encode secondary key
-*
-*/
+ * EncodeSecondaryKey : encode secondary key
+ *
+ */
 template<typename... T>
-std::string StoreBase::EncodeSecondaryKey (zpds::store::KeyTypeE keytype, T... key)
+std::string StoreBase::EncodeSecondaryKey (zpds::store::KeyTypeE keytype, T... key) const
 {
 	std::ostringstream ss;
 	MakePrefix(ss, keytype, key...);

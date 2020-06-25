@@ -12,43 +12,14 @@ local namespace=`jq -r '.namespace' ${jsfile}`
 local hc_name=`echo "$namespace::$name" | awk 'BEGIN{FS="::"}{R=$3;gsub(/[A-Z]/,"_\&",R); print toupper($1) "_" toupper($2) toupper(R)}'`
 local fname=`jq -r '.fname' ${jsfile}`
 local ALIASLINE=""
-if [ ! -z "$fname" ] ; then
+if [ "${fname}" == "null" -o -z ${fname} ] ; then
+	ALIASLINE="";
+else
 	ALIASLINE="using ${name}T=${fname}T;"
 fi
 
 cat << SHREOFF
-/**
- * @project zapdos
- * @file include/store/${name}Table.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
- * @version 1.0.0
- *
- * @section LICENSE
- *
- * Copyright (c) 2018-2019 S Roychowdhury
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @section DESCRIPTION
- *
- *  ${name}Table.hpp :   Headers for ${name}Table ${desc}
- *
- */
+
 #ifndef _${hc_name}_TABLE_HPP_
 #define _${hc_name}_TABLE_HPP_
 
@@ -56,12 +27,11 @@ cat << SHREOFF
 
 namespace zpds {
 namespace store {
-${ALIASLINE}
+$ALIASLINE
 class ${name}Table : public StoreTable<${name}T> {
 public:
 	using StoreTable<${name}T>::dbpointer;
 	using StoreTable<${name}T>::StoreTable;
-	using StoreTable<${name}T>::MapT;
 
 	/**
 	* Constructor
@@ -125,40 +95,7 @@ local namespace=`jq -r '.namespace' ${jsfile}`
 local hc_name=`echo "$namespace::$name" | awk 'BEGIN{FS="::"}{R=$3;gsub(/[A-Z]/,"_\&",R); print toupper($1) "_" toupper($2) toupper(R)}'`
 
 cat << SHREOFF
-/**
- * @project zapdos
- * @file src/store/${name}Table.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
- * @version 1.0.0
- *
- * @section LICENSE
- *
- * Copyright (c) 2018-2019 S Roychowdhury
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @section DESCRIPTION
- *
- *  ${name}Table.cc :   Implementation for ${name}Table ${desc}
- *
- */
 #include "store/${name}Table.hpp"
-// template class zpds::store::StoreTable<zpds::store::${name}T>;
 SHREOFF
 
 local kno=0;
@@ -319,4 +256,7 @@ add_hpp_file "$jsfile" > ${ZAPDOS_SOURCE}/include/store/${name}Table.hpp
 add_cc_head "$jsfile" > ${ZAPDOS_SOURCE}/src/store/${name}Table.cc
 add_cc_GetSecondary "$jsfile" >> ${ZAPDOS_SOURCE}/src/store/${name}Table.cc
 
+cd ${ZAPDOS_SOURCE}
+sh scripts/header.sh ${ZAPDOS_SOURCE}/src/store/${name}Table.cc "${name} table implementation"
+sh scripts/header.sh ${ZAPDOS_SOURCE}/include/store/${name}Table.hpp "${name} table headers"
 

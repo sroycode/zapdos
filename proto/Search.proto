@@ -4,92 +4,31 @@ option optimize_for  =  SPEED;
 
 package zpds.search;
 
-// Language Types
-enum LangTypeE {
-	EN                                                              =  0; // english
-}
-
-// Search Types
+// Search Index Types
 enum IndexTypeE {
-	LOCAL                                                           =  0; // local data
-	TEXT                                                            =  1; // wiki data
+	I_LOCALDATA                                                       = 0; //  items using LocalDataT
+	I_WIKIDATA                                                        = 1; //  items using WikiDataT
 }
 
-// Lookup Record Source Types
-enum SourceTypeE {
-	S_NONE                                                          =  0; // placeholder ignored
-
-	// local data type
-	S_OSM                                                           =  1; // openstreetmaps
-	S_MYLOCAL                                                       =  2; // your own local data
-
-	// for text data
-	S_WIKI                                                          = 11; // wiki data
-	S_MYTEXT                                                        = 12; // your own text data
+// Lang Types
+enum LangTypeE {
+	EN                                                               =  0; // english
 }
 
-// Query DS
-
-message PointLocT {
-	string ccode                                                    =  1; // country code
-	string scode                                                    =  2; // state code
-	string city                                                     =  3; // city
-	double lat                                                      =  4; // latitude
-	double lon                                                      =  5; // longitude
-	string geohash                                                  =  6; // for geo
-	string pincode                                                  =  7; // pincode
-	string region                                                   =  8; // city region
-
-	bool dont_use                                                   = 11; // dont use this 
-	bool preferred                                                  = 12; // preferred
+// Currency Type
+enum CurrTypeE {
+	USD                                                              =  0; // US Dollars
 }
 
+// Query Types
 enum QueryTypeE {
 	QRY_UNKNOWN                                                     =  0; 
 	QRY_COMPLETION_PHOTON                                           =  1; 
-	QRY_COMPLETION_TEXTDATA                                         =  2; 
-	QRY_COMPLETION_NOTOPH                                           =  3; 
+	QRY_COMPLETION_NOTOPH                                           =  2; 
+	QRY_COMPLETION_WIKIDATA                                         =  3; 
 }
 
-message UsedParamsT {
-	PointLocT                     cur                               =  1; // INPUT detected coords
-	PointLocT                     sel                               =  2; // INPUT selected coords
-	PointLocT                     qry                               =  3; // query derived coords
-
-	uint64                        items                             =  4; // INPUT no of results to return
-
-	LangTypeE                     lang                              =  5; // INPUT language
-	string                        name                              =  6; // INPUT profile name
-	IndexTypeE                     dtyp                             =  7; // data type
-	bool                          noname                            =  8; // reverse lookup no name
-
-	uint64                        no_of_words                       = 10; // no of words
-
-	string                        query                             = 11; // stemmed query
-	string                        raw_query                         = 12; // INPUT raw query
-
-	bool                          use_tags                          = 13; // use tags field
-	bool                          use_name                          = 14; // use name field 
-
-	bool                          full_words                        = 15; // INPUT flag by space at end
-	bool                          sort_by_dist                      = 16; // INPUT sort by distance
-
-	bool                          all_partial                       = 17; // use partials for all words
-	bool                          begin_with                        = 19; // prefer beginning with
-	bool                          last_partial                      = 20; // lst is partial
-
-	string                        extra                             = 21; // extra to add
-	bool                          extra_is_full                     = 22; // extra to add as full_word
-
-	int64                         distance_band                     = 24; // sort distance band in m
-	double                        distance_def                      = 25; // default distance in m
-
-	// output
-	repeated uint64               ids                               = 26; // ids 
-	repeated string               sortkeys                          = 28; // sorting keys
-
-}
-
+// Limit Types
 enum LimitTypeE {
 	L_NONE                                                          =  0; // default
 	L_CCODE                                                         =  1; // by country code
@@ -105,49 +44,132 @@ enum LimitTypeE {
 	L_NBRHASH5                                                      =  9; // geohash 5 two level neighbours
 }
 
+// Search Types
 enum SearchTypeE {
 	S_DEFAULT                                                       =  0;
 	S_BEGINWITH                                                     =  1;
 	S_PARTIAL                                                       =  2;
 	S_FULLWORD                                                      =  3;
-
 	S_NAME                                                          =  5;
-	S_TAGS                                                          =  6;
 
 }
 
+// Ordering of result
 enum OrderTypeE {
 	O_DEFAULT                                                       =  0; // imp only no distance other than filters
 	O_DIST_BAND                                                     =  1; // distance and importance band
 	O_DIST_ONLY                                                     =  2; // distance only , shortcut to band with 10m
 }
 
+// Special input if oneword
 enum InputTypeE {
 	I_DEFAULT                                                       =  0; // default
 	I_ONEWORD                                                       =  1; // special case oneword query
 }
 
-message QueryOrderT {
-	string                        rec_tagid                          =  1; // INPUT this tag id 
-	uint64                        weight                             =  2; // INPUT order descending
-	SourceTypeE                   rec_styp                           =  3; // INPUT query record styp
-	uint64                        rec_count                          =  4; // INPUT  max records
-	uint64                        oneword_length                     =  5; // INPUT  max length of oneword query to apply this
+// Location Reference 
 
-	string                        desc                               =  8; // INPUT description of this
+message PointLocT {
+	string ccode                                                    =  1; // country code
+	string scode                                                    =  2; // state code
+	string city                                                     =  3; // city
+	double lat                                                      =  4; // latitude
+	double lon                                                      =  5; // longitude
+	string geohash                                                  =  6; // for geo
+	string pincode                                                  =  7; // pincode
+	string region                                                   =  8; // city region
 
-	double                        distance_def                       =  9; // INPUT default distance in m
-	int64                         distance_band                      = 10; // INPUT sort distance band in m
+	bool dont_use                                                   = 11; // dont use this 
+	bool preferred                                                  = 12; // preferred
+}
+
+message UsedTagT {
+	string                        name                              =  1; // tag name
+	string                        value                             =  2; // tag value
+}
+
+message UsedParamsT {
+	PointLocT                     location                          =  1; // INPUT detected coords
+	uint64                        items                             =  2; // INPUT no of results to return
+
+	LangTypeE                     lang                              =  5; // INPUT language
+	string                        profile                           =  6; // INPUT profile username
+	IndexTypeE                    dtyp                              =  7; // data type
+
+	uint64                        no_of_words                       = 10; // no of words
+	string                        query                             = 11; // stemmed query
+	string                        raw_query                         = 12; // INPUT raw query
+	string                        extra                             = 13; // extra to add
+	int64                         distance_band                     = 14; // sort distance band in m
+	double                        distance_def                      = 15; // default distance in m
+
+	// flags
+	bool                          noname                            = 21; // reverse lookup no name
+	bool                          use_name                          = 23; // use name field 
+	bool                          full_words                        = 24; // INPUT flag by space at end
+	bool                          sort_by_dist                      = 25; // INPUT sort by distance
+	bool                          all_partial                       = 26; // use partials for all words
+	bool                          begin_with                        = 27; // prefer beginning with
+	bool                          last_partial                      = 28; // lst is partial
+	bool                          extra_is_full                     = 29; // extra to add as full_word
+
+	// filters : not needed for completion 
+	repeated string               filter_categories                 = 31; // restrict by these categories
+	repeated UsedTagT             filter_tags                       = 32; // restrict by these tags
+
+	// output
+	repeated uint64               ids                               = 51; // ids 
+	repeated string               sortkeys                          = 52; // sorting keys
+	repeated double               scores                            = 53; // scores
+
+}
+
+message QueryRuleT {
+	uint64                        weight                             =  1; // INPUT order descending
+	uint64                        max_records                        =  2; // INPUT  max records for this rule fetch
+	uint64                        oneword_length                     =  3; // INPUT  max length of oneword query to apply this
+	string                        desc                               =  4; // INPUT  text description
+
+	double                        distance_def                       =  6; // INPUT default distance in m
+	int64                         distance_band                      =  7; // INPUT sort distance band in m
 
 	LimitTypeE                    limit_type                         = 11; // INPUT limit by
 	SearchTypeE                   search_type                        = 12; // INPUT search text for
 	OrderTypeE                    order_type                         = 13; // INPUT order by
 	InputTypeE                    input_type                         = 14; // INPUT input type
 
-	string                        mrg_tagid                          = 15; // INPUT merge with this tag id
-
 }
 
-message QueryProfileT {
-	repeated QueryOrderT          orders                             =  1; // the order
+message QueryProfT {
+	QueryTypeE                    query_type                         =  1;
+	repeated QueryRuleT           rules                              =  2;
 }
+
+// Photon Service
+message PhotonPropT {
+	int64                         osm_id                            =  1; // osm_id
+	string                        osm_key                           =  2; // osm_key like place
+	string                        osm_value                         =  3; // osm_value like hamlet
+	string                        osm_type                          =  4; // osm_type like N
+	string                        city                              =  5; // city name
+	string                        country                           =  6; // country
+	string                        state                             =  7; // state
+	string                        name                              =  8; // name field
+	string                        address                           =  9; // address
+	string                        postcode                          = 10; // pin code
+	string                        area                              = 11; // area
+	repeated double               extent                            = 12; // extent from bbox
+}
+
+message PhotonGeomT {
+	string                        type                              =  1; // like Point
+	repeated double               coordinates                       =  2; // lat lon
+}
+
+message PhotonDataT {
+	string                        type                              =  1; // Feature
+	PhotonPropT                   properties                        =  2; // properties
+	PhotonGeomT                   geometry                          =  3; // geometry
+}
+
+

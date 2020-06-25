@@ -13,7 +13,3 @@ set(ZPDS_JAMSPELL_SOURCES
 )
 
 add_library(zpds_jamspell STATIC ${ZPDS_JAMSPELL_SOURCES})
-
-target_link_libraries(zpds_jamspell
- 	zpds_proto
-)

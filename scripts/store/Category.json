@@ -1,30 +1,17 @@
-
 {
 	"pkey" : "K_CATEGORY",
 	"name" : "Category",
-	"fname" : "LookupRecord",
+	"fname" : "HostData",
 	"namespace" : "zpds::store",
 	"desc" : " category",
 	"pname" : "category",
 	"uindex" : [
 		{
-			"keytype" : "U_CATEGORY_STYP_LANG_UNIQUEID",
+			"keytype" : "U_CATEGORY_NAME",
 			"keys" : [
-				{ "name" : "styp", "type" : "int32_t" },
-				{ "name" : "lang", "type" : "int32_t" },
-				{ "name" : "uniqueid", "type" : "std::string" }
+				{ "name" : "name", "type" : "std::string" }
 			]
 		}
 	],
-	"sindex" : [
-		{
-			"keytype" : "I_CATEGORY_STYP_LANG_LASTUP",
-			"keys" : [
-				{ "name" : "styp", "type" : "int32_t" },
-				{ "name" : "lang", "type" : "int32_t" },
-				{ "name" : "updated_at", "type" : "uint64_t" }
-			]
-		}
-	],
-	"project" : "zapdos"
+	"project" : "zpdseama"
 }

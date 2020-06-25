@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/store/CategoryTable.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  CategoryTable.hpp :   Headers for CategoryTable  category
+ *  CategoryTable.hpp : 
  *
  */
 #ifndef _ZPDS_STORE_CATEGORY_TABLE_HPP_
@@ -37,12 +37,10 @@
 
 namespace zpds {
 namespace store {
-using CategoryT=LookupRecordT;
 class CategoryTable : public StoreTable<CategoryT> {
 public:
 	using StoreTable<CategoryT>::dbpointer;
 	using StoreTable<CategoryT>::StoreTable;
-	using StoreTable<CategoryT>::MapT;
 
 	/**
 	* Constructor

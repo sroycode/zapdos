@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/main/DefaultServer.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,11 +27,11 @@
  *
  * @section DESCRIPTION
  *
- *  DefaultServer.cc :   DefaultServer File
+ *  DefaultServer.cc : Default Server Implementation , contains main
  *
  */
-
 #define STRIP_FLAG_HELP 1
+#define STRIP_INTERNAL_FLAG_HELP 1
 #include <gflags/gflags.h>
 
 #include <glog/logging.h>
@@ -54,26 +54,26 @@ DEFINE_bool(warmcache, false, "Warms Cache");
 DEFINE_bool(dryrun, false, "Dry run to load spellcheck etc");
 DEFINE_string(jinpath, "", "overwrite jinpath from cmd line");
 DEFINE_string(shared_secret, "", "overwrite shared_secret from cmd line");
+DEFINE_string(default_adminpass, "", "overwrite default_adminpass from cmd line");
 DEFINE_string(hrpc_thisurl, "", "overwrite hrpc/thisurl from cmd line");
+DEFINE_bool(no_xapian, false, "Flag to prevent search index");
 /* GFlags End */
 
-#include <utils/BaseUtils.hpp>
+#include "utils/BaseUtils.hpp"
 
 #include <exception>
 #include <stdexcept>
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
-#include <async++.h>
+#include "async++.h"
 
-#include <utils/CfgFileOptions.hpp>
-#include <utils/SharedTable.hpp>
+#include "utils/CfgFileOptions.hpp"
+#include "utils/SharedTable.hpp"
 
 #include "DefaultServer.hh"
 #include "WorkServer.hpp"
 #include "../http/WebServer.hpp"
 #include "../hrpc/SyncServer.hpp"
-
-#define ZPDS_DEFAULT_STRN_SYSTEM "system"
 
 #ifdef ZPDS_BUILD_WITH_CTEMPLATE
 #include <ctemplate/template.h>
@@ -85,8 +85,6 @@ DEFINE_string(hrpc_thisurl, "", "overwrite hrpc/thisurl from cmd line");
 int main(int argc, char *argv[])
 {
 
-
-	int Z_EXIT_STATUS=0;
 	/** GFlags **/
 	std::string usage("Usage:\n");
 	usage += std::string(argv[0]) + " -config my.conf # starts as master\n" ;
@@ -100,11 +98,10 @@ int main(int argc, char *argv[])
 		FLAGS_alsologtostderr = true;
 	}
 
-
 	// read command line
 	gflags::ParseCommandLineFlags(&argc, &argv, true);
 	// override default help
-	if (FLAGS_help || FLAGS_h) {
+	if (FLAGS_h) {
 		FLAGS_help = false;
 		FLAGS_helpshort = true;
 	}
@@ -124,10 +121,11 @@ int main(int argc, char *argv[])
 	auto wbs_section = zpds::http::WebServer::GetSection();
 	auto wbs_params = zpds::http::WebServer::GetRequire();
 
-	std::shared_ptr<::zpds::http::io_whatever> m_io_whatever = std::make_shared<typename ::zpds::http::io_whatever>();
 	auto stptr = zpds::utils::SharedTable::create();
+	stptr->io_whatever = std::make_shared<::zpds::http::io_whatever>();
+	auto m_io_whatever = stptr->io_whatever;
 
-	struct InterruptException{};
+	struct InterruptException {};
 
 	try {
 		MyCFG = zpds::utils::CfgFileOptions::create(FLAGS_config);
@@ -151,61 +149,67 @@ int main(int argc, char *argv[])
 		if (shared_secret.empty()) throw zpds::InitialException("shared_secret is needed");
 		stptr->shared_secret.Set( shared_secret );
 
+		// default_adminpass
+		if ( ! FLAGS_default_adminpass.empty() )
+			MyCFG->Update(ZPDS_DEFAULT_STRN_WORK, "default_adminpass", FLAGS_default_adminpass);
+
 		// hostname
 		auto hostname = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_SYSTEM, "hostname");
 		if (hostname.empty()) throw zpds::InitialException("hostname is needed");
 		stptr->hostname.Set( hostname );
 
-		// baseurl
-		auto baseurl = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_SYSTEM, "baseurl");
-		if (baseurl.empty()) throw zpds::InitialException("baseurl is needed");
-		stptr->baseurl.Set( baseurl );
+		// lock_updates default false
+		int lock_updates = MyCFG->Find<int>(ZPDS_DEFAULT_STRN_SYSTEM, "lock_updates", true); // no throw
+		stptr->lock_updates.Set( lock_updates >0 );
 
-		// dont_use_cache default false
-		int dont_use_cache = MyCFG->Find<int>(ZPDS_DEFAULT_STRN_SYSTEM, "dont_use_cache", true); // no throw
-		stptr->dont_use_cache.Set( dont_use_cache>0 );
+		// max_fetch_records default 1000
+		uint64_t max_fetch_records = MyCFG->Find<uint64_t>(ZPDS_DEFAULT_STRN_SYSTEM, "max_fetch_records", true); // no throw
+		stptr->max_fetch_records.Set( max_fetch_records>0 ? max_fetch_records : 1000 );
 
-		// dont_create_profile default false
-		int dont_create_profile = MyCFG->Find<int>(ZPDS_DEFAULT_STRN_SYSTEM, "dont_create_profile", true); // no throw
-		stptr->dont_create_profile.Set( dont_create_profile>0 );
+		// max_user_sessions default 5
+		uint64_t max_user_sessions = MyCFG->Find<uint64_t>(ZPDS_DEFAULT_STRN_SYSTEM, "max_user_sessions", true); // no throw
+		stptr->max_user_sessions.Set( (max_user_sessions>0 && max_user_sessions<10) ? max_user_sessions : 5 );
 
-		// allow_free_update default false
-		int allow_free_update = MyCFG->Find<int>(ZPDS_DEFAULT_STRN_SYSTEM, "allow_free_update", true); // no throw
-		stptr->allow_free_update.Set( allow_free_update>0 );
-
+		// uint64_t currtime = ZPDS_CURRTIME_MS;
 		/** Local Strings START */
 
-		std::string xapath = MyCFG->Find<std::string>("search", "datadir");
-		if (!boost::filesystem::exists(xapath)) boost::filesystem::create_directory(xapath);
+#ifdef ZPDS_BUILD_WITH_XAPIAN
+		std::string xapath = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_XAPIAN, "datadir");
+		if (xapath.empty()) throw zpds::InitialException("xapian/xapath is needed");
+		if (!boost::filesystem::exists(xapath)) boost::filesystem::create_directories(xapath);
 		stptr->xapath.Set( xapath );
-		stptr->xapdb = std::make_shared<::zpds::search::StoreTrie>(xapath);
-
-		// datadir
-		std::string datadir = MyCFG->Find<std::string>("work", "datadir");
-		if (datadir.empty()) throw zpds::InitialException("datadir is needed");
-		if (!boost::filesystem::exists(datadir)) boost::filesystem::create_directory(datadir);
-#ifdef ZPDS_USE_SEPARATE_LOGDB
-		// logdatadir
-		std::string logdatadir = MyCFG->Find<std::string>("work", "logdatadir");
-		if (logdatadir.empty()) throw zpds::InitialException("logdatadir is needed");
-		if (!boost::filesystem::exists(logdatadir)) boost::filesystem::create_directory(logdatadir);
-#endif
+		stptr->xapdb = ::zpds::search::WriteIndex::Create(xapath);
 
 		// spellcheck store jampath
-		std::string jampath = MyCFG->Find<std::string>("search", "jampath");
-		if (jampath.empty()) throw zpds::InitialException("jampath is needed");
-		if (!boost::filesystem::exists(jampath)) boost::filesystem::create_directory(jampath);
+		std::string jampath = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_XAPIAN, "jampath");
+		if (jampath.empty()) throw zpds::InitialException("xapian/jampath is needed");
+		if (!boost::filesystem::exists(jampath)) boost::filesystem::create_directories(jampath);
 		DLOG(INFO) << "Jampath Created";
 
 		// spellcheck source jinpath is optional
-		std::string jinpath = MyCFG->Find<std::string>("search", "jinpath",true);
+		std::string jinpath = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_XAPIAN, "jinpath",true);
 		if ( ! FLAGS_jinpath.empty() ) jinpath = FLAGS_jinpath;
-		uint64_t currtime = ZPDS_CURRTIME_MS;
 		stptr->jamdb = std::make_shared<::zpds::jamspell::StoreJam>(jampath, jinpath);
+
+		// no_xapian flag
+		stptr->no_xapian.Set ( FLAGS_no_xapian );
+#endif
+
+		// datadir
+		std::string datadir = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_WORK, "datadir");
+		if (datadir.empty()) throw zpds::InitialException("datadir is needed");
+		if (!boost::filesystem::exists(datadir)) boost::filesystem::create_directories(datadir);
+
+#ifdef ZPDS_USE_SEPARATE_LOGDB
+		// logdatadir
+		std::string logdatadir = MyCFG->Find<std::string>(ZPDS_DEFAULT_STRN_WORK, "logdatadir");
+		if (logdatadir.empty()) throw zpds::InitialException("logdatadir is needed");
+		if (!boost::filesystem::exists(logdatadir)) boost::filesystem::create_directories(logdatadir);
+#endif
 
 		// hrpc_thisurl
 		if ( ! FLAGS_hrpc_thisurl.empty() ) {
-			MyCFG->Update("hrpc", "thisurl" , FLAGS_hrpc_thisurl );
+			MyCFG->Update("hrpc", "thisurl", FLAGS_hrpc_thisurl );
 		}
 
 #ifdef ZPDS_BUILD_WITH_CTEMPLATE
@@ -213,7 +217,7 @@ int main(int argc, char *argv[])
 		ctemplate::Template::SetTemplateRootDirectory(templatedir);
 #endif
 
-		// exit in dryrun - just for spellchecker creation
+		// exit in dryrun - just for spellchecker creation or one init
 		if (FLAGS_dryrun) throw InterruptException();
 
 		/** Workserver Params OK */
@@ -251,11 +255,22 @@ int main(int argc, char *argv[])
 		DLOG(INFO) << "STARTING" << std::endl;
 		::zpds::http::io_whatever::work m_work(*m_io_whatever);
 		boost::asio::signal_set m_signals(*m_io_whatever,SIGINT,SIGTERM,SIGHUP);
-		// m_signals.async_wait(std::bind(&boost::asio::io_service::stop, m_io_whatever));
+		// m_signals.async_wait(std::bind(&boost::asio::io_whatever::stop, m_io_whatever));
 		m_signals.async_wait(
 		[&] (const boost::system::error_code& e, int signal_no) {
 			// wks->stop();
 			LOG(INFO) << "Interrupted: " << e.value() << " signal " << signal_no;
+			// stop receiving
+			stptr->is_ready.Set( false );
+			// wait for received writes to end
+			std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
+			// confirm received writes ended
+			auto tmp_csize = stptr->tmpcache->AssocSize();
+			while (tmp_csize > 0 ) {
+				LOG(INFO) << "Writes going on, wait : " << tmp_csize;
+				std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
+				tmp_csize = stptr->tmpcache->AssocSize();
+			}
 			wcs->stop();
 			wbs->stop();
 			m_io_whatever->stop();
@@ -270,21 +285,24 @@ int main(int argc, char *argv[])
 	catch(InterruptException) {
 		LOG(INFO) << "Exited Dryrun";
 	}
+	catch(zpds::BadCodeException& e) {
+		LOG(INFO) << "Error (bad code): " << e.what();
+	}
 	catch(zpds::BaseException& e) {
-		Z_EXIT_STATUS=1;
 		LOG(INFO) << "Error : " << e.what();
 	}
+	catch(Xapian::Error& e) {
+		LOG(INFO) << "Error (xap) : " << e.get_msg() << " " << e.get_description();
+	}
 	catch(std::exception& e) {
-		Z_EXIT_STATUS=1;
 		LOG(INFO) << "Error (sys) : " << e.what();
 	}
 	catch(...) {
-		Z_EXIT_STATUS=1;
 		LOG(INFO) << "Error (unknown) ";
 	}
 
 	gflags::ShutDownCommandLineFlags();
 	LOG(INFO) << "EXITING" << std::endl;
-	return Z_EXIT_STATUS;
+	return 0;
 }
 

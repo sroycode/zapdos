@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/QueryBase.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  QueryBase.hpp :  query base includes
+ *  QueryBase.hpp : Query Base includes
  *
  */
 #ifndef _ZPDS_QUERY_QUERYBASE_HPP_
@@ -48,6 +48,5 @@
 #include "query/ProtoForm.hpp"
 #include "query/ProtoJson.hpp"
 
-#include "HttpClient.hpp"
 
 #endif /* _ZPDS_QUERY_QUERYBASE_HPP_ */

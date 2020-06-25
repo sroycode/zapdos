@@ -4,54 +4,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(zpds_dumpdb
 	DumpDb.cc
+	../store/StoreBase.cc
+	../store/StoreLevel.cc
 )
 target_link_libraries(zpds_dumpdb
 	${ZPDS_LIB_DEPS}
-	zpds_store
+	zpds_proto
 )
 
 set(TOOL_TARGETS ${TOOL_TARGETS} zpds_dumpdb)
-
-
-# zpds_addlocal
-
-add_executable(zpds_addlocal
-	AddLocalData.cc
-	LineReader.cc
-	../query/ProtoJson.cc
-)
-target_link_libraries(zpds_addlocal
-	${CMAKE_THREAD_LIBS_INIT}
-	${GLOG_LIBRARIES}
-	${GFLAGS_LIBRARIES}
-	${Boost_LIBRARIES}
-	${PROTOBUF_LIBRARIES}
-	${CURL_LIBRARIES}
-	zpds_proto
-	zpds_cpr
-)
-
-set(TOOL_TARGETS ${TOOL_TARGETS} zpds_addlocal)
-
-# zpds_addtext
-
-add_executable(zpds_addtext
-	AddTextData.cc
-	LineReader.cc
-	../query/ProtoJson.cc
-)
-target_link_libraries(zpds_addtext
-	${CMAKE_THREAD_LIBS_INIT}
-	${GLOG_LIBRARIES}
-	${GFLAGS_LIBRARIES}
-	${Boost_LIBRARIES}
-	${PROTOBUF_LIBRARIES}
-	${CURL_LIBRARIES}
-	zpds_proto
-	zpds_cpr
-)
-
-set(TOOL_TARGETS ${TOOL_TARGETS} zpds_addtext)
 
 # zpds_spell
 
@@ -72,27 +33,64 @@ target_link_libraries(zpds_spell
 
 set(TOOL_TARGETS ${TOOL_TARGETS} zpds_spell)
 
-# zpds_nomina
+# zpds_adddata
 
-add_executable(zpds_nomina
-	NominaCsv.cc
+add_executable(zpds_adddata
+	AddData.cc
+	../query/ProtoJson.cc
+	../utils/SplitWith.cc
 )
-
-find_package(PQXX REQUIRED)
-include_directories(${PQXX_INCLUDE_DIRS})
-
-target_link_libraries(zpds_nomina
-	zpds_async
+target_link_libraries(zpds_adddata
 	${CMAKE_THREAD_LIBS_INIT}
 	${GLOG_LIBRARIES}
 	${GFLAGS_LIBRARIES}
-	${PQXX_LIBRARIES}
 	${Boost_LIBRARIES}
-	${CURL_LIBRARIES}
-	zpds_cpr
+	${PROTOBUF_LIBRARIES}
+	zpds_proto
 )
 
-set(TOOL_TARGETS ${TOOL_TARGETS} zpds_nomina)
+set(TOOL_TARGETS ${TOOL_TARGETS} zpds_adddata)
+
+# zpds_extractwiki
+
+add_executable(zpds_extractwiki
+	ExtractWiki.cc
+	../utils/SplitWith.cc
+)
+target_link_libraries(zpds_extractwiki
+	${CMAKE_THREAD_LIBS_INIT}
+	${Boost_LIBRARIES}
+	zpds_async
+)
+
+set(TOOL_TARGETS ${TOOL_TARGETS} zpds_extractwiki)
+
+# zpds_xapindex
+
+if (ZPDS_BUILD_WITH_XAPIAN)
+add_executable(zpds_xapindex
+	XapIndex.cc
+	../utils/SplitWith.cc
+	../search/BaseUtils.cc
+	../search/WriteIndex.cc
+	../search/KrovetzStemmer.cc
+	../search/GeoHashHelper.cc
+	../search/DistanceSlabKeyMaker.cc
+	../search/IndexBase.cc
+	../search/IndexLocal.cc
+	../search/IndexWiki.cc
+	../store/StoreBase.cc
+	../store/StoreLevel.cc
+	../store/CacheContainer.cc
+)
+target_link_libraries(zpds_xapindex
+	${ZPDS_LIB_DEPS}
+	zpds_proto
+)
+
+set(TOOL_TARGETS ${TOOL_TARGETS} zpds_xapindex)
+endif()
+
 
 # all targets
 

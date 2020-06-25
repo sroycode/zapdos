@@ -32,9 +32,9 @@ export HTTPIE
 # if postform is not set , set 0 i.e. posts are json
 export POSTFORM=${POSTFORM:=0};
 
-export TESTURL=${TESTURL:="http://localhost:9091"};
+export TESTURL=${TESTURL:="http://localhost:9093"};
 
 ## shared_secret dummy
-export shared_secret=${shared_secret:="ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
-
+export shared_secret=${shared_secret:="please-change-this-secret"};
+export default_adminpass=${default_adminpass:="please-change-this-password"};
 

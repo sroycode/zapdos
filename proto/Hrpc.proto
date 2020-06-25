@@ -6,15 +6,21 @@ package zpds.hrpc;
 
 enum MasterCmdTypeE {
 	M_NOACTION                                                      =  0;
-	M_NEWPROFILE                                                    =  1;
-	M_SETPROFILE                                                    =  2;
-	M_SETSIMPLETEMPLATE                                             =  3;
-	M_ADDDATA_LOCAL                                                 =  4;
-	M_ADDDATA_TEXT                                                  =  5;
-	M_ADDDATA_EXTRA                                                 =  6;
-	M_ADDDATA_CAT                                                   =  7;
+	M_MANAGE_TAGS                                                   =  1;
+	M_MANAGE_HOSTS                                                  =  2;
+	M_MANAGE_CATEGORY                                               =  3;
+
+	M_MANAGE_EXTER                                                  =  4;
+	M_MANAGE_USER                                                   =  5;
+	M_RESETPASS_EXTER                                               =  6;
+	M_RESETPASS_USER                                                =  7;
+
+	M_MANAGE_LOCALDATA                                              =  8;
+	M_MANAGE_WIKIDATA                                               =  9;
 
 }
+
+// DONOT TOUCH THIS - START
 
 enum RemoteCmdTypeE {
 	R_NOACTION                                                      =  0;
@@ -44,3 +50,4 @@ message StateT {
 	bool not_found                                                  = 21;
 }
 
+// DONOT TOUCH THIS - END

@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/ProtoForm.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  ProtoForm.hpp :  Headers for Form -> Protobuf implementation
+ *  ProtoForm.hpp : Headers for Form -> Protobuf Headers
  *
  */
 #ifndef _ZPDS_QUERY_PROTOFORM_HPP_
@@ -60,39 +60,39 @@ namespace zpds {
 namespace query {
 
 /**
-* urlencode : plain url-encode
-*
-* @param input by address
-*   const std::string&
-*
-* @return
-*   std::unordered_map<std::string,std::string>
-*/
+ * urlencode : plain url-encode
+ *
+ * @param input by address
+ *   const std::string&
+ *
+ * @return
+ *   std::unordered_map<std::string,std::string>
+ */
 std::unordered_map<std::string,std::string> urldecode(const std::string& text);
 
 /**
-* urldecode : plain url-decode
-*
-* @param value
-*   const std::string& input by address
-*
-* @return
-*   std::string
-*/
+ * urldecode : plain url-decode
+ *
+ * @param value
+ *   const std::string& input by address
+ *
+ * @return
+ *   std::string
+ */
 std::string urlencode(const std::string& value);
 
 /**
-* form2pb : Convert url-encoded form to protobuf
-*
-* @param form
-*   const std::string& from encoded string
-*
-* @param msg
-*   google::protobuf::Message* to protobuf
-*
-* @return
-*   none
-*/
+ * form2pb : Convert url-encoded form to protobuf
+ *
+ * @param form
+ *   const std::string& from encoded string
+ *
+ * @param msg
+ *   google::protobuf::Message* to protobuf
+ *
+ * @return
+ *   none
+ */
 void form2pb(const std::string& form, google::protobuf::Message* msg);
 
 }

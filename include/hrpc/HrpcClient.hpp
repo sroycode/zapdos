@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/hrpc/HrpcClient.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  HrpcClient.hpp : Header hrpc client
+ *  HrpcClient.hpp : Hrpc Client Headers
  *
  */
 #ifndef _ZPDS_HRPC_HRPC_CLIENT_HPP_
@@ -36,16 +36,16 @@
 #include "utils/BaseUtils.hpp"
 #include "utils/SharedTable.hpp"
 #include <google/protobuf/message.h>
-#include "../proto/Query.pb.h"
 #include "../proto/Hrpc.pb.h"
-
-#include "query/bin2ascii.h"
+#include "utils/S64String.hpp"
 
 namespace zpds {
 namespace hrpc {
 
 class HrpcClient {
 public:
+	bool no_asio=false; // asio not initialized
+	
 	/**
 	* constructor
 	*
@@ -70,7 +70,7 @@ public:
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param service_id
-	*   ::zpds::hrpc::MasterCmdTypeE service enum
+	*   MasterCmdTypeE service enum
 	*
 	* @param msg
 	*   google::protobuf::Message* message pointer
@@ -81,7 +81,7 @@ public:
 	* @return
 	*   bool status true if ok
 	*/
-	bool SendToMaster(::zpds::utils::SharedTable::pointer stptr, ::zpds::hrpc::MasterCmdTypeE service_id,
+	bool SendToMaster(::zpds::utils::SharedTable::pointer stptr, MasterCmdTypeE service_id,
 	                  google::protobuf::Message* msg, bool nothrow=false);
 
 	/**
@@ -94,7 +94,7 @@ public:
 	*   std::string address
 	*
 	* @param service_id
-	*   ::zpds::hrpc::RemoteCmdTypeE service enum
+	*   RemoteCmdTypeE service enum
 	*
 	* @param msg
 	*   google::protobuf::Message* message pointer
@@ -106,7 +106,39 @@ public:
 	*   bool status true if ok
 	*/
 	bool SendToRemote(::zpds::utils::SharedTable::pointer stptr, std::string address,
-	                  ::zpds::hrpc::RemoteCmdTypeE service_id, google::protobuf::Message* msg, bool nothrow=false);
+	                  RemoteCmdTypeE service_id, google::protobuf::Message* msg, bool nothrow=false);
+
+private:
+
+	/**
+	* SendFunction : actual send
+	*
+	* @param stptr
+	*   ::zpds::utils::SharedTable::pointer stptr
+	*
+	* @param address
+	*   const std::string address
+	*
+	* @param endpoint
+	*   const std::string endpoint
+	*
+	* @param service_name
+	*   const std::string service_id  as string
+	*
+	* @param msg
+	*   google::protobuf::Message* message pointer
+	*
+	* @param for_master
+	*   bool for master endpoint true
+	*
+	* @return
+	*   none , throws if not ok
+	*/
+	void SendFunction(
+	    ::zpds::utils::SharedTable::pointer stptr,
+	    const std::string address, const std::string endpoint,
+	    const std::string service_name,
+	    google::protobuf::Message* msg, bool for_master);
 
 };
 } // namespace hrpc

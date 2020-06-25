@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/StaticFileService.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StaticFileService.hpp :   Static File Service Implementation
+ *  StaticFileService.hpp : Static File Service Endpoint
  *
  */
 #ifndef _ZPDS_QUERY_STATIC_FILE_SERVICE_HPP_
@@ -39,7 +39,7 @@ namespace zpds {
 namespace query {
 
 template <class HttpServerT>
-class StaticFileService : protected zpds::query::ServiceBase<HttpServerT> {
+class StaticFileService : public zpds::query::ServiceBase<HttpServerT> {
 public:
 
 	/**

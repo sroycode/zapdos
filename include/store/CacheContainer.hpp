@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/store/CacheContainer.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,18 +27,23 @@
  *
  * @section DESCRIPTION
  *
- *  CacheContainer.hpp :   Shared headers for store cache
+ *  CacheContainer.hpp : Cache Container Headers
  *
  */
 #ifndef _ZPDS_STORE_CACHE_CONTAINER_HPP_
 #define _ZPDS_STORE_CACHE_CONTAINER_HPP_
 
 #include <memory>
-#include "sparsepp/spp.h"
 #include <utility>
 #include <functional>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
+
+#ifdef ZPDS_USE_SPARSE_HASH_CACHE
+#include "sparsepp/spp.h"
+#else
+#include <unordered_map>
+#endif // ZPDS_USE_SPARSE_HASH_CACHE
 
 #include "store/StoreBase.hpp"
 
@@ -52,7 +57,11 @@ public:
 	using ReadLockT = boost::shared_lock< LockT >;
 
 	using AssocT = std::string;
+#ifdef ZPDS_USE_SPARSE_HASH_CACHE
 	using AssocMapT = spp::sparse_hash_map<std::string,AssocT>;
+#else
+	using AssocMapT = std::unordered_map<std::string,AssocT>;
+#endif // ZPDS_USE_SPARSE_HASH_CACHE
 
 	/**
 	* create : static construction creates new first time
@@ -84,11 +93,13 @@ public:
 	* @param assoc
 	*   AssocT assoc
 	*
+	* @param only_if_exists
+	*   bool only if exists default false
+	*
 	* @return
 	*   none
 	*/
-	void SetAssoc(std::string hash, AssocT assoc);
-
+	void SetAssoc(std::string hash, AssocT assoc, bool only_if_exists=false);
 
 	/**
 	* GetAssoc : get assoc
@@ -114,6 +125,25 @@ public:
 	*   none
 	*/
 	void DelAssoc(std::string hash);
+
+	/**
+	* CheckAssoc : get assoc
+	*
+	* @param hash
+	*   std::string hash to get
+	*
+	* @return
+	*   bool if ok
+	*/
+	bool CheckAssoc(std::string hash);
+
+	/**
+	* AssocSize : get assoc size
+	*
+	* @return
+	*   size_t assoc container size
+	*/
+	size_t AssocSize();
 
 private:
 	LockT mutex_;

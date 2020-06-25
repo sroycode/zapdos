@@ -5,6 +5,3 @@ set(ZPDS_HTTP_SOURCES
 )
 
 add_library(zpds_http STATIC ${ZPDS_HTTP_SOURCES})
-target_link_libraries(zpds_http
-	zpds_query
-)

@@ -1,12 +1,12 @@
 /**
  * @project zapdos
- * @file src/utils/CfgFileOptions.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @file src/utils/CfgFileOptions.cc
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,10 +27,9 @@
  *
  * @section DESCRIPTION
  *
- *  CfgFileOptions.cc :   Config File Reader implementation
+ *  CfgFileOptions.cc : Config File Reader impl
  *
  */
-
 #include <fstream>
 #include <algorithm>
 #include <iostream>
@@ -57,12 +56,13 @@ zpds::utils::CfgFileOptions::~CfgFileOptions() {}
  * Check : Check if Value Exists
  *
  */
-bool zpds::utils::CfgFileOptions::Check(const std::string Section, const std::string Name)
+bool zpds::utils::CfgFileOptions::Check(const std::string& Section, const std::string& Name)
 {
 	try {
 		std::string s = Find<std::string>(Section,Name);
 		return true;
-	} catch (zpds::ConfigException& e) {
+	}
+	catch (zpds::ConfigException& e) {
 		return false;
 	}
 	return false; // never reaches
@@ -83,7 +83,7 @@ void zpds::utils::CfgFileOptions::Show()
  * Update: Update or Add an entry
  *
  */
-void zpds::utils::CfgFileOptions::Update(const std::string Section, const std::string Name, std::string Value)
+void zpds::utils::CfgFileOptions::Update(const std::string& Section, const std::string& Name, const std::string& Value)
 {
 	SectionMap.insert(ssMapT::value_type(MakeKey(Section,Name),Value));
 }
@@ -92,7 +92,7 @@ void zpds::utils::CfgFileOptions::Update(const std::string Section, const std::s
  * MakeKey: Merge Section and Name
  *
  */
-std::string zpds::utils::CfgFileOptions::MakeKey(std::string Section, std::string Name)
+std::string zpds::utils::CfgFileOptions::MakeKey(const std::string& Section, const std::string& Name)
 {
 	return Section + ZPDS_CFGFILE_DELIM_STR + Name;
 }
@@ -101,7 +101,7 @@ std::string zpds::utils::CfgFileOptions::MakeKey(std::string Section, std::strin
  * Constructor : the used constructor
  *
  */
-zpds::utils::CfgFileOptions::CfgFileOptions(const std::string InputFile)
+zpds::utils::CfgFileOptions::CfgFileOptions(const std::string& InputFile)
 {
 	std::ifstream file(InputFile.c_str());
 	if(!file.is_open())

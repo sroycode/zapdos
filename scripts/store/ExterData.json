@@ -1,0 +1,18 @@
+{
+	"pkey" : "K_EXTERDATA",
+	"name" : "ExterData",
+	"fname" : "UserData",
+	"namespace" : "zpds::store",
+	"desc" : " exterdata",
+	"pname" : "exterdata",
+	"uindex" : [
+		{
+			"keytype" : "U_EXTERDATA_NAME",
+			"keys" : [
+				{ "name" : "name", "type" : "std::string" }
+			]
+		}
+	],
+	"project" : "zpdseama"
+}
+

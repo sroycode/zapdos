@@ -27,7 +27,7 @@
 // possible hash functions, by using SIMD instructions, or by
 // compromising on hash quality.
 
-#include "jamspell/config.h"
+#include "jamspell/city_config.h"
 #include "jamspell/city.h"
 
 #include <algorithm>

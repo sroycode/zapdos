@@ -25,9 +25,7 @@ addons:
       - libctemplate-dev
       - libtbb-dev
       - libzstd-dev
-      - libsodium-dev
-      - libosmium-dev
-      - libpqxx-dev
+      - libcrypto++
 
 language: cpp
 

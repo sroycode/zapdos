@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/hrpc/SyncServiceList.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,22 +27,22 @@
  *
  * @section DESCRIPTION
  *
- *  SyncServiceList.hpp :   Set up Service List
+ *  SyncServiceList.hpp : Set up Service List
  *
  */
 #ifndef _ZPDS_HRPC_SYNC_SERVICE_LIST_HPP_
 #define _ZPDS_HRPC_SYNC_SERVICE_LIST_HPP_
 
-#include <query/NotFoundService.hpp>
-#include <query/QueryBase.hpp>
-#include <hrpc/HrpcMasterEndpointService.hpp>
-#include <hrpc/HrpcRemoteEndpointService.hpp>
+#include "query/NotFoundService.hpp"
+#include "query/QueryBase.hpp"
+#include "hrpc/MasterEndpointService.hpp"
+#include "hrpc/RemoteEndpointService.hpp"
 
 #define ZPDS_SYNCSERVICELIST_SCOPE_HTTP \
 		zpds::query::NotFoundService<HttpServerT> {sharedtable,server,ZPDS_SERVICE_SCOPE_HTTP}; \
 		zpds::hrpc::RemoteKeeper::pointer rkeeper = std::make_shared<zpds::hrpc::RemoteKeeper>(sharedtable); \
-		zpds::hrpc::HrpcMasterEndpointService<HttpServerT>(sharedtable,server,rkeeper,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::hrpc::HrpcRemoteEndpointService<HttpServerT>(sharedtable,server,rkeeper,ZPDS_SERVICE_SCOPE_HTTP);
+		zpds::hrpc::MasterEndpointService<HttpServerT>(sharedtable,server,rkeeper,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::hrpc::RemoteEndpointService<HttpServerT>(sharedtable,server,rkeeper,ZPDS_SERVICE_SCOPE_HTTP);
 
 #define ZPDS_SYNCSERVICELIST_SCOPE_HTTPS \
 		zpds::query::NotFoundService<HttpServerT> {sharedtable,server,ZPDS_SERVICE_SCOPE_HTTP};

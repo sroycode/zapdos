@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/jamspell/StoreJam.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StoreJam :  container for spellchecker
+ *  StoreJam.hpp : Jamspell Store Base Slass Headers
  *
  */
 #ifndef _ZPDS_JAMSPELL_STORE_JAM_HPP_
@@ -80,16 +80,16 @@ public:
 	/**
 	* Correct : correct string
 	*
-	* @param input
-	*   std::string input
-	*
 	* @param lang
 	*   ::zpds::search::LangTypeE language
+	*
+	* @param input
+	*   const std::string& input
 	*
 	* @return
 	*   std::string
 	*/
-	std::string Correct( ::zpds::search::LangTypeE lang, std::string input) const;
+	std::string Correct(::zpds::search::LangTypeE lang, const std::string& input) const;
 
 protected:
 	JamMapT jammap;

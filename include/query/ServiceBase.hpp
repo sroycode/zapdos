@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/ServiceBase.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  ServiceBase.hpp :   Service ABC
+ *  ServiceBase.hpp : Abstract Base Class for Query Service
  *
  */
 #ifndef _ZPDS_QUERY_SERVICEBASE_HPP_
@@ -97,7 +97,7 @@ protected:
 		output = content_stream.str();
 		*response <<  "HTTP/" << request->http_version << " " << ec << " " << em;
 		*response << "\r\nContent-Length: " << output.length() << "\r\n\r\n" << output.c_str();
-		LOG(INFO) << "NOK: " << output;
+		LOG(INFO) << " NOK: " << output;
 	}
 
 	/**
@@ -149,21 +149,13 @@ protected:
 	* @param payload
 	*   std::string& payload
 	*
-	* @param add_cors
-	*   bool add cors headers
-	*
 	* @return
 	*   none
 	*/
 	void HttpOKAction(typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request,
-	                  int ec, const char* em, const char* content_type, std::string& payload, bool add_cors)
+	                  int ec, const char* em, const char* content_type, std::string& payload)
 	{
 		*response << "HTTP/" << request->http_version << " " << ec <<  " " << em << "\r\n";
-		if (add_cors) {
-			*response << "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept\r\n";
-			*response << "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n";
-			*response << "Access-Control-Allow-Origin: *\r\n";
-		}
 		*response << "Content-Type: " << content_type << "\r\n";
 		*response << "Content-Length: " << payload.length() << "\r\n";
 		*response << "\r\n" << payload.c_str();
@@ -212,22 +204,14 @@ protected:
 	* @param dict
 	*   ctemplate::TemplateDictionary* dict
 	*
-	* @param add_cors
-	*   bool add cors headers
-	*
 	* @return
 	*   none
 	*/
 	void HttpTemplateAction(typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request,
 	                        int ec, const char* em, const char* content_type,
-	                        std::string tfile, ctemplate::TemplateDictionary* dict, bool add_cors)
+	                        std::string tfile, ctemplate::TemplateDictionary* dict)
 	{
 		*response << "HTTP/" << request->http_version << " " << ec <<  " " << em << "\r\n";
-		if (add_cors) {
-			*response << "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept\r\n";
-			*response << "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n";
-			*response << "Access-Control-Allow-Origin: *\r\n";
-		}
 		*response << "Content-Type: " << content_type << "\r\n";
 
 		std::string payload;

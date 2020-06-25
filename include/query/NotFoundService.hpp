@@ -1,12 +1,12 @@
 /**
  * @project zapdos
- * @file src/query/NotFoundService.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @file include/query/NotFoundService.hpp
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  NotFoundService.hpp :   NotFound Server Implementation
+ *  NotFoundService.hpp : NotFound Server Endpoint
  *
  */
 #ifndef _ZPDS_QUERY_NOTFOUNDSERVICE_HPP_
@@ -39,7 +39,7 @@ namespace zpds {
 namespace query {
 
 template <class HttpServerT>
-class NotFoundService : protected zpds::query::ServiceBase<HttpServerT> {
+class NotFoundService : public zpds::query::ServiceBase<HttpServerT> {
 public:
 
 	/**
@@ -64,14 +64,47 @@ public:
 		: zpds::query::ServiceBase<HttpServerT>(ZPDS_SERVICE_SCOPE_HTTP | ZPDS_SERVICE_SCOPE_HTTPS)
 	{
 		if (!(this->myscope & scope)) return; // scope mismatch
+
 		server->default_resource["GET"] =
 		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			this->HttpErrorAction(response,request,404,"NOT FOUND");
 		};
+
+		server->default_resource["HEAD"] =
+		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
+			this->HttpErrorAction(response,request,404,"NOT FOUND");
+		};
+
 		server->default_resource["POST"] =
 		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			this->HttpErrorAction(response,request,404,"NOT FOUND");
 		};
+
+		server->default_resource["PUT"] =
+		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
+			this->HttpErrorAction(response,request,404,"NOT FOUND");
+		};
+
+		server->default_resource["DELETE"] =
+		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
+			this->HttpErrorAction(response,request,404,"NOT FOUND");
+		};
+
+		server->default_resource["CONNECT"] =
+		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
+			this->HttpErrorAction(response,request,404,"NOT FOUND");
+		};
+
+		server->default_resource["OPTIONS"] =
+		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
+			this->HttpErrorAction(response,request,404,"NOT FOUND");
+		};
+
+		server->default_resource["TRACE"] =
+		[this](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
+			this->HttpErrorAction(response,request,404,"NOT FOUND");
+		};
+
 	}
 
 private:

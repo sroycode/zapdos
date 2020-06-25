@@ -6,7 +6,7 @@
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  AsioCompat.hpp :  asio compatibility for Web Server ( Modified from eidheim/Simple-Web-Server )
+ *  AsioCompat.hpp : Asio compatibility for Web Server ( Modified from eidheim/Simple-Web-Server )
  *
  */
 #ifndef _ZPDS_HTTP_ASIO_COMPAT_HPP_
@@ -77,6 +77,15 @@ void async_resolve(asio::ip::tcp::resolver &resolver, const std::pair<std::strin
 {
 	resolver.async_resolve(host_port.first, host_port.second, std::forward<handler_type>(handler));
 }
+template <typename handler_type>
+inline void post(io_context &context, handler_type &&handler)
+{
+	asio::post(context, std::forward<handler_type>(handler));
+}
+inline asio::executor_work_guard<io_context::executor_type> make_work_guard(io_context &context)
+{
+	return asio::make_work_guard(context);
+}
 #else
 using io_context = asio::io_service;
 using io_whatever = asio::io_service;
@@ -101,7 +110,17 @@ void async_resolve(asio::ip::tcp::resolver &resolver, const std::pair<std::strin
 {
 	resolver.async_resolve(asio::ip::tcp::resolver::query(host_port.first, host_port.second), std::forward<handler_type>(handler));
 }
+template <typename handler_type>
+inline void post(io_context &context, handler_type &&handler)
+{
+	context.post(std::forward<handler_type>(handler));
+}
+inline io_context::work make_work_guard(io_context &context)
+{
+	return io_context::work(context);
+}
 #endif
+
 } // namespace http
 } // namespace zpds
 

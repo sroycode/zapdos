@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/HelpQuery.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  HelpQuery.hpp :  Help Handler
+ *  HelpQuery.hpp : Help Handler Endpoint
  *
  */
 #ifndef _ZPDS_QUERY_HELPQUERY_HPP_
@@ -103,7 +103,7 @@ public:
 	{
 		HelpListT hl;
 		ReadLockT lock (shared_lock);
-		std::copy_if( helplist.begin() , helplist.end(), std::back_inserter(hl), [scope](const HelpT& h) {
+		std::copy_if( helplist.begin(), helplist.end(), std::back_inserter(hl), [scope](const HelpT& h) {
 			return (h.scope & scope);
 		});
 		return hl;

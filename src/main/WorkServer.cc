@@ -1,12 +1,12 @@
 /**
  * @project zapdos
- * @file src/work/WorkServer.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @file src/main/WorkServer.cc
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,24 +27,23 @@
  *
  * @section DESCRIPTION
  *
- *  WorkServer.cc :  Work Service
+ *  WorkServer.cc : Work Server handles all initialization
  *
  */
-
 #include <gflags/gflags.h>
 DECLARE_bool(warmcache);
 
 #include "async++.h"
 #include "WorkServer.hpp"
 #include "store/StoreLevel.hpp"
-#include "query/bin2ascii.h"
+#include "utils/B64String.hpp"
 
+#include "store/ExterCredService.hpp"
+#include "store/ExterDataService.hpp"
 
-#include "store/ProfileTable.hpp"
-#include "store/SimpleTemplateTable.hpp"
-#include "store/ProfileService.hpp"
-
-#include "search/SearchTrie.hpp"
+#ifdef ZPDS_BUILD_WITH_XAPIAN
+#include "search/SearchCache.hpp"
+#endif
 
 zpds::work::WorkServer::WorkServer(zpds::utils::SharedTable::pointer stptr)
 	: zpds::utils::ServerBase(stptr)
@@ -64,11 +63,13 @@ const std::string zpds::work::WorkServer::GetSection()
 
 const zpds::utils::ServerBase::ParamsListT zpds::work::WorkServer::GetRequire()
 {
+	zpds::utils::ServerBase::ParamsListT p{"datadir","cachesize","default_adminpass" };
+
 #ifdef ZPDS_USE_SEPARATE_LOGDB
-	return {"datadir","cachesize","logdatadir","logcachesize" };
-#else
-	return {"datadir","cachesize" };
+	p.insert(p.end(), { "logdatadir","logcachesize" });
 #endif
+
+	return p;
 }
 
 
@@ -79,13 +80,16 @@ void zpds::work::WorkServer::init(zpds::utils::ServerBase::ParamsListT params)
 		throw zpds::ConfigException("WorkServer: params and required size mismatch");
 
 	try {
-		std::string datadir = params[0];
-		std::size_t cachesize = std::stoul(params[1]);
+		size_t pcount=0;
+		std::string datadir = params[pcount];
+		size_t cachesize = std::stoul(params[++pcount]);
 		if (datadir.empty()) throw zpds::InitialException("datadir is needed");
+		std::string default_adminpass = params[++pcount];
+
 
 #ifdef ZPDS_USE_SEPARATE_LOGDB
-		std::string logdatadir = params[2];
-		std::size_t logcachesize = std::stoul(params[3]);
+		std::string logdatadir = params[++pcount];
+		size_t logcachesize = std::stoul(params[++pcount]);
 		if (logdatadir.empty()) throw zpds::InitialException("logdatadir is needed");
 #endif
 
@@ -108,74 +112,63 @@ void zpds::work::WorkServer::init(zpds::utils::ServerBase::ParamsListT params)
 #endif
 
 		// if resets last_lkey
-		sharedtable->logcounter.Set ( (last_lkey>0) ? last_lkey : 1 );
+		sharedtable->logcounter.Set ( (last_lkey>0) ? last_lkey : 0 );
 
-		// first use create default
+		uint64_t currtime = ZPDS_CURRTIME_MS;
 
+		// check admin exists
 
-		// populate cache
-		if ( ! sharedtable->dont_use_cache.Get() ) {
-			LOG(INFO) << "Using Cache ";
-
-			// add profile
-			size_t addc=0;
-			{
-				::zpds::store::ProfileTable sth_table(sharedtable->maindb.Get());
-				::zpds::store::ProfileT sth;
-				sth_table.ScanTable(0,UINT_LEAST64_MAX,[this,&addc](::zpds::store::ProfileT* record) {
-					std::string name = this->sharedtable->dbcache->EncodeSecondaryKey<std::string>(
-					                       ::zpds::store::U_PROFILE_NAME, record->name() );
-					std::string value;
-					record->SerializeToString(&value);
-					this->sharedtable->dbcache->SetAssoc(name, value);
-					++addc;
-					DLOG(INFO) << "Cache Added: " << name;
-				});
-				LOG(INFO) << "Cache Added Profiles : " << addc;
-			}
-
-			// add simpletemplate
-			addc=0;
-			{
-				::zpds::store::SimpleTemplateTable sth_table(sharedtable->maindb.Get());
-				::zpds::store::SimpleTemplateT sth;
-				sth_table.ScanTable(0,UINT_LEAST64_MAX,[this,&addc](::zpds::store::SimpleTemplateT* record) {
-					std::string name = this->sharedtable->dbcache->EncodeSecondaryKey<std::string,uint64_t>(
-					                       ::zpds::store::U_SIMPLETEMPLATE_NAME_QTYP, record->name(), record->qtyp() );
-					std::string value;
-					record->SerializeToString(&value);
-					this->sharedtable->dbcache->SetAssoc(name, value);
-					++addc;
-					DLOG(INFO) << "Cache Added: " << name;
-				});
-				LOG(INFO) << "Cache Added SimpleTemplates : " << addc;
-			}
-
-			// warm up xapian cache
-			uint64_t currtime = ZPDS_CURRTIME_MS;
-			if (FLAGS_warmcache) {
-				std::string xapath = sharedtable->xapath.Get();
-
-				// collect the ids from index
-				const google::protobuf::EnumDescriptor *l = ::zpds::search::LangTypeE_descriptor();
-				const google::protobuf::EnumDescriptor *d = ::zpds::search::IndexTypeE_descriptor();
-				for (auto i=0 ; i < l->value_count() ; ++i ) {
-					for (auto j=0 ; j < d->value_count() ; ++j ) {
-						LOG(INFO) << "Warming cache : " << l->value(i)->name() << "_" << d->value(j)->name() ;
-						async::parallel_for(async::irange(0, 9), [xapath,i,j](size_t k) {
-							::zpds::search::SearchTrie trie( xapath );
-							trie.WarmCache( ::zpds::search::LangTypeE(i),::zpds::search::IndexTypeE(j),k,10);
-						});
-					}
-				}
-
-				LOG(INFO) << "Cache Warming took: " << (ZPDS_CURRTIME_MS - currtime)/1000 << " s";
-
-			}
-
+		::zpds::store::ExterCredService ucs;
+		::zpds::store::ExterDataService uds;
+		{
+			::zpds::store::ExterDataT admin;
+			admin.set_name(ZPDS_DEFAULT_ADMIN);
+			admin.set_passkey( default_adminpass );
 			if ( sharedtable->is_master.Get() )
-				LOG(INFO) << "System is Ready: ";
+				uds.AdminCreateAction(sharedtable,&admin,false,true,false);
+			ucs.Get(sharedtable,&admin);
+			if (admin.id()>0)
+				LOG(INFO) << ZPDS_DEFAULT_ADMIN << " found created at: " << admin.created_at();
+			else
+				LOG(INFO) << ZPDS_DEFAULT_ADMIN << " not found , need to initialize";
 		}
+
+		// check default exists
+		{
+			::zpds::store::ExterDataT admin;
+			admin.set_name(ZPDS_DEFAULT_SEARCH_EXTER);
+			admin.set_passkey( default_adminpass );
+			if ( sharedtable->is_master.Get() )
+				uds.AdminCreateAction(sharedtable,&admin,false,false,true);
+			ucs.Get(sharedtable,&admin);
+			if (admin.id()>0)
+				LOG(INFO) << ZPDS_DEFAULT_SEARCH_EXTER << " found created at: " << admin.created_at();
+		}
+
+		currtime = ZPDS_CURRTIME_MS;
+
+#ifdef ZPDS_BUILD_WITH_XAPIAN
+		if (FLAGS_warmcache) {
+			std::string xapath = sharedtable->xapath.Get();
+
+			// collect the ids from index
+			const google::protobuf::EnumDescriptor *l = ::zpds::search::LangTypeE_descriptor();
+			const google::protobuf::EnumDescriptor *d = ::zpds::search::IndexTypeE_descriptor();
+			for (auto i=0 ; i < l->value_count() ; ++i ) {
+				for (auto j=0 ; j < d->value_count() ; ++j ) {
+					LOG(INFO) << "Warming cache : " << l->value(i)->name() << "_" << d->value(j)->name() ;
+					async::parallel_for(async::irange(0, 9), [xapath,i,j](size_t k) {
+						::zpds::search::SearchCache trie( xapath );
+						trie.WarmCache( ::zpds::search::LangTypeE(i),::zpds::search::IndexTypeE(j),k,10);
+					});
+				}
+			}
+			LOG(INFO) << "Cache Warming took: " << (ZPDS_CURRTIME_MS - currtime)/1000 << " s";
+		}
+
+#endif
+
+		LOG(INFO) << ( sharedtable->is_master.Get() ? "Master" : "Slave" ) << " is Ready: ";
 	}
 	catch (zpds::BaseException& e) {
 		DLOG(INFO) << "WorkServer init failed: " << e.what() << std::endl;

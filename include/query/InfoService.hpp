@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/InfoService.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  InfoService.hpp :   Info Service Implementation
+ *  InfoService.hpp : Info Service Endpoint
  *
  */
 #ifndef _ZPDS_QUERY_INFO_SERVICE_HPP_
@@ -39,7 +39,7 @@ namespace zpds {
 namespace query {
 
 template <class HttpServerT>
-class InfoService : protected zpds::query::ServiceBase<HttpServerT> {
+class InfoService : public zpds::query::ServiceBase<HttpServerT> {
 public:
 
 	/**
@@ -76,12 +76,12 @@ public:
 		server->resource["/help$"]["GET"]
 		=[this,stptr,scope,helpquery](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,scope,helpquery,response,request] {
-				try {
+				try
+				{
 					DLOG(INFO) << request->path;
 					std::string output;
 					std::stringstream content_stream;
-					for (auto& var: helpquery->get(scope))
-					{
+					for (auto& var: helpquery->get(scope)) {
 						content_stream << "\r\n\r\n" << var.route ;
 						size_t counter=0;
 						for (auto& desc: var.desc) content_stream << "\r\n -- " << desc;
@@ -90,8 +90,9 @@ public:
 					*response << "HTTP/1.1 200 OK\r\n";
 					*response << "Content-type: text/plain\r\n";
 					*response << "Content-Length: " << output.length() << "\r\n\r\n" << output.c_str();
-					this->HttpOKAction(response,request,200,"OK","text/plain",output,true);
-				} catch (...)
+					this->HttpOKAction(response,request,200,"OK","text/plain",output);
+				}
+				catch (...)
 				{
 					this->HttpErrorAction(response,request,500,"INTERNAL SERVER ERROR");
 				}
@@ -106,17 +107,18 @@ public:
 		server->resource["/help.html$"]["GET"]
 		=[this,stptr,scope,helpquery](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,scope,helpquery,response,request] {
-				try {
+				try
+				{
 					DLOG(INFO) << request->path;
 					ctemplate::TemplateDictionary d("help");
-					for (auto& var: helpquery->get(scope))
-					{
+					for (auto& var: helpquery->get(scope)) {
 						ctemplate::TemplateDictionary* dict = d.AddSectionDictionary("ONE_RESULT");
 						dict->SetValue("ROUTE",var.route);
 						for (auto& desc: var.desc) dict->SetValueAndShowSection("DESC",desc,"DESC_SECTION");
 					}
-					this->HttpTemplateAction(response,request,200,"OK","text/html","help.tpl",&d,true);
-				} catch (...)
+					this->HttpTemplateAction(response,request,200,"OK","text/html","help.tpl",&d);
+				}
+				catch (...)
 				{
 					this->HttpErrorAction(response,request,500,"INTERNAL SERVER ERROR");
 				}
@@ -130,14 +132,14 @@ public:
 		server->resource["/info$"]["GET"]
 		=[this,stptr](typename HttpServerT::RespPtr response, typename HttpServerT::ReqPtr request) {
 			ZPDS_PARALLEL_ONE([this,stptr,response,request] {
-				try {
+				try
+				{
 					LOG(INFO) << request->path;
 					::zpds::query::StateT sstate;
 					sstate.set_ts( ZPDS_CURRTIME_MS );
 					sstate.set_is_ready( stptr->is_ready.Get() );
 					// get other params if ready
-					if (sstate.is_ready())
-					{
+					if (sstate.is_ready()) {
 						sstate.set_hostname( stptr->hostname.Get() );
 						sstate.set_is_master( stptr->is_master.Get() );
 						if(!sstate.is_master())
@@ -146,9 +148,10 @@ public:
 
 					// aftermath
 					std::string output;
-					pb2json(&sstate , output);
-					this->HttpOKAction(response,request,200,"OK","application/json",output,true);
-				} catch (...)
+					pb2json(&sstate, output);
+					this->HttpOKAction(response,request,200,"OK","application/json",output);
+				}
+				catch (...)
 				{
 					this->HttpErrorAction(response,request,500,"INTERNAL SERVER ERROR");
 				}

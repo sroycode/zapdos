@@ -5,17 +5,27 @@ set(ZPDS_WORK_SOURCES
 )
 
 add_library(zpds_work STATIC ${ZPDS_WORK_SOURCES})
-target_link_libraries(zpds_work
-	zpds_hrpc
-)
 
 set(ZPDS_LIB_DEPS
 	${ZPDS_LIB_DEPS}
+	zpds_work
+	zpds_hrpc
+	zpds_store
+	zpds_http
+	zpds_query
 	zpds_utils
 	zpds_async
-	zpds_work
-	zpds_http
+	zpds_proto
+	zpds_crypto
 )
+
+if (ZPDS_BUILD_WITH_XAPIAN)
+set(ZPDS_LIB_DEPS
+	${ZPDS_LIB_DEPS}
+	zpds_search
+	zpds_jamspell
+)
+endif()
 
 set(ZPDS_SOURCES
 	DefaultServer.cc

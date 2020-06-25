@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/query/ProtoForm.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,12 +27,12 @@
  *
  * @section DESCRIPTION
  *
- *  ProtoForm.cc :  Form to Protobuf implementation
+ *  ProtoForm.cc : Form to Protobuf implementation
  *
  */
 #include "query/ProtoForm.hpp"
 
-#include "query/bin2ascii.h"
+#include "utils/B64String.hpp"
 #include <cctype>
 #include <iomanip>
 #include <sstream>
@@ -66,20 +66,24 @@ std::unordered_map<std::string,std::string> zpds::query::urldecode(const std::st
 				escaped << h;
 				i += 2;
 			}
-		} else if (c == '+') {
+		}
+		else if (c == '+') {
 			escaped << ' ';
-		} else if (c == '=') {
+		}
+		else if (c == '=') {
 			name = escaped.str();
 			escaped.str("");
 			escaped.clear();
 			name_set=true;
-		} else if (c == '&') {
+		}
+		else if (c == '&') {
 			if (name_set)
 				m[name]=escaped.str();
 			escaped.str("");
 			escaped.clear();
 			name_set=false;
-		} else {
+		}
+		else {
 			escaped << c;
 		}
 	}

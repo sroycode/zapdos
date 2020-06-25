@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/tools/TestSpell.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,10 +27,9 @@
  *
  * @section DESCRIPTION
  *
- *  TestSpell.cc : spellcheck loader n test
+ *  TestSpell.cc : zpds_spell : Spellcheck loader n test
  *
  */
-
 #define ZPDS_DEFAULT_EXE_NAME "zpds_spell"
 #define ZPDS_DEFAULT_EXE_VERSION "1.0.0"
 #define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018-2019 S Roychowdhury"
@@ -80,7 +79,8 @@ int Correct(const std::string& modelFile)
 }
 
 /** main */
-int main(int argc, const char** argv) {
+int main(int argc, const char** argv)
+{
 	if (argc<3) {
 		PrintUsage(argv);
 		exit(1);

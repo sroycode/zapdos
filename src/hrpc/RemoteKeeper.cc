@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/hrpc/RemoteKeeper.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,12 +27,13 @@
  *
  * @section DESCRIPTION
  *
- *  RemoteKeeper.cc  :  Remotes list handler implementation
+ *  RemoteKeeper.cc : Hrpc Remote List Manager impl
  *
  */
-
-#include <hrpc/RemoteKeeper.hpp>
 #include <thread>
+#include "hrpc/RemoteKeeper.hpp"
+#include "hrpc/ServiceDefine.hh"
+#include "hrpc/HrpcClient.hpp"
 
 /**
 * constructor
@@ -58,8 +59,9 @@ void zpds::hrpc::RemoteKeeper::SetHosts(zpds::hrpc::StateT* state)
 			rmap[rms->address()]= {rms->logcounter(), rms->updated_at()};
 		}
 		stptr->remotes.AddMany(std::move(rmap));
-	} else {
-		stptr->remotes.AddOne( state->thisurl() , { state->logcounter(), state->ts() } );
+	}
+	else {
+		stptr->remotes.AddOne( state->thisurl(), { state->logcounter(), state->ts() } );
 	}
 	LOG(INFO) << "Added Remote from: " << state->thisurl() ;
 }
@@ -70,7 +72,7 @@ void zpds::hrpc::RemoteKeeper::SetHosts(zpds::hrpc::StateT* state)
 */
 void zpds::hrpc::RemoteKeeper::AddHost(zpds::hrpc::RemoteT* rms)
 {
-	stptr->remotes.AddOne( rms->address() , { rms->logcounter(), rms->updated_at() } );
+	stptr->remotes.AddOne( rms->address(), { rms->logcounter(), rms->updated_at() } );
 }
 
 /**
@@ -142,13 +144,14 @@ void zpds::hrpc::RemoteKeeper::MasterUpdate(uint64_t cutoff)
 		}
 		DLOG(INFO) << "Cand 2: " << newmaster << " " << max_logcounter;
 	}
-	
+
 	if (newmaster == stptr->thisurl.Get()) {
 		// lastslave initialised
 		stptr->lastslave.Set("");
 		stptr->is_master.Set(true);
 		LOG(INFO) << "New Master elected: ME !";
-	} else {
+	}
+	else {
 		zpds::hrpc::StateT state;
 		GetHosts(&state);
 		zpds::hrpc::HrpcClient hclient;
@@ -159,10 +162,12 @@ void zpds::hrpc::RemoteKeeper::MasterUpdate(uint64_t cutoff)
 				stptr->master.Set(newmaster);
 				LOG(INFO) << "New Master elected: " << newmaster;
 				break;
-			} else {
-				LOG(INFO) << "New Master is not ready: " << newmaster;
-				std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
 			}
-		} while(++retries<10);
+			else {
+				LOG(INFO) << "New Master is not ready: " << newmaster;
+				std::this_thread::sleep_for( std::chrono::milliseconds( ELECTION_SLEEP_INTERVAL ) );
+			}
+		}
+		while(++retries< ELECTION_MAX_RETRIES );
 	}
 }

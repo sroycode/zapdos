@@ -1,0 +1,16 @@
+{
+	"pkey" : "K_USERDATA",
+	"name" : "UserData",
+	"namespace" : "zpds::store",
+	"desc" : " userdata",
+	"pname" : "userdata",
+	"uindex" : [
+		{
+			"keytype" : "U_USERDATA_NAME",
+			"keys" : [
+				{ "name" : "name", "type" : "std::string" }
+			]
+		}
+	],
+	"project" : "zpdseama"
+}

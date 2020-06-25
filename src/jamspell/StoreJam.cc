@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/jamspell/StoreJam.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,14 +27,12 @@
  *
  * @section DESCRIPTION
  *
- *  StoreJam :  container for spellcheck implementation
+ *  StoreJam.cc : Jamspell Store base class impl
  *
  */
-
 #include "jamspell/StoreJam.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
-#include "utils/StringHelpers.hpp"
 
 /**
  * Constructor : default
@@ -75,7 +73,7 @@ zpds::jamspell::StoreJam::~StoreJam()
 * Correct : correct the spelling
 *
 */
-std::string zpds::jamspell::StoreJam::Correct(::zpds::search::LangTypeE lang, std::string input) const
+std::string zpds::jamspell::StoreJam::Correct(::zpds::search::LangTypeE lang, const std::string& input) const
 {
 	if (jammap.find(lang)==jammap.end()) return input;
 	std::wstring wtext = UTF8ToWide(input);

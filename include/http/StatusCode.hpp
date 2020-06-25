@@ -6,7 +6,7 @@
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StatusCode.hpp :  status codes http for Web Server ( Modified from eidheim/Simple-Web-Server )
+ *  StatusCode.hpp : Status Codes http for Web Server ( Modified from eidheim/Simple-Web-Server )
  *
  */
 #ifndef _ZPDS_HTTP_STATUS_CODE_HPP_

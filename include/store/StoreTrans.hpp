@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/store/StoreTrans.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StoreTrans.hpp :   Headers for transaction store
+ *  StoreTrans.hpp : Transaction Store Headers
  *
  */
 #ifndef _ZPDS_STORE_STORE_TRANS_HPP_
@@ -38,15 +38,18 @@
 
 namespace zpds {
 namespace store  {
-class StoreTrans : public StoreBase {
+class StoreTrans : virtual public StoreBase {
 public:
 	using dbpointer = StoreLevel::dbpointer;
 
 	/**
 	* Constructor
 	*
+	* @param currtime
+	*   uint64_t set currtime default ZPDS_CURRTIME_MS
+	*
 	*/
-	StoreTrans() = default;
+	StoreTrans(uint64_t currtime = ZPDS_CURRTIME_MS );
 
 	/**
 	* make noncopyable and remove default
@@ -132,6 +135,8 @@ public:
 	void ReadOne(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans);
 
 private:
+	// shared current_time can be manipulated by calling class
+	const uint64_t use_currtime;
 
 	/**
 	* AddToCache : adds a transaction to cache

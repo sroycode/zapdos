@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/utils/SortHelpers.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  SortHelpers.hpp :   For Standard Inclusion
+ *  SortHelpers.hpp : Sort helpers for Standard Inclusion Headers
  *
  */
 #ifndef _ZPDS_UTILS_SORT_HELPERS_HPP_
@@ -48,12 +48,14 @@
 #define DR_BUFF_MAX std::numeric_limits<int32_t>::max()
 #define DR_BUFF_MIN std::numeric_limits<int32_t>::min()
 
+#define ZPDS_UINT64_MAX std::numeric_limits<uint64_t>::max()
+
 /** Sort Helper functions start */
 
 /**
-* MakeSortKey : make suffix key for single item default
-*
-*/
+ * MakeSortKey : make sort key for single item default
+ *
+ */
 template <typename T>
 static void MakeSortKey(std::ostream& o,  T t)
 {
@@ -61,9 +63,9 @@ static void MakeSortKey(std::ostream& o,  T t)
 }
 
 /**
-* MakeSortKey : make suffix key for single item uint64_t specialization
-*
-*/
+ * MakeSortKey : make sort key for single item uint64_t specialization
+ *
+ */
 template<> void MakeSortKey(std::ostream& o, uint64_t t)
 {
 	t = ( t > DR_BUFF_MAX ) ? DR_BUFF_MAX : t;
@@ -71,36 +73,9 @@ template<> void MakeSortKey(std::ostream& o, uint64_t t)
 }
 
 /**
-* MakeSortKey : make suffix key for string specialization
-*
-*/
-template<> void MakeSortKey(std::ostream& o, std::string t)
-{
-	o << std::hash<std::string> {}(t);
-}
-
-/**
-* MakeSortKey : make suffix key for string specialization
-*
-*/
-template<> void MakeSortKey(std::ostream& o, std::string& t)
-{
-	o << std::hash<std::string> {}(t);
-}
-
-/**
-* MakeSortKey : make suffix key for string specialization
-*
-*/
-template<> void MakeSortKey(std::ostream& o, std::string&& t)
-{
-	o << std::hash<std::string> {}(t);
-}
-
-/**
-* MakeSortKey : make suffix key for single item int64_t
-*
-*/
+ * MakeSortKey : make sort key for single item int64_t
+ *
+ */
 template<> void MakeSortKey(std::ostream& o, int64_t t)
 {
 	t = ( t > DR_BUFF_MAX ) ? DR_BUFF_MAX : ( t < DR_BUFF_MIN ) ? DR_BUFF_MIN : t;
@@ -108,36 +83,45 @@ template<> void MakeSortKey(std::ostream& o, int64_t t)
 }
 
 /**
-* MakeSortKey : make suffix key for uint32_t specialization
-*
-*/
+ * MakeSortKey : make sort key for uint32_t specialization
+ *
+ */
 template<> void MakeSortKey(std::ostream& o, uint32_t t)
 {
 	o << static_cast<uint64_t>( ( (int64_t)t * DR_BUFF_INT) + std::numeric_limits<int64_t>::max() );
 }
 
 /**
-* MakeSortKey : make suffix key for int32_t specialization
-*
-*/
+ * MakeSortKey : make sort key for int32_t specialization
+ *
+ */
 template<> void MakeSortKey(std::ostream& o, int32_t t)
 {
 	o << static_cast<uint64_t>( ( (int64_t)t * DR_BUFF_INT) + ((t>0) ? std::numeric_limits<int64_t>::max() : 0 ));
 }
 
 /**
-* MakeSortKey : make suffix key for single item double
-*
-*/
+ * MakeSortKey : make sort key for single item double
+ *
+ */
 template<> void MakeSortKey(std::ostream& o, double t)
 {
 	o << static_cast<uint64_t>( std::llround((long double)t * DR_BUFF_INT) + ((t>0) ? std::numeric_limits<int64_t>::max() : 0 ));
 }
 
 /**
-* MakeSortKey : variadic recursive for multiple suffix
-*
-*/
+ * MakeSortKey : make sort key for single item char
+ *
+ */
+template<> void MakeSortKey(std::ostream& o, char t)
+{
+	o << t;
+}
+
+/**
+ * MakeSortKey : variadic recursive for multiple sort
+ *
+ */
 template<typename T, typename... Args>
 static void MakeSortKey(std::ostream& o, T t, Args... args)
 {
@@ -146,9 +130,9 @@ static void MakeSortKey(std::ostream& o, T t, Args... args)
 }
 
 /**
-* EncodeSortKey : encode key
-*
-*/
+ * EncodeSortKey : encode key
+ *
+ */
 template<typename... T>
 static std::string EncodeSortKey (T... key)
 {

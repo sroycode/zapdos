@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/WebServiceList.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  WebServiceList.hpp :   Set up Service List
+ *  WebServiceList.hpp : Set up Service List
  *
  */
 #ifndef _ZPDS_QUERY_WEBSERVICELIST_HPP_
@@ -40,13 +40,15 @@
 #include "query/StaticFileService.hpp"
 
 #include "query/CommandService.hpp"
-#include "query/ProfileService.hpp"
-#include "query/LookupRecordService.hpp"
-#include "query/TextRecordService.hpp"
-#include "query/ExtraAttribService.hpp"
-#include "query/PhotonService.hpp"
-#include "query/TextDataService.hpp"
+#include "query/LoginService.hpp"
+
+#include "query/TagDataService.hpp"
 #include "query/CategoryService.hpp"
+
+#include "query/UserDataService.hpp"
+#include "query/ItemDataService.hpp"
+
+#include "query/SearchCompletionService.hpp"
 
 #define ZPDS_WEBSERVICELIST_SCOPE_HTTP \
 		zpds::query::NotFoundService<HttpServerT> {sharedtable,server,ZPDS_SERVICE_SCOPE_HTTP}; \
@@ -54,12 +56,11 @@
 		zpds::query::InfoService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::StaticFileService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 		zpds::query::CommandService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::ProfileService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::LookupRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::TextRecordService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::ExtraAttribService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::PhotonService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
-		zpds::query::TextDataService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP);  \
-		zpds::query::CategoryService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP);
+		zpds::query::LoginService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::TagDataService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::CategoryService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::UserDataService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::ItemDataService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
+		zpds::query::SearchCompletionService<HttpServerT>(sharedtable,server,helpquery,ZPDS_SERVICE_SCOPE_HTTP); \
 
 #endif // _ZPDS_QUERY_WEBSERVICELIST_HPP_

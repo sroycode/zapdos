@@ -1,0 +1,17 @@
+{
+	"pkey" : "K_WIKIDATA",
+	"name" : "WikiData",
+	"fname" : "ItemData",
+	"namespace" : "zpds::store",
+	"desc" : " wikidata",
+	"pname" : "wikidata",
+	"uindex" : [
+		{
+			"keytype" : "U_WIKIDATA_UNIQUEID",
+			"keys" : [
+				{ "name" : "unique_id", "type" : "std::string" }
+			]
+		}
+	],
+	"project" : "zapdos"
+}

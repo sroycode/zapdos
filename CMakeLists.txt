@@ -4,14 +4,18 @@ if(POLICY CMP0025)
 	cmake_policy(SET CMP0025 NEW)
 endif()
 
+SET(CMAKE_INSTALL_PREFIX /usr/local)
 project(ZPDS_DIM LANGUAGES CXX)
 
-# ZPDS version string
-set(ZPDS_VERSION_MAJOR "0")
-set(ZPDS_VERSION_MINOR "9")
+# ZAPDOS version string
+set(ZPDS_VERSION_MAJOR "1")
+set(ZPDS_VERSION_MINOR "0")
 set(ZPDS_VERSION_PATCH "0")
 set(ZPDS_VERSION_STRING "${ZPDS_VERSION_MAJOR}.${ZPDS_VERSION_MINOR}.${ZPDS_VERSION_PATCH}")
 set(ZPDS_VERSION_PHASE "prerelease/${CMAKE_BUILD_TYPE}")
+
+# hide gflag default help
+OPTION(GFLAGS_STRIP_INTERNAL_FLAG_HELP "Hide help from GFLAGS modules" OFF)
 
 # build documenation
 option(ZPDS_BUILD_DOCS "Build Docs." OFF)
@@ -23,6 +27,9 @@ option(ZPDS_BUILD_TOOLS "Build Loader and tools." ON)
 option(ZPDS_BUILD_WITH_LEVELDB "Build internal store leveldb." OFF)
 option(ZPDS_BUILD_WITH_ROCKSDB "Build internal store rocksdb." ON)
 
+# build xapian search
+option(ZPDS_BUILD_WITH_XAPIAN "Build Search Support." ON)
+
 # static library unused
 option(ZPDS_BUILD_STATIC "Build static library." OFF)
 
@@ -30,10 +37,7 @@ option(ZPDS_BUILD_STATIC "Build static library." OFF)
 #SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 # ctemplate support 
-option(ZPDS_BUILD_WITH_CTEMPLATE "Build ctemplate support." ON)
-
-# https inactive
-option(ZPDS_BUILD_WITH_SSL "Build ssl support." OFF)
+option(ZPDS_BUILD_WITH_CTEMPLATE "Build ctemplate support." OFF)
 
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
@@ -68,7 +72,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Enforce the C++ standard, and disable extensions
 if(NOT DEFINED CMAKE_CXX_STANDARD)
-	set(CMAKE_CXX_STANDARD 11)
+	set(CMAKE_CXX_STANDARD 14)
 endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -121,15 +125,15 @@ set(Boost_NO_BOOST_CMAKE ON)
 endif()
 
 #find_package(threads REQUIRED)
-find_package(Boost 1.59.0 COMPONENTS coroutine chrono system thread context date_time filesystem REQUIRED)
+find_package(Boost 1.65.0 COMPONENTS coroutine chrono system thread context date_time filesystem regex REQUIRED)
 find_package(GLOG REQUIRED)
 find_package(GFLAGS REQUIRED)
 find_package(TCMALLOC REQUIRED)
 find_package(ICU REQUIRED)
 find_package(SNAPPY 1.1.0 REQUIRED)
-find_package(Protobuf 3.1.0 REQUIRED)
+find_package(Protobuf 3.5.0 REQUIRED)
 find_package(CURL 7.29 REQUIRED)
-find_package(Xapian 1.4 REQUIRED)
+find_package(CRYPTOPP 5.6 REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${GLOG_INCLUDE_DIRS})
@@ -137,9 +141,9 @@ include_directories(${GFLAGS_INCLUDE_DIRS})
 include_directories(${TCMALLOC_INCLUDE_DIRS})
 include_directories(${ICU_INCLUDE_DIRS})
 include_directories(${SNAPPY_INCLUDE_DIRS})
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CURL_INCLUDE_DIRS})
-include_directories(${XAPIAN_INCLUDE_DIRS})
+include_directories(${CRYPTOPP_INCLUDE_DIR})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -152,17 +156,35 @@ set(ZPDS_LIB_DEPS
 	${GFLAGS_LIBRARIES}
 	${TCMALLOC_LIBRARIES}
 	${ICU_LIBRARIES}
-	${SNAPPY_LIBRARIES}
-	${PROTOBUF_LIBRARIES}
-	${XAPIAN_LIBRARIES}
+	${Protobuf_LIBRARIES}
 	${CURL_LIBRARIES}
+	${CRYPTOPP_LIBRARIES}
 	)
 
 # Libunwind Linux only
-find_package(UNWIND)
-if (UNWIND_FOUND)
-	include_directories(${UNWIND_INCLUDE_DIRS})
-	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${UNWIND_LIBRARIES})
+if(UNIX AND NOT APPLE)
+	find_package(UNWIND)
+	if (UNWIND_FOUND)
+		include_directories(${UNWIND_INCLUDE_DIRS})
+		set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${UNWIND_LIBRARIES})
+	endif(UNWIND_FOUND)
+endif(UNIX AND NOT APPLE)
+
+# Rocksdb or leveldb
+if (JDAUTOC_BUILD_WITH_LEVELDB AND JDAUTOC_BUILD_WITH_ROCKSDB)
+	message(FATAL_ERROR "Both leveldb or rocksdb cannot be set")
+elseif (ZPDS_BUILD_WITH_LEVELDB)
+	find_package(LEVELDB REQUIRED)
+	include_directories(${LEVELDB_INCLUDE_DIRS})
+	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${LEVELDB_LIBRARIES})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_LEVELDB=1")
+elseif (ZPDS_BUILD_WITH_ROCKSDB)
+	find_package(ROCKSDB 5.16.0 REQUIRED)
+	include_directories(${ROCKSDB_INCLUDE_DIRS})
+	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${ROCKSDB_LIBRARIES})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_ROCKSDB=1")
+else()
+	message(FATAL_ERROR "One of leveldb or rocksdb is needed")
 endif()
 
 # Find if tbb is there ( rocksdb automatically takes )
@@ -172,27 +194,16 @@ if (TBB_FOUND)
 	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${TBB_LIBRARIES})
 endif()
 
-# Rocksdb or leveldb
-if (ZPDS_BUILD_WITH_LEVELDB AND ZPDS_BUILD_WITH_ROCKSDB)
-	message(FATAL_ERROR "Both leveldb or rocksdb cannot be set")
-endif()
-if (ZPDS_BUILD_WITH_LEVELDB)
-	find_package(LEVELDB REQUIRED)
-	include_directories(${LEVELDB_INCLUDE_DIRS})
-	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${LEVELDB_LIBRARIES})
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_LEVELDB=1")
-elseif (ZPDS_BUILD_WITH_ROCKSDB)
-	find_package(ROCKSDB 5.2.0 REQUIRED)
-	include_directories(${ROCKSDB_INCLUDE_DIRS})
-	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${ROCKSDB_LIBRARIES})
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_ROCKSDB=1")
-else()
-	message(FATAL_ERROR "Either leveldb or rocksdb is required")
-endif()
-
 # Build Loader
 
 # Optional Packages
+
+if (ZPDS_BUILD_WITH_XAPIAN)
+	find_package(XAPIAN 1.4 REQUIRED)
+	include_directories(${XAPIAN_INCLUDE_DIRS})
+	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${XAPIAN_LIBRARIES})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_XAPIAN=1")
+endif()
 
 # Optional Interfaces
 
@@ -203,12 +214,12 @@ if (ZPDS_BUILD_WITH_CTEMPLATE)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_CTEMPLATE=1")
 endif()
 
-if (ZPDS_BUILD_WITH_SSL)
-	find_package(OpenSSL REQUIRED)
-	include_directories(${OPENSSL_INCLUDE_DIR})
-	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_SSL=1")
-endif()
+## add snappy at the end , see https://github.com/rescrv/HyperLevelDB/issues/15
+set(ZPDS_LIB_DEPS
+	${ZPDS_LIB_DEPS}
+	${SNAPPY_LIBRARIES}
+	)
+
 
 if (ZPDS_BUILD_DOCS)
 find_package(Doxygen)
@@ -234,19 +245,10 @@ endif()
 
 # Flags and Options
 
-add_definitions("-Wfatal-errors")
+# add_definitions("-Wall")
 # Clang-specific options
 if (CMAKE_COMPILER_IS_CLANG OR CMAKE_COMPILER_IS_APPLECLANG)
 add_definitions ("-Wno-deprecated")
-# add_definitions ("-Wno-unused-function")
-# add_definitions ("-Wno-overloaded-virtual")
-# add_definitions ("-Wno-unneeded-internal-declaration")
-# add_definitions ("-Wno-unused-private-field")
-# add_definitions ("-Wno-tautological-compare")
-# disable warning about unused command line arguments
-# add_definitions ("-Qunused-arguments")
-# Don't warn if we ask it not to warn about warnings it doesn't know
-# add_definitions ("-Wunknown-warning-option")
 	if (CLANG_VERSION_STRING VERSION_GREATER 3.5 OR APPLECLANG_VERSION_STRING VERSION_GREATER 6.0)
 		add_definitions ("-Wno-unused-local-typedefs")
 	endif ()

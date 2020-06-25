@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/query/ProtoJson.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  ProtoJson.cc :  Protobuf to Json implementation (modified from https://github.com/yinqiwen/pbjson )
+ *  ProtoJson.cc : Protobuf to Json implementation (modified from https://github.com/yinqiwen/pbjson )
  *
  */
 #include "query/ProtoJson.hpp"
@@ -71,6 +71,7 @@ std::string zpds::query::pb2json(const google::protobuf::Message* msg, bool blan
 bool zpds::query::json2pb(const std::string& json, google::protobuf::Message* msg)
 {
 	google::protobuf::util::JsonParseOptions options;
+	options.ignore_unknown_fields=false;
 	return (google::protobuf::util::JsonStringToMessage(json, msg, options) == google::protobuf::util::Status::OK);
 }
 

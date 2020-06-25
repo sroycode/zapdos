@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/store/CacheContainer.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,10 +27,9 @@
  *
  * @section DESCRIPTION
  *
- *  CacheContainer.cc : cache store
+ *  CacheContainer.cc : Cache Container impl
  *
  */
-
 #include "store/CacheContainer.hpp"
 
 /**
@@ -48,10 +47,13 @@ zpds::store::CacheContainer::~CacheContainer () {}
 * SetAssoc : add an assoc entry
 *
 */
-void zpds::store::CacheContainer::SetAssoc(std::string hash, zpds::store::CacheContainer::AssocT assoc)
+void zpds::store::CacheContainer::SetAssoc(std::string hash, zpds::store::CacheContainer::AssocT assoc, bool only_if_exists)
 {
 	WriteLockT writelock(mutex_);
 	DLOG(INFO) << "Added Assoc Cache: " << hash;
+	if (only_if_exists) {
+		if ( assoc_map.find(hash) == assoc_map.end() ) return;
+	}
 	assoc_map[hash] = assoc;
 }
 
@@ -81,4 +83,24 @@ void zpds::store::CacheContainer::DelAssoc(std::string hash)
 	auto it = assoc_map.find(hash);
 	if (it != assoc_map.end())
 		assoc_map.erase(it);
+}
+
+/**
+* CheckAssoc : get if assoc
+*
+*/
+bool zpds::store::CacheContainer::CheckAssoc(std::string hash)
+{
+	ReadLockT readlock(mutex_);
+	return (assoc_map.find(hash) != assoc_map.end());
+}
+
+/**
+* AssocSize : get assoc size
+*
+*/
+size_t zpds::store::CacheContainer::AssocSize()
+{
+	ReadLockT readlock(mutex_);
+	return assoc_map.size();
 }

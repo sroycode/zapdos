@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/store/StoreTrans.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,20 +27,47 @@
  *
  * @section DESCRIPTION
  *
- *  StoreTrans.cc :   Implementation for transaction store
+ *  StoreTrans.cc : Implementation for transaction store
  *
  */
-
 #include "store/StoreTrans.hpp"
 #include "hrpc/HrpcClient.hpp"
-#include "search/StoreTrie.hpp"
+
+#include "store/TagDataService.hpp"
+#include "store/ExterCredService.hpp"
+#include "store/UserCredService.hpp"
+#include "store/CategoryService.hpp"
+
+#include "store/TempNameCache.hpp"
+#include "utils/PrintWith.hpp"
+
+#ifdef ZPDS_BUILD_WITH_XAPIAN
+#include "search/IndexLocal.hpp"
+#include "search/IndexWiki.hpp"
+const ::zpds::search::IndexLocal indexlocal;
+const ::zpds::search::IndexWiki indexwiki;
+#endif
+
+/**
+* Constructor with currtime
+*
+*/
+zpds::store::StoreTrans::StoreTrans(uint64_t currtime) : use_currtime(currtime) {}
 
 /**
 * Commit : write both transaction and log
 *
 */
-void ::zpds::store::StoreTrans::StoreTrans::Commit(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans, bool is_master)
+void zpds::store::StoreTrans::StoreTrans::Commit(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans, bool is_master)
 {
+
+	// For clean shutdown, to check
+	// keep a lock on slave updates
+	::zpds::store::TempNameCache namecache{stptr};
+	if ( ! stptr->is_master.Get() ) {
+		namecache.MultiTypeLock(ZPDS_LOCK_SLAVE_UPDATES);
+	}
+
 	if (trans->item_size()==0) return;
 	if (!CommitLog(stptr,trans,is_master))
 		throw ::zpds::BadDataException("Insert failed for log");
@@ -62,16 +89,22 @@ void ::zpds::store::StoreTrans::StoreTrans::Commit(::zpds::utils::SharedTable::p
 * CommitLog : write log ensure id is sequentially generated
 *
 */
-bool ::zpds::store::StoreTrans::StoreTrans::CommitLog(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans, bool is_master)
+bool zpds::store::StoreTrans::StoreTrans::CommitLog(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans, bool is_master)
 {
 	if (trans->item_size()==0) return true;
 	dbpointer logdb = stptr->logdb.Get();
 	// the logcounter is incremented just before writing
 	trans->set_id( stptr->logcounter.GetNext() );
-	if (is_master) trans->set_ts( ZPDS_CURRTIME_MS );
+	if (is_master) trans->set_ts( use_currtime );
 	std::string value;
 	trans->SerializeToString(&value);
-	usemydb::Status s = logdb->Put(usemydb::WriteOptions(),EncodePrimaryKey(K_LOGNODE,trans->id()),value);
+
+	std::string blank = std::to_string(trans->id());
+
+	usemydb::WriteBatch batch;
+	batch.Put(EncodePrimaryKey(K_LOGNODE,trans->id()),value);
+	batch.Put(EncodeSecondaryKey<int64_t, int64_t>(I_LOGNODE_TS, trans->ts(), trans->id()),blank);
+	usemydb::Status s = logdb->Write(usemydb::WriteOptions(), &batch);
 	return s.ok();
 }
 
@@ -79,7 +112,7 @@ bool ::zpds::store::StoreTrans::StoreTrans::CommitLog(::zpds::utils::SharedTable
 * CommitData : write data
 *
 */
-bool ::zpds::store::StoreTrans::StoreTrans::CommitData(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans)
+bool zpds::store::StoreTrans::StoreTrans::CommitData(::zpds::utils::SharedTable::pointer stptr, TransactionT* trans)
 {
 	if (trans->item_size()==0) return true;
 	usemydb::WriteBatch batch;
@@ -100,7 +133,7 @@ bool ::zpds::store::StoreTrans::StoreTrans::CommitData(::zpds::utils::SharedTabl
 * ReadLog : read from log in sequence
 *
 */
-void ::zpds::store::StoreTrans::StoreTrans::ReadLog(::zpds::utils::SharedTable::pointer stptr, TransListT* tlist)
+void zpds::store::StoreTrans::StoreTrans::ReadLog(::zpds::utils::SharedTable::pointer stptr, TransListT* tlist)
 {
 	auto logc = stptr->logcounter.Get();
 	if (tlist->lastid()>logc)
@@ -161,47 +194,77 @@ void zpds::store::StoreTrans::ReadOne(::zpds::utils::SharedTable::pointer stptr,
 void zpds::store::StoreTrans::AddToCache(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::TransactionT* trans)
 {
 	if (trans->item_size()==0) return;
+	// bool only_if_exists=true;
+
 	for (auto i=0; i<trans->item_size(); ++i) {
 		std::string key = trans->mutable_item(i)->key();
 		bool to_del = trans->mutable_item(i)->to_del() ;
 		if (!CheckPrimaryKey(key)) continue;
 		auto kp = DecodePrimaryKey( key );
-
 		switch(kp.first) {
 		default:
 			break;
-		case K_PROFILE: {
-			if ( stptr->dont_use_cache.Get() ) continue;
-			::zpds::store::ProfileT record;
+		case K_TAGDATA: {
+			::zpds::store::TagDataT record;
 			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
-			std::string name = EncodeSecondaryKey<std::string>(U_PROFILE_NAME, record.name());
-			if ( to_del ) stptr->dbcache->DelAssoc( name );
-			else stptr->dbcache->SetAssoc(name, trans->mutable_item(i)->value() );
+			// delete from cache
+			std::string&& name = EncodeSecondaryKey<int32_t, std::string>(U_TAGDATA_KEYTYPE_NAME, record.keytype(), record.name());
+			stptr->dbcache->DelAssoc( name );
 			break;
 		}
-		case K_SIMPLETEMPLATE: {
-			if ( stptr->dont_use_cache.Get() ) continue;
-			::zpds::store::SimpleTemplateT record;
-			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
-			std::string name = EncodeSecondaryKey<std::string,uint64_t>(U_SIMPLETEMPLATE_NAME_QTYP, record.name(), record.qtyp() );
-			if ( to_del ) stptr->dbcache->DelAssoc( name );
-			else stptr->dbcache->SetAssoc(name, trans->mutable_item(i)->value() );
-			break;
-		}
-		case K_LOOKUPRECORD: {
-			::zpds::store::LookupRecordT record;
-			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
 
-			if ( to_del ) stptr->xapdb->DelLocalData( &record );
-			else stptr->xapdb->AddLocalData( &record );
+		case K_CATEGORY: {
+			::zpds::store::CategoryT record;
+			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
+			// delete from cache
+			std::string&& name = EncodeSecondaryKey<std::string>(U_CATEGORY_NAME, record.name());
+			stptr->dbcache->DelAssoc( name );
 			break;
 		}
-		case K_TEXTRECORD: {
-			::zpds::store::TextRecordT record;
-			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
 
-			if ( to_del ) stptr->xapdb->DelTextData( &record );
-			else stptr->xapdb->AddTextData( &record );
+		case K_EXTERDATA: {
+			::zpds::store::ExterDataT record;
+			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
+			// delete from cache
+			std::string&& name = EncodeSecondaryKey<std::string>(U_EXTERDATA_NAME, record.name());
+			stptr->dbcache->DelAssoc( name );
+			break;
+		}
+
+		case K_USERDATA: {
+			::zpds::store::UserDataT record;
+			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
+			// delete from cache
+			std::string&& name = EncodeSecondaryKey<std::string>(U_USERDATA_NAME, record.name());
+			stptr->dbcache->DelAssoc( name );
+			break;
+		}
+
+		case K_LOCALDATA: {
+			// as of now this needs only xapian , if there are more place this line inside ZPDS_BUILD_WITH_XAPIAN
+			if ( stptr->no_xapian.Get() ) continue;
+
+			::zpds::store::ItemDataT record;
+			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
+#ifdef ZPDS_BUILD_WITH_XAPIAN
+			// add to search
+			if ( to_del ) indexlocal.DelRecord(stptr, &record);
+			else indexlocal.AddRecord(stptr, &record);
+#endif
+			break;
+		}
+
+		case K_WIKIDATA: {
+			// as of now this needs only xapian , if there are more place this line inside ZPDS_BUILD_WITH_XAPIAN
+			if ( stptr->no_xapian.Get() ) continue;
+
+			::zpds::store::ItemDataT record;
+			if (!record.ParseFromString(trans->mutable_item(i)->value())) continue;
+#ifdef ZPDS_BUILD_WITH_XAPIAN
+			// add to search
+			if ( to_del ) indexwiki.DelRecord(stptr, &record);
+			else indexwiki.AddRecord(stptr, &record);
+#endif
 			break;
 		}
 
@@ -209,8 +272,10 @@ void zpds::store::StoreTrans::AddToCache(::zpds::utils::SharedTable::pointer stp
 
 		}
 	}
+#ifdef ZPDS_BUILD_WITH_XAPIAN
 	if (stptr->force_commit.Get()) {
 		stptr->force_commit.Set(false);
 		stptr->xapdb->CommitData();
 	}
+#endif
 }

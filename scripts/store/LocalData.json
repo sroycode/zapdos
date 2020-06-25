@@ -1,0 +1,17 @@
+{
+	"pkey" : "K_LOCALDATA",
+	"name" : "LocalData",
+	"fname" : "ItemData",
+	"namespace" : "zpds::store",
+	"desc" : " localdata",
+	"pname" : "localdata",
+	"uindex" : [
+		{
+			"keytype" : "U_LOCALDATA_UNIQUEID",
+			"keys" : [
+				{ "name" : "unique_id", "type" : "std::string" }
+			]
+		}
+	],
+	"project" : "zapdos"
+}

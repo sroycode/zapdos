@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/store/CategoryService.cc
- * @author S Roychowdhury < sroycode at gmail dot com >
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury.
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,338 +27,220 @@
  *
  * @section DESCRIPTION
  *
- *  CategoryService.cc : Implementation of Category Service
+ *  CategoryService.cc : Category Data Manipulation impl
  *
  */
-
-#include <cmath>
-#include <unordered_set>
-
 #include "store/CategoryService.hpp"
+#include "store/ServiceDefine.hh"
+
 #include "store/CategoryTable.hpp"
-#include "utils/StringHelpers.hpp"
-#include "store/ExtraAttribTable.hpp"
+#include "store/StoreTrans.hpp"
+#include "store/TempNameCache.hpp"
+#include "utils/SplitWith.hpp"
+#include "utils/PrintWith.hpp"
+
 
 /**
-* AddDataAction : data addition
-*
-* Updates in parallel not supported on master
-*  Slave is anyway single threaded
-*  1. Xapian is single update
-*  2. Category data updates with merge can mess up if parallel
+* Get : gets the data
 *
 */
-void zpds::store::CategoryService::AddDataAction(
-    ::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams)
+void zpds::store::CategoryService::Get(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::CategoryT* data) const
 {
-
-	boost::unique_lock< boost::shared_mutex > lock {stptr->update_lock, boost::try_to_lock};
-	if (!lock.owns_lock()) {
-		throw ::zpds::BadDataException("Cannot Insert category data in more than one query");
-	}
-	DLOG(INFO) << "Owns Lock" ;
-
-	using StrIntMapT = std::unordered_map<std::string,size_t>;
-	StrIntMapT IsDoneMap;
-	size_t upcount=0;
-
-	auto data = esparams->mutable_ldata();
-	auto resp = esparams->mutable_lresp();
-	zpds::store::TransactionT trans;
-
-	if ( data->records_size() ==0 ) return;
-
-	if (data->merge()) {
-		DLOG(INFO) << " Merge : " << data->records_size();
-		for (auto i=0; i<data->records_size(); ++i) {
-			std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(
-			                       U_CATEGORY_STYP_LANG_UNIQUEID,
-			                       data->records(i).styp(), data->records(i).lang(), data->records(i).uniqueid()  );
-			auto it = IsDoneMap.find(hash);
-			if (it!=IsDoneMap.end()) {
-				if (it->second!=i)
-					bool stat = MergeOne( data->mutable_records(it->second), data->mutable_records(i) );
-			}
-			else {
-				IsDoneMap.insert({hash,i});
-			}
-		}
-		IsDoneMap.clear();
-		for (auto i=0; i<data->records_size(); ++i) {
-			std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(
-			                       U_CATEGORY_STYP_LANG_UNIQUEID,
-			                       data->records(i).styp(), data->records(i).lang(), data->records(i).uniqueid()  );
-			auto it = IsDoneMap.find(hash);
-			if (it!=IsDoneMap.end()) continue; // duplicate already merged
-			auto styp = data->mutable_records(i)->styp();
-			if ( MergeCategory(stptr,data->mutable_records(i),&trans) ) {
-				++upcount;
-			}
-			IsDoneMap.insert({hash,0}); // no need to handle handle duplicates
-		}
+	std::string temp;
+	bool category_found= stptr->dbcache->GetAssoc(EncodeSecondaryKey<std::string>(U_CATEGORY_NAME, data->name() ), temp);
+	if (category_found) {
+		category_found = data->ParseFromString(temp);
 	}
 	else {
-		DLOG(INFO) << " Upsert : " << data->records_size();
-		// go from bottom hence upper duplicates are discarded
-		for (auto i=data->records_size()-1; i>=0; --i) {
-			std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(
-			                       U_CATEGORY_STYP_LANG_UNIQUEID,
-			                       data->records(i).styp(), data->records(i).lang(), data->records(i).uniqueid()  );
-			auto it = IsDoneMap.find(hash);
-			if (it!=IsDoneMap.end()) continue; // duplicate
-			auto styp = data->mutable_records(i)->styp();
-			if ( UpsertCategory(stptr,data->mutable_records(i),&trans) ) {
-				++upcount;
-			}
-			IsDoneMap.insert({hash,0}); // upsert does not handle duplicates
+		::zpds::store::CategoryTable data_table{stptr->maindb.Get()};
+		category_found = data_table.GetOne(data,::zpds::store::U_CATEGORY_NAME);
+		if (category_found) {
+			stptr->dbcache->SetAssoc(
+			    EncodeSecondaryKey<std::string>(U_CATEGORY_NAME, data->name()), Pack(data) ) ;
 		}
 	}
-	zpds::store::StoreTrans storetrans;
+	if (!category_found) data->set_notfound(true);
+}
+
+/**
+* Pack : shrink to bare essentials for packing into cache
+*
+*/
+std::string zpds::store::CategoryService::Pack(::zpds::store::CategoryT* data) const
+{
+	::zpds::store::CategoryT tocache;
+	tocache.set_id( data->id() );
+	tocache.set_name( data->name() );
+	tocache.set_cansee_type( data->cansee_type() );
+	tocache.set_cansee_price( data->cansee_price() );
+	tocache.set_is_deleted( data->is_deleted() );
+	std::string packed;
+	tocache.SerializeToString(&packed);
+	return packed;
+}
+
+/**
+* ManageDataAction : sets categorydata
+*
+*/
+void zpds::store::CategoryService::ManageDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CategoryRespT* resp)
+{
+	if (!stptr->is_master.Get())
+		throw ::zpds::BadCodeException("Category change is master only");
+
+	auto status = resp->mutable_status();
+	int32_t action=0;
+	bool merge=false;
+	std::tie(action,merge)=WriteActionFilter(resp->action());
+
+	::zpds::store::ExterDataT updater;
+	updater.set_name( resp->username() );
+	updater.set_sessionkey( resp->sessionkey() );
+	updater.set_keytype( ::zpds::store::K_EXTERDATA );
+	if (! CheckSession(stptr, &updater,true) )
+		throw zpds::BadDataException("Invalid updater or Invalid session",M_INVALID_PARAM);
+	auto&& updater_can_add_category = updater.is_admin() || updater.can_add_category() ;
+	if (! updater_can_add_category )
+		throw zpds::BadDataException("This updater cannot update category",M_INVALID_PARAM);
+
+	::zpds::store::CategoryTable category_table{stptr->maindb.Get()};
+
+	// just add the payload to payloads for easy processing
+	if (!resp->payload().name().empty()) resp->add_payloads()->Swap(resp->mutable_payload());
+	status->set_inputcount( resp->payloads_size() );
+
+	// start addition , first format the data , then update
+	uint64_t currtime = ZPDS_CURRTIME_MS;
+
+	::zpds::store::TransactionT trans;
+	::zpds::store::TempNameCache namecache{stptr};
+
+	// check concurrent update, hack to stop problems with table creation in duck
+	if (!namecache.MultiTypeLock(ZPDS_LOCK_CATEGORY_HOST))
+		throw zpds::BadDataException("Someone else is updating category",M_INVALID_PARAM);
+
+	// update payloads if exists
+	for (size_t i = 0 ; i<resp->payloads_size(); ++i)	{
+		auto rdata = resp->mutable_payloads(i);
+		if ( rdata->name().empty() )
+			throw zpds::BadDataException("Category must have name: " + rdata->name(),M_INVALID_PARAM);
+		if (rdata->name() != SanitNSLower(rdata->name()) )
+			throw zpds::BadDataException("Category has invalid name: " + rdata->name(),M_INVALID_PARAM);
+
+		// checks
+		if (namecache.CheckLocal(::zpds::store::K_CATEGORY,rdata->name()))
+			throw zpds::BadDataException("Duplicate category found: " + rdata->name(),M_INVALID_PARAM);
+		if (!namecache.ReserveName(::zpds::store::K_CATEGORY,rdata->name(),false))
+			throw zpds::BadDataException("This category is being worked on: " + rdata->name(),M_INVALID_PARAM);
+		status->set_updatecount( status->updatecount() + 1 );
+
+		::zpds::store::CategoryT tdata;
+		tdata.set_name( rdata->name() );
+		bool category_found = category_table.GetOne(&tdata,::zpds::store::U_CATEGORY_NAME);
+		if ( category_found && (!updater.is_admin()) && (tdata.manager()!=updater.name()) )
+			throw zpds::BadDataException("This exter cannot update this category",M_INVALID_PARAM);
+		if (category_found && action == ZPDS_UACTION_CREATE)
+			throw zpds::BadDataException("Create failed, category already exists: " + rdata->name(),M_INVALID_PARAM);
+		if ((!category_found) && (action == ZPDS_UACTION_UPDATE || action == ZPDS_UACTION_DELETE))
+			throw zpds::BadDataException("Update failed, category does not exist: " + rdata->name(),M_INVALID_PARAM);
+
+		if (!category_found) {
+			tdata.set_notfound(false);
+			tdata.set_id(stptr->maincounter.GetNext() );
+			tdata.set_created_at( currtime );
+			tdata.set_manager( updater.name() );
+		}
+		if ( action == ZPDS_UACTION_DELETE) {
+			tdata.set_is_deleted( true );
+		}
+		else {
+			if ( !( (rdata->lang() == ::zpds::search::EN) && merge) )
+				tdata.set_lang( rdata->lang() );
+			if ( !(rdata->description().empty() && merge) )
+				tdata.set_description( rdata->description() );
+			if ( !( (rdata->cansee_type() == ::zpds::store::C_BASIC) && merge) )
+				tdata.set_cansee_type( rdata->cansee_type() );
+			if ( !( (rdata->cansee_price()>0) && merge) )
+				tdata.set_cansee_price( rdata->cansee_price() );
+			if ( !(rdata->is_deleted() && merge) )
+				tdata.set_is_deleted( rdata->is_deleted() );
+		}
+		tdata.set_updated_at( currtime );
+		// add tdata
+		if (!category_table.AddRecord(&tdata,&trans,category_found))
+			throw ::zpds::BadDataException("Cannot Insert category data");
+	}
+
+	// commit to table
+	zpds::store::StoreTrans storetrans(currtime);
+	trans.set_updater( updater.name() );
 	storetrans.Commit(stptr,&trans,true); // as master
-	resp->set_count( upcount );
-	resp->set_success( true );
-	lock.unlock();
-}
 
-/**
-* GetDataAction : data addition
-*
-*/
-void zpds::store::CategoryService::GetDataAction(
-    ::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams)
-{
-	auto data = esparams->mutable_ldata();
-	auto resp = esparams->mutable_lresp();
-	::zpds::store::CategoryTable sth_table{stptr->maindb.Get()};
-	::zpds::store::ExtraAttribTable att_table{stptr->maindb.Get()};
-	for (auto i=0; i<data->records_size(); ++i) {
-		::zpds::store::CategoryT* sth = data->mutable_records(i);
-		if (! sth_table.GetOne(sth,U_CATEGORY_STYP_LANG_UNIQUEID) ) {
-			sth->set_notfound(true);
-			continue;
-		}
-
-		// extrattribs
-		if ( esparams->extra() ) {
-			::zpds::store::ExtraAttribT att;
-			att.set_styp( sth->styp() );
-			att.set_lang( sth->lang() );
-			att.set_uniqueid( sth->uniqueid() );
-			if (att_table.GetOne(&att,U_EXTRAATTRIB_STYP_LANG_UNIQUEID) ) {
-				sth->mutable_attr()->Swap( att.mutable_attr() );
-			}
-		}
-	}
-}
-
-/**
-* GetIndexDataAction : data addition
-*
-*/
-void zpds::store::CategoryService::GetIndexDataAction(
-    ::zpds::utils::SharedTable::pointer stptr,
-    ::zpds::query::CatParamsT* esparams)
-{
-	auto data = esparams->mutable_ldata();
-	auto resp = esparams->mutable_lresp();
-	::zpds::store::CategoryTable sth_table{stptr->maindb.Get()};
-	::zpds::store::ExtraAttribTable att_table{stptr->maindb.Get()};
-
-	// collect the ids from index
-	auto styp = esparams->styp();
-	auto lang = esparams->lang();
-	const google::protobuf::EnumDescriptor *e = ::zpds::search::SourceTypeE_descriptor();
-	for (auto j=0; j< e->value_count(); ++j) {
-		if ( e->value(j)->number() == ::zpds::search::SourceTypeE::S_NONE ) continue;
-		if ( ( esparams->styp() != ::zpds::search::SourceTypeE::S_NONE ) && ( esparams->styp() != e->value(j)->number() )) continue;
-		std::string keymatch = sth_table.EncodeSecondaryKey<int32_t,int32_t>(
-		                           I_CATEGORY_STYP_LANG_LASTUP,
-		                           e->value(j)->number(), lang
-		                       );
-		std::string keystart = sth_table.EncodeSecondaryKey<int32_t, int32_t, uint64_t, uint64_t>(
-		                           I_CATEGORY_STYP_LANG_LASTUP,
-		                           e->value(j)->number(), lang,
-		                           esparams->last_up(), esparams->last_id()
-		                       );
-
-		auto last_up = esparams->last_up();
-		auto last_id = esparams->last_id();
-
-		sth_table.ScanIndex( keystart, keymatch, esparams->limit(),
-		[data, last_up,last_id](::zpds::store::NodeT* record) {
-			// if ( record->last_id() == last_id &&  record->last_up() == last_up ) return true;
-			data->add_records()->set_id( record->id() );
-			return true;
-		});
-
-	}
-
-	// populate from data
-	for (auto i=0; i<data->records_size(); ++i) {
-		::zpds::store::CategoryT* sth = data->mutable_records(i);
-		if (! sth_table.GetOne(sth,K_CATEGORY) ) {
-			sth->set_notfound(true);
-			continue;
-		}
-
-		// extrattribs
-		if ( esparams->extra() ) {
-			::zpds::store::ExtraAttribT att;
-			att.set_styp( sth->styp() );
-			att.set_lang( sth->lang() );
-			att.set_uniqueid( sth->uniqueid() );
-			if (att_table.GetOne(&att,U_EXTRAATTRIB_STYP_LANG_UNIQUEID) ) {
-				sth->mutable_attr()->Swap( att.mutable_attr() );
-			}
-		}
-
-		// others
-	}
-}
-
-/**
-* UpsertCategory : Category data addition
-*
-*/
-bool zpds::store::CategoryService::UpsertCategory(::zpds::utils::SharedTable::pointer stptr,
-        zpds::store::CategoryT* data, zpds::store::TransactionT* trans)
-{
-	std::string hash = EncodeSecondaryKey<int32_t,uint32_t,std::string>(
-	                       U_CATEGORY_STYP_LANG_UNIQUEID,
-	                       data->styp(), data->lang(), data->uniqueid()
-	                   );
-
-	uint64_t currtime = ZPDS_CURRTIME_MS;
-	::zpds::store::CategoryT sth;
-	sth.set_styp ( data->styp() );
-	sth.set_lang ( data->lang() );
-	sth.set_uniqueid ( data->uniqueid() );
-	::zpds::store::CategoryTable sth_table{stptr->maindb.Get()};
-	bool hash_found = sth_table.GetOne(&sth,U_CATEGORY_STYP_LANG_UNIQUEID);
-	data->set_id( hash_found ? sth.id() : stptr->maincounter.GetNext() );
-	data->set_updated_at( currtime );
-	data->set_created_at( hash_found ? sth.created_at() : currtime );
-	data->set_notfound(false);
-	if (!sth_table.AddRecord(data,trans,hash_found))
-		throw ::zpds::BadDataException("Cannot Insert data");
-	return true;
+	status->set_success(true);
 
 }
 
 /**
-* MergeCategory : Category data addition by merge
+* AllowedFieldsFilter : sets update variable, not needed
 *
 */
-bool zpds::store::CategoryService::MergeCategory(::zpds::utils::SharedTable::pointer stptr,
-        zpds::store::CategoryT* data, zpds::store::TransactionT* trans)
+int32_t zpds::store::CategoryService::AllowedFieldsFilter(int32_t update)
 {
-	std::string hash = EncodeSecondaryKey<int32_t,int32_t,std::string>(U_CATEGORY_STYP_LANG_UNIQUEID,
-	                   data->styp(), data->lang(), data->uniqueid()
-	                                                                  );
-	uint64_t currtime = ZPDS_CURRTIME_MS;
-	::zpds::store::CategoryT sth;
-	sth.set_styp ( data->styp() );
-	sth.set_lang ( data->lang() );
-	sth.set_uniqueid ( data->uniqueid() );
-	::zpds::store::CategoryTable sth_table{stptr->maindb.Get()};
-	bool hash_found = sth_table.GetOne(&sth,U_CATEGORY_STYP_LANG_UNIQUEID);
-	if (hash_found) {
-		// merge to original and swap
-		bool stat = MergeOne( &sth, data );
-		if (!stat) return false; // nothing to merge , identical records
-		sth.Swap(data);
-	}
-	else {
-		data->set_id( stptr->maincounter.GetNext() );
-	}
-	data->set_updated_at( currtime );
-	data->set_created_at( hash_found ? sth.created_at() : currtime );
-	data->set_notfound(false);
-	if (!sth_table.AddRecord(data,trans,hash_found))
-		throw ::zpds::BadDataException("Cannot Insert data");
-	return true;
+	return update;
+}
 
+
+/**
+* ReadDataAction : read Category
+*
+*/
+void zpds::store::CategoryService::ReadDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CategoryRespT* resp)
+{
+	auto status = resp->mutable_status();
+
+	::zpds::store::ExterDataT reader;
+	reader.set_name( resp->username() );
+	reader.set_sessionkey( resp->sessionkey() );
+	reader.set_keytype( ::zpds::store::K_EXTERDATA );
+
+	if (! CheckSession(stptr, &reader, true) )
+		throw zpds::BadDataException("Invalid reader or Invalid session",M_INVALID_PARAM);
+
+	::zpds::store::CategoryTable data_table{stptr->maindb.Get()};
+
+	// update payload if exists
+	if (!resp->payload().name().empty()) {
+		auto rdata = resp->mutable_payload();
+		bool data_found = data_table.GetOne(rdata,::zpds::store::U_CATEGORY_NAME);
+		if (!data_found) rdata->set_notfound(true);
+		status->set_inputcount( status->inputcount() + ( rdata->notfound() ? 0 : 1 ) );
+	}
+
+	// update payloads if exists
+	for (auto i = 0 ; i<resp->payloads_size(); ++i)	{
+		if (resp->payloads(i).name().empty()) continue;
+		auto rdata = resp->mutable_payloads(i);
+		bool data_found = data_table.GetOne(rdata,::zpds::store::U_CATEGORY_NAME);
+		if (!data_found) rdata->set_notfound(true);
+		status->set_inputcount( status->inputcount() + ( rdata->notfound() ? 0 : 1 ) );
+	}
+
+	status->set_success(true);
 }
 
 /**
-* MergeOne : Category data merging
+* GetAllNames : read all Category names
 *
 */
-bool zpds::store::CategoryService::MergeOne(zpds::store::CategoryT* mto, zpds::store::CategoryT* mfrom)
+std::vector<std::string> zpds::store::CategoryService::GetAllNames(
+    ::zpds::utils::SharedTable::pointer stptr, ::zpds::store::KeyTypeE keytype )
 {
-	if ( ( mto->styp() != mfrom->styp() ) || ( mto->uniqueid() != mfrom->uniqueid() ) || ( mto->lang() != mfrom->lang() ) )
-		throw ::zpds::BadDataException("Mismatch of id in data");
-
-	using StrSetT = std::unordered_set<std::string>;
-	StrSetT dset;
-
-	size_t change=0;
-
-	// ccode
-	if ((! mfrom->ccode().empty()) && (mto->ccode() != mfrom->ccode()) ) {
-		mto->set_ccode( mfrom->ccode() ); ;
-		++change;
-	}
-
-	// scode
-	if ((! mfrom->scode().empty()) && (mto->scode() != mfrom->scode()) ) {
-		mto->set_scode( mfrom->scode() ); ;
-		++change;
-	}
-
-	// city
-	if ((! mfrom->city().empty()) && (mto->city() != mfrom->city()) ) {
-		mto->set_city( mfrom->city() ); ;
-		++change;
-	}
-
-	// country
-	if ((! mfrom->country().empty()) && (mto->country() != mfrom->country()) ) {
-		mto->set_country( mfrom->country() ); ;
-		++change;
-	}
-
-	// fld_name
-	if ((! mfrom->fld_name().empty()) && (mto->fld_name() != mfrom->fld_name()) ) {
-		mto->set_fld_name( mfrom->fld_name() ); ;
-		++change;
-	}
-
-	// importance
-	if ( (mfrom->importance() >0 ) && (mto->importance() != mfrom->importance()) ) {
-		mto->set_importance( mfrom->importance() ); ;
-		++change;
-	}
-
-	// rating
-	if ( (mfrom->rating() >0 ) && (mto->rating() != mfrom->rating()) ) {
-		mto->set_rating( mfrom->rating() );
-		++change;
-	}
-
-	// tags
-	if ((! mfrom->tags().empty()) && (mto->tags() != mfrom->tags()) ) {
-		mto->set_tags( mfrom->tags() ); ;
-		++change;
-	}
-
-	// alias_styp
-	if (mto->alias_styp() != mfrom->alias_styp() ) {
-		mto->set_alias_styp( mfrom->alias_styp() ); ;
-		++change;
-	}
-
-	// alias_uniqueid
-	if ((! mfrom->alias_uniqueid().empty()) && (mto->alias_uniqueid() != mfrom->alias_uniqueid()) ) {
-		mto->set_alias_uniqueid( mfrom->alias_uniqueid() ); ;
-		++change;
-	}
-
-	// is_deleted
-	if ( (mfrom->is_deleted() ) && (mto->is_deleted() != mfrom->is_deleted()) ) {
-		mto->set_is_deleted( mfrom->is_deleted() ); ;
-		++change;
-	}
-
-	return (change>0);
+	auto local_stptr=stptr->share();
+	::zpds::store::CategoryTable sth_table(stptr->maindb.Get());
+	std::vector<std::string> svec;
+	sth_table.ScanTable(0,UINT_LEAST64_MAX,[&svec](::zpds::store::CategoryT* record) {
+		svec.push_back(record->name());
+		return true;
+	});
+	return svec;
 }

@@ -6,7 +6,7 @@
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,26 +27,24 @@
  *
  * @section DESCRIPTION
  *
- *  SyncServer.cc :  Sync Service
+ *  SyncServer.cc : Client Sync Service impl
  *
  */
-#include "async++.h"
 #include <future>
 #include <chrono>
 #include <thread>
 #include <functional>
-#include <store/StoreTrans.hpp>
+#include "store/StoreTrans.hpp"
 #include "../proto/Query.pb.h"
 #include "../proto/Store.pb.h"
 
 #include "SyncServer.hpp"
 #include "SyncServiceList.hpp"
 
-#include <hrpc/HrpcClient.hpp>
-#include <hrpc/RemoteKeeper.hpp>
+#include "hrpc/HrpcClient.hpp"
+#include "hrpc/RemoteKeeper.hpp"
+#include "hrpc/ServiceDefine.hh"
 
-#define ZPDS_SYNC_FIRST_CHUNK_SIZE 1000
-#define ZPDS_SYNC_CHUNK_SIZE 1000
 
 /**
 * Constructor : private default Constructor
@@ -96,17 +94,18 @@ void zpds::hrpc::SyncServer::init(zpds::utils::ServerBase::ParamsListT params)
 		sharedtable->thisurl.Set(params[2]);
 
 		if (sharedtable->is_master.Get()) {
-			// set this in async loop
-			std::async( std::launch::async, [this] {
+			// set this in async loop on a new thread
+			async::spawn(async::thread_scheduler(),[this] {
 				this->MasterLoop();
 			});
-		} else {
+		}
+		else {
 			// set slave loop
 
 			// sync from pointed master till current before start
 			this->SyncFirst();
 
-			// set this in async loop
+			// set this in async loop on a new thread
 			async::spawn(async::thread_scheduler(),[this] {
 				this->SyncFromMaster();
 				// if upgraded to master
@@ -126,7 +125,8 @@ void zpds::hrpc::SyncServer::init(zpds::utils::ServerBase::ParamsListT params)
 		DLOG(INFO) << "SyncServer init 2 here" << std::endl;
 		server->start();
 
-	} catch (zpds::BaseException& e) {
+	}
+	catch (zpds::BaseException& e) {
 		DLOG(INFO) << "SyncServer init failed: " << e.what() << std::endl;
 		std::rethrow_exception(std::current_exception());
 	}
@@ -154,11 +154,13 @@ void zpds::hrpc::SyncServer::SyncFirst()
 	if (sharedtable->is_master.Get()) return;
 
 	// check last one is in sync
+	DLOG(INFO) << "Checking comparelog is ok with syncer" ;
 	if (!this->CompareLog(sharedtable->master.Get()))
 		throw zpds::InitialException("Master Slave log mismatch");
 
 	DLOG(INFO) << "comparelog ok" ;
 	::zpds::hrpc::HrpcClient hclient;
+	hclient.no_asio=true; // not initialized yet
 	::zpds::store::TransListT data;
 	::zpds::store::StoreTrans storetrans;
 	::zpds::store::TransactionT trans;
@@ -171,7 +173,7 @@ void zpds::hrpc::SyncServer::SyncFirst()
 		data.set_endpoint( sharedtable->thisurl.Get() );
 		data.set_ts( ZPDS_CURRTIME_MS );
 		data.set_lastid( sharedtable->logcounter.Get() );
-		data.set_limit( ZPDS_SYNC_FIRST_CHUNK_SIZE );
+		data.set_limit( SYNCFIRST_CHUNK_SIZE );
 		DLOG(INFO) << "sending: " << data.DebugString();
 
 		bool status = hclient.SendToRemote(sharedtable,sharedtable->master.Get(),::zpds::hrpc::R_TRANSLOG,&data,false);
@@ -183,7 +185,7 @@ void zpds::hrpc::SyncServer::SyncFirst()
 			storetrans.Commit(sharedtable,&trans,false); // commit as slave
 		}
 		if ( data.lastid() == data.currid() )  break;
-		std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( SYNCFIRST_SLEEP_INTERVAL ) );
 	}
 	// see if the pointed machine is master or refers to a master
 	::zpds::hrpc::StateT sstate;
@@ -201,12 +203,14 @@ void zpds::hrpc::SyncServer::SyncFirst()
 			// SetHosts called manually as master update will not reach since is_ready not set
 			::zpds::hrpc::RemoteKeeper rkeeper(sharedtable);
 			rkeeper.SetHosts(&sstate);
-		} else {
+		}
+		else {
 			sharedtable->master.Set( sstate.master() );
 		}
 		if (++tolcount>2)
 			throw zpds::InitialException("the pointed machine is not 1 hop away from master");
-	} while(!sstate.is_master());
+	}
+	while(!sstate.is_master());
 	LOG(INFO) << "Sync Complete, master is set to " << sharedtable->master.Get();
 }
 
@@ -221,6 +225,7 @@ void zpds::hrpc::SyncServer::SyncFromMaster()
 	this->to_stop_sync.Set(false);
 
 	// check last one is in sync as the earlier sync may have been with a slave
+	DLOG(INFO) << "Checking comparelog is ok with master" ;
 	if (!this->CompareLog(sharedtable->master.Get()))
 		throw zpds::InitialException("Master Slave log mismatch");
 
@@ -260,7 +265,7 @@ void zpds::hrpc::SyncServer::SyncFromMaster()
 		data.set_endpoint( sharedtable->thisurl.Get() );
 		data.set_ts( ZPDS_CURRTIME_MS );
 		data.set_lastid( sharedtable->logcounter.Get() );
-		data.set_limit( ZPDS_SYNC_CHUNK_SIZE );
+		data.set_limit( SYNCMASTER_CHUNK_SIZE );
 		DLOG(INFO) << "sending: " << data.DebugString();
 
 		bool status = hclient.SendToRemote(sharedtable,sharedtable->master.Get(),::zpds::hrpc::R_TRANSLOG,&data,true);
@@ -272,13 +277,16 @@ void zpds::hrpc::SyncServer::SyncFromMaster()
 				storetrans.Commit(sharedtable,&trans,false); // as slave
 			}
 			failcount=0;
-		} else {
+		}
+		else {
 			++failcount;
 			if (failcount==1) {
 				faildetected = ZPDS_CURRTIME_MS;
-			} else if (failcount==10) {
+			}
+			else if (failcount==SYNCMASTER_FAILCOUNT_ONE) {
 				rkeeper.HostUpdate();
-			} else if (failcount==20) {
+			}
+			else if (failcount==SYNCMASTER_FAILCOUNT_TWO) {
 				rkeeper.MasterUpdate(faildetected);
 				if (sharedtable->is_master.Get()) {
 					// master needs to stop loop
@@ -288,7 +296,7 @@ void zpds::hrpc::SyncServer::SyncFromMaster()
 			}
 			DLOG(INFO) << "Missed an update at logc: " << sharedtable->logcounter.Get() << " fc " << failcount;
 		}
-		std::this_thread::sleep_for( std::chrono::milliseconds( (data.trans_size()>0) ? 20 : 100 ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( (data.trans_size()>0) ? SYNCMASTER_SLEEP_SHORT : SYNCMASTER_SLEEP_LONG ) );
 	}
 }
 
@@ -302,6 +310,7 @@ bool zpds::hrpc::SyncServer::CompareLog(std::string address)
 	// check last one is in sync
 	uint64_t old_logc = sharedtable->logcounter.Get();
 	if (old_logc ==0) return true; // blank slave
+	DLOG(INFO) << "Slave is not blank, logcounter: " << old_logc;
 
 	::zpds::hrpc::HrpcClient hclient;
 	::zpds::store::StoreTrans storetrans;
@@ -311,6 +320,7 @@ bool zpds::hrpc::SyncServer::CompareLog(std::string address)
 	DLOG(INFO) << "comparelog sending to " << address;
 	bool status = hclient.SendToRemote(sharedtable,address,::zpds::hrpc::R_READONE,&trans1,true);
 	if (!status) throw zpds::InitialException("Cannot reach master for verification");
+	DLOG(INFO) << "comparelog received from " << address;
 	DLOG(INFO) << trans1.DebugString();
 	if (trans1.notfound()) throw zpds::InitialException("Master does not have last log, mismatch");
 

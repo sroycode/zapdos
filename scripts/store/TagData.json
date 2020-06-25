@@ -1,0 +1,17 @@
+{
+	"pkey" : "K_TAGDATA",
+	"name" : "TagData",
+	"namespace" : "zpds::store",
+	"desc" : " tagdata",
+	"pname" : "tagdata",
+	"uindex" : [
+		{
+			"keytype" : "U_TAGDATA_KEYTYPE_NAME",
+			"keys" : [
+				{ "name" : "keytype", "type" : "int32_t" },
+				{ "name" : "name", "type" : "std::string" }
+			]
+		}
+	],
+	"project" : "zpdseama"
+}

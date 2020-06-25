@@ -1,31 +1,39 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(ZPDS_STORE_SOURCES
-		StoreBase.cc
-		StoreLevel.cc
-		StoreTrans.cc
-		CacheContainer.cc
+	StoreBase.cc
+	StoreLevel.cc
+	StoreTrans.cc
+	CacheContainer.cc
+	TempNameCache.cc
 
-		ProfileTable.cc
-		SimpleTemplateTable.cc
-		LookupRecordTable.cc
-		TextRecordTable.cc
-		ExtraAttribTable.cc
-		CategoryTable.cc
+	TagDataTable.cc
+	ExterDataTable.cc
+	UserDataTable.cc
+	CategoryTable.cc
 
-		ProfileService.cc
-		LookupRecordService.cc
-		TextRecordService.cc
-		ExtraAttribService.cc
-		PhotonService.cc
-		TextDataService.cc
-		CategoryService.cc
-   )
+	LocalDataTable.cc
+	WikiDataTable.cc
+
+	HandleSession.cc
+	HandleTagData.cc
+	HandleGeneric.cc
+	HandleStringData.cc
+
+	CredServiceBase.cc
+	UserCredService.cc
+	ExterCredService.cc
+
+	TagDataService.cc
+	CategoryService.cc
+
+	UserDataService.cc
+	ExterDataService.cc
+
+	ItemDataService.cc
+	LocalDataService.cc
+	WikiDataService.cc
+
+)
 
 add_library(zpds_store STATIC ${ZPDS_STORE_SOURCES})
-
-target_link_libraries(zpds_store
-	zpds_remote
-	zpds_search
-	zpds_jamspell
-)

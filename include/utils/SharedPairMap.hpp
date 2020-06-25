@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/utils/SharedPairMap.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  SharedPairMap.hpp :   Shared String Map
+ *  SharedPairMap.hpp : Shared Pair Map for SharedTable Headers
  *
  */
 #ifndef _ZPDS_UTILS_SHARED_PAIR_MAP_HPP_

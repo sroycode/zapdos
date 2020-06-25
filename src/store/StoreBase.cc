@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/store/StoreBase.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -31,32 +31,12 @@
  *
  */
 #include <cmath>
+#include <sstream>
+#include <locale>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "store/StoreBase.hpp"
-
-
-/**
-* Base80String : Get limited char string
-*  : someone needs to get a faster way for this to be usable
-*  refer http://www.hackersdelight.org/divcMore.pdf
-*
-*/
-template<typename T, size_t N>
-inline std::string Base80String(T dividend)
-{
-	const static char usechars[] = "()+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz";
-	T modulo=0;
-	std::string out(N,' '); // N  (char 32 space)
-	size_t c=N;
-	while (dividend > 0 && c>0) {
-		modulo = (dividend - 1) % 80;
-		dividend = (T)((dividend - modulo) / 80);
-		out[--c] = usechars[modulo];
-	}
-	return out;
-}
 
 /**
 * Str2Uint64 : Convert the first 8 characters of a string to 64 bit
@@ -83,7 +63,7 @@ inline uint64_t Str2Uint64 (std::string str)
 * EncodeKeyType : make prefix key with keytype
 *
 */
-std::string zpds::store::StoreBase::EncodeKeyType(zpds::store::KeyTypeE keytype)
+std::string zpds::store::StoreBase::EncodeKeyType(zpds::store::KeyTypeE keytype) const
 {
 	std::stringstream ss;
 	ss << ZPDS_FMT_ID_KEY( (unsigned short)keytype );
@@ -94,7 +74,7 @@ std::string zpds::store::StoreBase::EncodeKeyType(zpds::store::KeyTypeE keytype)
 * EncodePrimaryKey : make primary key with id only
 *
 */
-std::string zpds::store::StoreBase::EncodePrimaryKey(zpds::store::KeyTypeE keytype, ::google::protobuf::uint64 id)
+std::string zpds::store::StoreBase::EncodePrimaryKey(zpds::store::KeyTypeE keytype, ::google::protobuf::uint64 id) const
 {
 	std::stringstream ss;
 	ss << ZPDS_FMT_NODE_KEY( (unsigned short)keytype, id );
@@ -105,19 +85,19 @@ std::string zpds::store::StoreBase::EncodePrimaryKey(zpds::store::KeyTypeE keyty
 * CheckPrimaryKey : check if this is primary key
 *
 */
-bool zpds::store::StoreBase::CheckPrimaryKey (std::string& key)
+bool zpds::store::StoreBase::CheckPrimaryKey (std::string& key) const
 {
 	if (key.length() != ( ZPDS_KEYID_LEN + ZPDS_NODE_LEN )) return false;
 	::zpds::store::KeyTypeE x = (::zpds::store::KeyTypeE) std::stoi(key.substr(0,ZPDS_KEYID_LEN),0,16);
 	return (x >= ::zpds::store::K_NONODE && x <= ::zpds::store::K_MAXNODE);
-	
+
 }
 
 /**
-* DecodePrimaryKey : get keytype and id from primary key, 
+* DecodePrimaryKey : get keytype and id from primary key,
 *
 */
-std::pair<zpds::store::KeyTypeE,uint64_t> zpds::store::StoreBase::DecodePrimaryKey (std::string& key)
+std::pair<zpds::store::KeyTypeE,uint64_t> zpds::store::StoreBase::DecodePrimaryKey (std::string& key) const
 {
 	if (!CheckPrimaryKey(key))
 		throw zpds::BadDataException("Invalid Key probed");
@@ -126,3 +106,76 @@ std::pair<zpds::store::KeyTypeE,uint64_t> zpds::store::StoreBase::DecodePrimaryK
 	return std::make_pair(x,y);
 }
 
+/**
+* SanitNSLower : lowercase , nospace word, only puntcts ( _ - . )
+*
+*/
+std::string zpds::store::StoreBase::SanitNSLower(const std::string& orig) const
+{
+	if (orig.empty()) return std::string();
+	std::ostringstream xtmp;
+	std::locale loc;
+	for (auto i = orig.cbegin(), n = orig.cend(); i != n; ++i) {
+		auto c = (*i);
+		// if alnum lowercase into string
+		if (std::isalnum(c)) xtmp << std::tolower(c,loc);
+		else if (c=='-' || c=='.' || c=='_') xtmp << c;
+	}
+	return xtmp.str();
+}
+
+/**
+* SanitLower : lowercase, only single space and puntcts
+*
+*/
+std::string zpds::store::StoreBase::SanitLower(const std::string& orig, bool notrim) const
+{
+	if (orig.empty()) return std::string();
+	std::ostringstream xtmp;
+	bool last_is_space = false;
+	std::locale loc;
+	for (auto i = orig.cbegin(), n = orig.cend(); i != n; ++i) {
+		auto c = (*i);
+		// if alnum or punct keep
+		if (std::isalnum(c)) {
+			xtmp << std::tolower(c,loc);
+			last_is_space=false;
+		}
+		else if (std::ispunct(c)) {
+			xtmp << c;
+			last_is_space=false;
+		}
+		else if (std::isspace(c,loc)) {
+			if (!last_is_space) xtmp << c;
+			last_is_space=true;
+		}
+	}
+	if (notrim) return xtmp.str();
+	return boost::algorithm::trim_copy(xtmp.str());
+}
+
+/**
+* SanitKeepCase : only single space and puntcts
+*
+*/
+std::string zpds::store::StoreBase::SanitKeepCase(const std::string& orig, bool notrim) const
+{
+	if (orig.empty()) return std::string();
+	std::ostringstream xtmp;
+	bool last_is_space = false;
+	std::locale loc;
+	for (auto i = orig.cbegin(), n = orig.cend(); i != n; ++i) {
+		auto c = (*i);
+		// if alnum or punct keep
+		if (std::isalnum(c) || std::ispunct(c)) {
+			xtmp << c;
+			last_is_space=false;
+		}
+		else if (std::isspace(c,loc)) {
+			if (!last_is_space) xtmp << c;
+			last_is_space=true;
+		}
+	}
+	if (notrim) return xtmp.str();
+	return boost::algorithm::trim_copy(xtmp.str());
+}

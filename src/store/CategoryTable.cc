@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/store/CategoryTable.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,11 +27,10 @@
  *
  * @section DESCRIPTION
  *
- *  CategoryTable.cc :   Implementation for CategoryTable  category
+ *  CategoryTable.cc : 
  *
  */
-#include <store/CategoryTable.hpp>
-// template class zpds::store::StoreTable<zpds::store::CategoryT>;
+#include "store/CategoryTable.hpp"
 
 /**
 * Constructor
@@ -41,8 +40,8 @@ zpds::store::CategoryTable::CategoryTable( zpds::store::CategoryTable::dbpointer
 	: zpds::store::CategoryTable::CategoryTable(
 	trydb,
 	K_CATEGORY,
-	{ U_CATEGORY_STYP_LANG_UNIQUEID },
-	{ I_CATEGORY_STYP_LANG_LASTUP }
+	{ U_CATEGORY_NAME },
+	{  }
 	)
 
 {}
@@ -59,14 +58,8 @@ std::string zpds::store::CategoryTable::GetKey(zpds::store::CategoryT* record, z
 	case K_CATEGORY:
 		key = EncodePrimaryKey(PrimaryKey,record->id());
 		break;
-	case U_CATEGORY_STYP_LANG_UNIQUEID : {
-		key = EncodeSecondaryKey<int32_t,int32_t,std::string>(keytype , record->styp(),record->lang(),record->uniqueid()  );
-		break;
-	}
-	case I_CATEGORY_STYP_LANG_LASTUP : {
-		key = (pre) ?
-		      EncodeSecondaryKey<int32_t,int32_t,uint64_t>(keytype , record->styp(),record->lang(),record->updated_at() )
-			    : EncodeSecondaryKey<int32_t,int32_t,uint64_t,uint64_t>(keytype , record->styp(),record->lang(),record->updated_at(),record->id() );
+	case U_CATEGORY_NAME : {
+		key = EncodeSecondaryKey<std::string>(keytype , record->name()  );
 		break;
 	}
 	}

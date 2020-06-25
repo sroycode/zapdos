@@ -1,0 +1,20 @@
+ZAPDOS_SOURCE=$(dirname $(cd ${0%/*} 2>>/dev/null ; echo `pwd`/${0##*/}))
+export ZAPDOS_SOURCE
+
+export PATH=${PATH}:${ZAPDOS_SOURCE}/thirdparty/bin
+export CPPFLAGS="-I/opt/local/include -I/usr/local/include -I${ZAPDOS_SOURCE}/thirdparty/include"
+export CXXFLAGS="-I/opt/local/include -I/usr/local/include -I${ZAPDOS_SOURCE}/thirdparty/include"
+export LDFLAGS="-L/opt/local/lib -L/usr/local/lib -L${ZAPDOS_SOURCE}/thirdparty/lib"
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ZAPDOS_SOURCE}/thirdparty/lib:${ZAPDOS_SOURCE}/thirdparty/lib64
+export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${ZAPDOS_SOURCE}/thirdparty/lib:${ZAPDOS_SOURCE}/thirdparty/lib64
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${ZAPDOS_SOURCE}/thirdparty/lib/pkgconfig:/usr/local/lib/pkgconfig"
+export GLOG_logtostderr=1 
+
+# openssl homebrew keg only
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/opt/openssl/lib"
+export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:/usr/local/opt/openssl/lib"
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/openssl/lib"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openssl/include"
+export CXXFLAGS="${CXXFLAGS} -I/usr/local/opt/openssl/include"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/local/opt/openssl/lib/pkgconfig"
+export PATH="${PATH}:/usr/local/opt/openssl/bin"

@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file src/store/StoreLevel.cc
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StoreLevel.cc :   store
+ *  StoreLevel.cc : Storage class LevelDB/RocksDB
  *
  */
 #define ZPDS_LEVELDB_WRITEBUFFER 32 * ZPDS_MEGABYTE
@@ -62,7 +62,7 @@ zpds::store::StoreLevel::StoreLevel(dbpointer trydb)
 /*
 * Initialize : main init
 */
-void zpds::store::StoreLevel::Initialize(const std::string datadir, const size_t cache_in_mb,uint64_t& last_pkey, uint64_t& last_lkey)
+void zpds::store::StoreLevel::Initialize(const std::string& datadir, const size_t cache_in_mb,uint64_t& last_pkey, uint64_t& last_lkey)
 {
 	// db options
 	usemydb::Options db_options;
@@ -121,7 +121,8 @@ void zpds::store::StoreLevel::Initialize(const std::string datadir, const size_t
 		size_t usekey;
 		std::tie(usekey,id) = DecodePrimaryKey(value);
 		if (id>last_lkey) last_lkey=id;
-	} while(false);
+	}
+	while(false);
 
 	// now get the last used primary key
 	for (size_t keytype=K_LOGNODE; keytype > K_NONODE; --keytype) {

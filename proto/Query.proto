@@ -7,150 +7,147 @@ import "Store.proto";
 
 package zpds.query;
 
-message StateT {
-	string hostname                                                 =  1;
-	string master                                                   =  2;
-	bool is_master                                                  =  5;
-	bool is_ready                                                   =  6;
-	uint64 ts                                                       =  7;
+// DONOT TOUCH THIS - START
 
-	bool not_found                                                  = 21;
+message StateT {
+	string                       hostname                           =  1;
+	string                       master                             =  2;
+	bool                         is_master                          =  5;
+	bool                         is_ready                           =  6;
+	uint64                       ts                                 =  7;
+
+	bool                         not_found                          = 21;
 }
 
 message ErrorT {
-	string errorcode                                                =  1;
-	string error                                                    =  2;
-	bool success                                                    =  3;
-	int32 ecode                                                     =  4;
+	string                       errorcode                          =  1;
+	string                       error                              =  2;
+	bool                         success                            =  3;
+	int32                        ecode                              =  4;
 
-	uint64 inputcount                                               =  8;
-	uint64 updatecount                                              =  9;
+	uint64                       inputcount                         =  8;
+	uint64                       updatecount                        =  9;
 }
 
-// ProfileService
-message ProfileRespT {
-	string   name                                                   =  1;
-	string   oldpass                                                =  2; // old password
-	string   newpass                                                =  3; // new password
+// DONOT TOUCH THIS - END
 
-	uint64   update                                                 =  4; // can update
-
-	uint64   updated_at                                             = 20; // profile last updated
-	bool     not_found                                              = 21;
+enum WriteTypeE {
+	W_NONE                                                          =  0;
+	W_CREATE                                                        =  1;
+	W_UPSERT                                                        =  2;
+	W_UPDATE                                                        =  3;
+	W_DELETE                                                        =  4;
+	W_UMERGE                                                        =  5;
 }
 
-message SimpleProRespT {
-	string   name                                                   =  1;
-	string   passkey                                                =  2; // current password
-
-	search.QueryTypeE qtyp                                          =  4; // query type id
-	search.QueryProfileT qprof                                      =  5; // query profile template
-	bool     ignore                                                 =  6;	//  ignore this profile
-
-	uint64   updated_at                                             = 20; // profile last updated
-	bool     not_found                                              = 21;
+enum ReaderTypeE {
+	R_NONE                                                          =  0;
+	R_SELF                                                          =  1; // self view
+	R_ADMIN                                                         =  2; // admin view
+	R_CREATR                                                        =  3; // exter who created this
+	R_OTHER                                                         =  4; // exter other
+	R_USER                                                          =  5; // other users
+	R_PUBLIC                                                        =  6; // unsigned view if any
 }
 
-message MultiSimpleProRespT {
-	string   name                                                   =  1;
-	string   passkey                                                =  2; // current password
+// LoginService
+message LoginRespT {
+	string                        username                          =  1; // INPUT login name
 
-	repeated SimpleProRespT qtpls                                   =  3; // templates
+	string                        password                          =  4; // INPUT password
+	string                        sessionkey                        =  5; // INPUT web session key
+
+	ErrorT                        error                             = 11;
 }
 
-message SimpleFieldT {
-	string   name                                                   =  1;
-	string   desc                                                   =  2;
-	string   type                                                   =  3;
-	repeated string values                                          =  4;
-	bool     is_repeated                                            =  5;
-}
+// ExterDataService + UserDataService
+message ResetRespT {
+	string                        username                          =  1; // INPUT login name
 
-message SimpleFieldListT {
-	repeated SimpleFieldT fields                                    =  1;
-}
+	string                        oldpass                           =  2; // INPUT old password
+	string                        newpass                           =  3; // INPUT new password
+	string                        otp                               =  4; // INPUT one time password for reset
 
-// LookupData
-
-message LookupDataT {
-	repeated zpds.store.LookupRecordT records                      =  1; // default records
-	bool                          merge                             =  3;
-	bool                          delete                            =  4;
-
-	string   name                                                   = 11; // for use by update
-	string   passkey                                                = 12; // for use by update
-	uint64                        extra                             = 26; // append extra data
-}
-
-message LookupRespT {
-	uint64                        count                             =  1; // no of updates
-	bool                          success                           =  2;
-}
-
-message LookupParamsT {
-	LookupDataT                   ldata                             =  1;
-	LookupRespT                   lresp                             =  2;
-
-	string   name                                                   = 11;
-	string   passkey                                                = 12; // new password
-
-	search.LangTypeE              lang                              = 21; // record type
-	search.SourceTypeE            styp                              = 22; // record type
-	uint64                        last_up                           = 23; // updated after
-	uint64                        last_id                           = 24; // last id as secondary
-	uint64                        limit                             = 25; // no of items
-	bool                          extra                             = 26; // append extra data
+	ErrorT                        status                            =  5;
 
 }
 
-// PhotonService
+// TagDataService
+message TagDataRespT {
+	string                        username                          =  1; // updater name
+	string                        sessionkey                        =  2; // updater credential
+	ErrorT                        status                            =  3;
+	WriteTypeE                    action                            =  4; // action type
+	store.KeyTypeE                keytype                           =  5; // keytype check
 
-// record for photon type interface
-
-message PhotonPropT {
-	int64                         osm_id                            =  1; // osm_id
-	string                        osm_key                           =  2; // osm_key like place
-	string                        osm_value                         =  3; // osm_value like hamlet
-	string                        osm_type                          =  4; // osm_type like N
-	string                        city                              =  5; // city name
-	string                        country                           =  6; // country
-	string                        state                             =  7; // state
-	string                        name                              =  8; // name field
-	string                        address                           =  9; // address
-	string                        postcode                          = 10; // pin code
-	string                        area                              = 11; // area
-	repeated double               extent                            = 12; // extent from bbox
+	store.TagDataT                payload                           = 11; // input data
+	repeated store.TagDataT       payloads                          = 12; // input data
 }
 
-message PhotonGeomT {
-	string                        type                              =  1; // like Point
-	repeated double               coordinates                       =  2; // lat lon
+// CategoryService (extendable)
+message CategoryRespT {
+	string                        username                          =  1; // updater name
+	string                        sessionkey                        =  2; // updater credential
+	ErrorT                        status                            =  3;
+	WriteTypeE                    action                            =  4; // action type
+
+	bool                          getall                            =  5; // read get all
+
+	store.CategoryT               payload                           = 11; // input data
+	repeated store.CategoryT      payloads                          = 12; // input data
 }
 
-message PhotonFeatureT {
-	string                        type                              =  1; // Feature
-	PhotonPropT                   properties                        =  2; // properties
-	PhotonGeomT                   geometry                          =  3; // geometry
+// UserDataService
+message UserDataRespT {
+	string                        username                          =  1; // updater name
+	string                        sessionkey                        =  2; // updater creds
+	ErrorT                        status                            =  3;
+	WriteTypeE                    action                            =  4; // action type
+	store.KeyTypeE                keytype                           =  5; // keytype check
+
+	int32                         fields                            =  6; // fields to update
+	bool                          is_self                           =  7; // updating for self
+
+	store.UserDataT               payload                           = 11; // input data
+	repeated store.UserDataT      payloads                          = 12; // input data
 }
 
-message PhotonFeatureListT {
+// ItemDataService
+
+
+message ItemDataRespT {
+	string                        username                          =  1; // updater name
+	string                        sessionkey                        =  2; // updater creds
+	ErrorT                        status                            =  3;
+	WriteTypeE                    action                            =  4; // action type
+
+	int32                         fields                            =  6; // fields to update
+
+	store.KeyTypeE                usertype                          =  8; // keytype for reader 
+	store.KeyTypeE                datatype                          =  9; // keytype for data
+
+	store.ItemDataT               payload                           = 11; // input data for CRUD
+	repeated store.ItemDataT      payloads                          = 12; // input data for CRUD  
+}
+
+// Search Response
+message PhotonResultT {
 	string                        type                              =  1; // like FeatureCollection
-	repeated PhotonFeatureT       features                          =  2;
+	repeated search.PhotonDataT   features                          =  2; // search results
 }
 
-message PhotonParamsT {
-	search.UsedParamsT            cdata                             =  1;
-	PhotonFeatureListT            cresp                             =  2;
-
+message ItemResultT {
+	repeated store.ItemDataT      records                           =  1; // search results
 }
 
-// TextDataService
+message SearchCompletionRespT {
+	string                        username                          =  1; // updater name
+	string                        sessionkey                        =  2; // updater creds
+	ErrorT                        status                            =  3;
 
-// record for search text type interface
+	search.UsedParamsT            cdata                             = 16; // search input params
+	ItemResultT                   cresp                             = 17; // search output 
 
-message TextDataParamsT {
-	search.UsedParamsT            cdata                             =  1;
-	store.LookupRecordListT       cresp                             =  2;
-
+	PhotonResultT                 photondata                        = 18; // search output photon
+	ItemResultT                   wikidata                          = 19; // search output photon
 }
-

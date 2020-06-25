@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/query/ProtoJson.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  ProtoJson.hpp :  Headers for Protobuf<->Json implementation (modified from https://github.com/yinqiwen/pbjson )
+ *  ProtoJson.hpp : Headers for Protobuf<->Json Headers (modified from https://github.com/yinqiwen/pbjson )
  *
  */
 #ifndef _ZPDS_QUERY_PROTOJSON_HPP_
@@ -44,62 +44,62 @@ namespace zpds {
 namespace query {
 
 /**
-* pb2json : Convert protobuf to json
-*
-* @param msg
-*   const google::protobuf::Message* from msg pointer
-*
-* @param str
-*   std::string& to string
-*
-* @param blank
-*   bool print blank default false
-*
-* @return
-*   none
-*/
+ * pb2json : Convert protobuf to json
+ *
+ * @param msg
+ *   const google::protobuf::Message* from msg pointer
+ *
+ * @param str
+ *   std::string& to string
+ *
+ * @param blank
+ *   bool print blank default false
+ *
+ * @return
+ *   none
+ */
 void pb2json(const google::protobuf::Message* msg, std::string& str, bool blank=false);
 
 /**
-* pb2json : Convert protobuf to json
-*
-* @param msg
-*   const google::protobuf::Message* from msg pointer
-*
-* @param blank
-*   bool print blank default false
-*
-* @return
-*   std::string
-*/
+ * pb2json : Convert protobuf to json
+ *
+ * @param msg
+ *   const google::protobuf::Message* from msg pointer
+ *
+ * @param blank
+ *   bool print blank default false
+ *
+ * @return
+ *   std::string
+ */
 std::string pb2json(const google::protobuf::Message* msg, bool blank=false);
 
 /**
-* json2pb : Convert json to protobuf
-*
-* @param json
-*   std::string& from string
-*
-* @param msg
-*   google::protobuf::Message* to msg pointer
-*
-* @return
-*   bool status
-*/
+ * json2pb : Convert json to protobuf
+ *
+ * @param json
+ *   std::string& from string
+ *
+ * @param msg
+ *   google::protobuf::Message* to msg pointer
+ *
+ * @return
+ *   bool status
+ */
 bool json2pb(const std::string& json, google::protobuf::Message* msg);
 
 /**
-* err2json : Generate a Json for Error Message
-*
-* @param errorcode
-*   const int errorcode
-*
-* @param error
-*   std::string error string
-*
-* @return
-*   str::string
-*/
+ * err2json : Generate a Json for Error Message
+ *
+ * @param errorcode
+ *   const int errorcode
+ *
+ * @param error
+ *   std::string error string
+ *
+ * @return
+ *   str::string
+ */
 std::string err2json(const int errorcode, const std::string error);
 
 }

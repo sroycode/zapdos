@@ -6,7 +6,7 @@
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury.
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,129 +27,109 @@
  *
  * @section DESCRIPTION
  *
- *  CategoryService.hpp : Header for es record data service
+ *  CategoryService.hpp : Non Abstract Base Class Category Data Headers
  *
  */
 #ifndef _ZPDS_STORE_CATEGORY_SERVICE_HPP_
 #define _ZPDS_STORE_CATEGORY_SERVICE_HPP_
 
-#include "query/QueryBase.hpp"
+#include "store/HandleSession.hpp"
 #include "store/StoreBase.hpp"
-#include "store/StoreTrans.hpp"
-#include "remote/GeoHashHelper.hpp"
-
-namespace zpds {
-namespace query {
-using CatParamsT = LookupParamsT;
-using CatDataT = LookupDataT;
-using CatRespT = LookupRespT;
-}
-}
+#include "query/QueryBase.hpp"
+#include "store/HandleGeneric.hpp"
+#include "store/HandleAllNames.hpp"
 
 namespace zpds {
 namespace store {
 
-using CategoryT = LookupRecordT;
-
-class CategoryService : public StoreBase  {
+class CategoryService : virtual public StoreBase, virtual public HandleSession,
+	virtual public HandleGeneric, virtual public HandleAllNames  {
 public:
+	// using pointer = boost::scoped_ptr<CategoryService>;
 
 	/**
-	* AddDataAction : unified data addition
-	*
-	* @param stptr
-	*   ::zpds::utils::SharedTable::pointer stptr
-	*
-	* @param esparams
-	*   ::zpds::query::CatParamsT* esparams
-	*
-	* @return
-	*   none throws if not ok
-	*/
-	void AddDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams);
-
-	/**
-	* GetDataAction : get data
-	*
-	* @param stptr
-	*   ::zpds::utils::SharedTable::pointer stptr
-	*
-	* @param esparams
-	*   ::zpds::query::CatParamsT* esparams
-	*
-	*
-	* @return
-	*   none throws if not ok
-	*/
-	void GetDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams);
-
-	/**
-	* GetIndexDataAction : get data for ES Index
-	*
-	* @param stptr
-	*   ::zpds::utils::SharedTable::pointer stptr
-	*
-	* @param esparams
-	*   ::zpds::query::CatParamsT* esparams
-	*
-	* @return
-	*   none throws if not ok
-	*/
-	void GetIndexDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CatParamsT* esparams);
-
-private:
-	::zpds::remote::GeoHashHelper gh;
-
-	/**
-	* UpsertCategory : Category data addition
+	* Get : gets the category data
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
 	* @param data
-	*   ::zpds::store::CategoryT* data type Category
-	*
-	* @param trans
-	*   ::zpds::store::TransactionT* trans
+	*   ::zpds::query::CategoryT* data
 	*
 	* @return
-	*   bool
+	*   none throws if not ok
 	*/
-	bool UpsertCategory(::zpds::utils::SharedTable::pointer stptr, CategoryT* data, TransactionT* trans);
+	virtual void Get(::zpds::utils::SharedTable::pointer stptr, ::zpds::store::CategoryT* data) const;
 
 	/**
-	* MergeCategory : Category data merging
+	* Pack : shrink to bare essentials for packing into cache
+	*
+	* @param data
+	*   ::zpds::query::CategoryT* data
+	*
+	* @return
+	*   std::string packed string
+	*/
+	virtual std::string Pack(::zpds::store::CategoryT* data) const;
+
+	/**
+	* ManageDataAction : sets category data
 	*
 	* @param stptr
 	*   ::zpds::utils::SharedTable::pointer stptr
 	*
-	* @param data
-	*   ::zpds::store::CategoryT* data type Category
-	*
-	* @param trans
-	*   ::zpds::store::TransactionT* trans
+	* @param resp
+	*   ::zpds::query::CategoryRespT* resp
 	*
 	* @return
-	*   bool
+	*   none throws if not ok
 	*/
-	bool MergeCategory(::zpds::utils::SharedTable::pointer stptr, CategoryT* data, TransactionT* trans);
+	virtual void ManageDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CategoryRespT* resp);
 
 	/**
-	* MergeOne : Category data merging for one record
+	* ReadDataAction : read Category
 	*
-	* @param mto
-	*   ::zpds::store::CategoryT* data type Category merged to
+	* @param stptr
+	*   ::zpds::utils::SharedTable::pointer stptr
 	*
-	* @param mfrom
-	*   ::zpds::store::CategoryT* data type Category merged from
+	* @param resp
+	*   ::zpds::query::CategoryRespT* resp
 	*
 	* @return
-	*   true if changed
+	*   none throws if not ok
 	*/
-	bool MergeOne(CategoryT* mto, CategoryT* mfrom);
+	virtual void ReadDataAction(::zpds::utils::SharedTable::pointer stptr, ::zpds::query::CategoryRespT* resp);
 
+	/**
+	* GetAllNames : read all names
+	*
+	* @param stptr
+	*   ::zpds::utils::SharedTable::pointer stptr
+	*
+	* @param keytype
+	*   ::zpds::store::KeyTypeE keytype is for tags only , defaults to K_NONODE
+	*
+	* @return
+	*   std::vector<std::string> vector of names
+	*/
+	virtual std::vector<std::string> GetAllNames(::zpds::utils::SharedTable::pointer stptr, KeyTypeE keytype=K_NONODE) override;
+
+
+protected:
+
+	/**
+	* AllowedFieldsFilter : sets update variable, not needed
+	*
+	* @param update
+	*   int32_t input update
+	*
+	* @return
+	*   int32_t value
+	*/
+	virtual int32_t AllowedFieldsFilter(int32_t update) override;
 
 };
 } // namespace store
 } // namespace zpds
 #endif /* _ZPDS_STORE_CATEGORY_SERVICE_HPP_ */
+

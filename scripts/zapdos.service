@@ -1,0 +1,22 @@
+[Unit]
+Description=Vnaad Zapdos
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+#Environment="LIBASYNC_NUM_THREADS=32"
+TimeoutStopSec=10
+User=zapdos
+Group=zapdos
+
+Type=simple
+ExecStart=/usr/local/bin/zpds_server -config /etc/zapdos/default.conf
+#ExecStart=/usr/local/bin/zpds_server -config /etc/zapdos/default.conf -warmcache
+SyslogIdentifier=zapdos
+#Restart=always
+RestartSec=10
+StandardOutput=file:/var/log/zapdos/zapdos_server_default.log
+StandardError=file:/var/log/zapdos/zapdos_server_error.log
+LimitNOFILE=35000
+KillMode=process

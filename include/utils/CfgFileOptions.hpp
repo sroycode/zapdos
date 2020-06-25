@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/utils/CfgFileOptions.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  CfgFileOptions.hpp :   Config File Reader
+ *  CfgFileOptions.hpp : Config File Reader Headers
  *
  */
 #ifndef _ZPDS_UTILS_CFGFILEOPTIONS_HPP_
@@ -55,10 +55,10 @@ public:
 	 * create
 	 *
 	 * @param InputFile
-	 *   std::string Input File Name
+	 *   const std::string& Input File Name
 	 *
 	 */
-	static pointer create(const std::string InputFile)
+	static pointer create(const std::string& InputFile)
 	{
 		pointer p(new CfgFileOptions(InputFile));
 		return p;
@@ -70,24 +70,24 @@ public:
 	 * Check : Check if Value Exists
 	 *
 	 * @param Section
-	 *   std::string Section to find it in
+	 *   const std::string& Section to find it in
 	 *
 	 * @param Name
-	 *   std::string Name to find
+	 *   const std::string& Name to find
 	 *
 	 * @return
 	 *   bool
 	 */
-	bool Check(const std::string Section, const std::string Name);
+	bool Check(const std::string& Section, const std::string& Name);
 
 	/**
 	 * Find: Find an entry
 	 *
 	 * @param Section
-	 *   std::string Section to find it in
+	 *   const std::string& Section to find it in
 	 *
 	 * @param Name
-	 *   std::string Name to find
+	 *   const std::string& Name to find
 	 *
 	 * @param NoThrow
 	 *   Bool get default-val if true, defult false.
@@ -96,7 +96,7 @@ public:
 	 *   Type
 	 */
 	template<typename T>
-	T Find(const std::string Section, const std::string Name, bool NoThrow=false)
+	T Find(const std::string& Section, const std::string& Name, bool NoThrow=false)
 	{
 		auto it = SectionMap.find(MakeKey(Section,Name));
 		if (it != SectionMap.end()) {
@@ -123,7 +123,7 @@ public:
 	 * FindList: Find several entries
 	 *
 	 * @param Section
-	 *   std::string Section to find it in
+	 *   const std::string& Section to find it in
 	 *
 	 * @param NameList
 	 *   sListT Names to find
@@ -135,7 +135,7 @@ public:
 	 *   Type
 	 */
 	template<typename T>
-	T FindList(const std::string Section, const sListT NameList, bool NoThrow=false)
+	T FindList(const std::string& Section, const sListT NameList, bool NoThrow=false)
 	{
 		T ValueList;
 		for(auto name : NameList) {
@@ -156,30 +156,31 @@ public:
 	 * Update: Update or Add an entry
 	 *
 	 * @param Section
-	 *   std::string Section
+	 *   const std::string& Section
 	 * @param Name
-	 *   std::string Name
+	 *   const std::string& Name
 	 * @param Value
-	 *   std::string Value
+	 *   const std::string& Value
 	 *
 	 * @return
 	 *   none
 	 */
-	void Update(const std::string Section, const std::string Name, std::string Value);
+	void Update(const std::string& Section, const std::string& Name, const std::string& Value);
 
 	/**
 	 * MakeKey: Merge Section and Name
 	 *
 	 * @param Section
-	 *   std::string Section to find it in
+	 *   const std::string& Section to find it in
 	 *
 	 * @param Name
-	 *   std::string Name to find
+	 *   const std::string& Name to find
 	 *
 	 * @return
-	 *   std::string merged
+	 *   std::string& merged
 	 */
-	std::string MakeKey(std::string Section, std::string Name);
+	std::string MakeKey(const std::string& Section, const std::string& Name);
+
 private:
 	ssMapT SectionMap; /** Section + name = value  */
 	ssMapT InheritMap; /** Section and inherits */
@@ -194,16 +195,16 @@ private:
 	 * Constructor : the used constructor
 	 *
 	 * @param InputFile
-	 *   std::string Input File Name
+	 *   const std::string& Input File Name
 	 *
 	 */
-	CfgFileOptions(const std::string InputFile);
+	CfgFileOptions(const std::string& InputFile);
 
 	/**
 	 * FromString: Get the Corresp value in a different Type
 	 *
 	 * @param InData
-	 *   std::string input Data
+	 *   const std::string& input Data
 	 *
 	 * @param NoThrow
 	 *   (optional) bool get default if error, default FALSE
@@ -212,18 +213,20 @@ private:
 	 *   T OutType
 	 */
 	template<typename T>
-	inline T ConvertAnyToAny(std::string InData, bool NoThrow=false)
+	inline T ConvertAnyToAny(const std::string& InData, bool NoThrow=false)
 	{
 		T OutData = T();
 
 		try {
 			OutData=boost::lexical_cast<T>(InData);
 
-		} catch(std::exception& e) {
+		}
+		catch(std::exception& e) {
 			if(! NoThrow)
 				throw zpds::ConfigException("conversion error");
 
-		} catch(...) {
+		}
+		catch(...) {
 			if(! NoThrow)
 				throw zpds::ConfigException("conversion error");
 		}

@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/hrpc/ProtoServiceBase.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  ProtoServiceBase.hpp :   Service ABC
+ *  ProtoServiceBase.hpp : Hrpc Protobuf Service Base
  *
  */
 #ifndef _ZPDS_HRPC_PROTO_SERVICE_BASE_HPP_

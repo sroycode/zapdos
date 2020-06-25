@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/utils/BaseUtils.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  BaseUtils.hpp :   For Standard Inclusion
+ *  BaseUtils.hpp : For Standard Inclusion Headers
  *
  */
 #ifndef _ZPDS_UTILS_BASEUTILS_HPP_
@@ -38,6 +38,8 @@
 #include <memory>
 #include <exception>
 #include <chrono>
+#include <boost/scoped_ptr.hpp>
+
 #define ZPDS_CURRTIME_MS std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
 #define ZPDS_CURRTIME_MUS std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
 
@@ -53,16 +55,17 @@
 #define ZPDS_SERVICE_SCOPE_HTTP  0x0001
 #define ZPDS_SERVICE_SCOPE_HTTPS 0x0002
 
-#define ZPDS_DEFAULT_GEOHASH_PRECISION 5
-#define ZPDS_PERM_GEOHASH_PRECISION 5
-#define ZPDS_TEMP_GEOHASH_PRECISION 7
 
 #define ZPDS_MAX_RULE_WEIGHT 1000
 
-#define ZPDS_TEMP_SYSTEM_MAXSPEED_KM 500.0
-
 #define ZPDS_UPLOAD_MAX_RECORDS 10000
-#define ZPDS_DEFAULT_LANG  "en"
+#define ZPDS_NUPLOAD_MAX_RECORDS 100
+#define ZPDS_SCAN_MAX_RECORDS 10000
+
+#define ZPDS_DEFAULT_ADMIN  "admin"
+#define ZPDS_DEFAULT_SEARCH_EXTER "default"
+
+#define ZPDS_SESSION_LIFETIME_MS 10 * 86400 * 1000 // ten days
 
 namespace zpds {
 class BaseException : public std::exception {
@@ -112,13 +115,14 @@ class BadCodeException : public BaseException {
 class LocalException : public BaseException {
 	using BaseException::BaseException;
 };
+class NullException {};
 
 #if __GNUC__ >= 4
-	#define ZPDS_EXPORT_PUBLIC __attribute__ ((visibility ("default")))
-	#define ZPDS_EXPORT_LOCAL  __attribute__ ((visibility ("hidden")))
+#define ZPDS_EXPORT_PUBLIC __attribute__ ((visibility ("default")))
+#define ZPDS_EXPORT_LOCAL  __attribute__ ((visibility ("hidden")))
 #else
-	#define ZPDS_EXPORT_PUBLIC
-	#define ZPDS_EXPORT_LOCAL
+#define ZPDS_EXPORT_PUBLIC
+#define ZPDS_EXPORT_LOCAL
 #endif
 
 } // namespace zpds

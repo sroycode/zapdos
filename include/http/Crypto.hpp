@@ -6,7 +6,7 @@
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  Crypto.hpp :  crypto utils for Web Server ( Modified from eidheim/Simple-Web-Server )
+ *  Crypto.hpp : Crypto utils for Web Server ( Modified from eidheim/Simple-Web-Server )
  *
  */
 #ifndef _ZPDS_HTTP_CRYPTO_HPP_

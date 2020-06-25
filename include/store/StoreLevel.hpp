@@ -1,12 +1,12 @@
 /**
  * @project zapdos
  * @file include/store/StoreLevel.hpp
- * @author  S Roychowdhury < sroycode at gmail dot com>
+ * @author  S Roychowdhury < sroycode at gmail dot com >
  * @version 1.0.0
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
  *
  * @section DESCRIPTION
  *
- *  StoreLevel.hpp :   Shared headers for store
+ *  StoreLevel.hpp : Abstract Base Class for LevelDB Headers
  *
  */
 #ifndef _ZPDS_STORE_STORELEVEL_HPP_
@@ -70,12 +70,11 @@ public:
 	StoreLevel(const StoreLevel&) = delete;
 	StoreLevel& operator=(const StoreLevel&) = delete;
 
-
 	/**
 	* Initialize: init main db
 	*
 	* @param datadir
-	*   std::string data directory to store
+	*   std::string& data directory to store
 	*
 	* @param cache_in_mb
 	*   size_t cache size in MB
@@ -89,7 +88,7 @@ public:
 	* @return
 	*   none
 	*/
-	void Initialize(const std::string datadir, const size_t cache_in_mb, uint64_t& last_pkey, uint64_t& last_lkey);
+	void Initialize(const std::string& datadir, const size_t cache_in_mb, uint64_t& last_pkey, uint64_t& last_lkey);
 
 	/**
 	* getDB: Get shared pointer to DB

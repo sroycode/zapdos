@@ -6,7 +6,7 @@
  *
  * @section LICENSE
  *
- * Copyright (c) 2018-2019 S Roychowdhury
+ * Copyright (c) 2018-2020 S Roychowdhury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,14 +27,14 @@
  *
  * @section DESCRIPTION
  *
- *  SyncServer.hpp :   Work Storage Server Headers
+ *  SyncServer.hpp : Client Sync Service Headers
  *
  */
 #ifndef _ZPDS_HRPC_SYNC_SERVER_HPP_
 #define _ZPDS_HRPC_SYNC_SERVER_HPP_
 
-#include <store/StoreBase.hpp>
-#include <utils/ServerBase.hpp>
+#include "store/StoreBase.hpp"
+#include "utils/ServerBase.hpp"
 #include "http/HttpServer.hpp"
 
 
