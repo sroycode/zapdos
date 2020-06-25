@@ -1,6 +1,6 @@
 # Project Zapdos
 
-Search engine for OSM location data, wiki data, products and more.
+Search engine for OSM location data, wiki data and maybe more.
 
 The steps to compile are in [here](./COMPILE.md). After compilation it builds these:
 
