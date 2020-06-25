@@ -16,7 +16,7 @@ You need to install these tools using standard utils.
 - snappy 1.1.7
 - rocksdb 5.6
 - crypto++ 8.0
-- xapian 1.4+
+- xapian 1.4.10+
 
 Optional
 - ctemplate
