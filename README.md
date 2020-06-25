@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/sroycode/zapdos.svg?branch=master)](https://travis-ci.org/sroycode/zapdos)
 [![GitHub (pre-)release](https://img.shields.io/github/release-pre/sroycode/zapdos.svg)](https://github.com/sroycode/zapdos)
 
-Search engine for OSM location data, wiki data, products and more. For details see [doc](doc/README.md).
+Search engine for OSM location data, wiki data, products and more. For details see [docs](docs/README.md).
 
 ## Code is WIP
 
@@ -35,7 +35,7 @@ at endpoint `_query/api/v1/textdata/{profile}` .
 
 ## Compiling
 
-For instructions on setting up the development environment see [doc/COMPILE.md](doc/COMPILE.md)
+For instructions on setting up the development environment see [docs/COMPILE.md](docs/COMPILE.md)
 
 ## Testing
 
