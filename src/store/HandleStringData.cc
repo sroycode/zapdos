@@ -63,7 +63,7 @@ bool zpds::store::HandleStringData::HandleStrings(
 		if ( var->empty()  || kmap.find(*var)!=kmap.end() ) continue;
 		kmap[*var] = odata->Add();
 		kmap[*var]->assign(*var);
-		// Check : shreos
+		// Check : TODO
 		change=true;
 	}
 	return change;

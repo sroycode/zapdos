@@ -16,7 +16,7 @@ You need to install these tools using standard utils.
 - snappy 1.1.7
 - rocksdb 5.6
 - crypto++ 8.0
-- xapian 1.4.10+
+- xapian 1.4+
 
 Optional
 - ctemplate
@@ -41,7 +41,7 @@ sudo apt install -y \
 	wget ccache cmake make libtool pkg-config g++ gcc autoconf automake curl jq lcov \
 	protobuf-compiler vim-common libboost-all-dev libboost-all-dev libcurl4-openssl-dev zlib1g-dev liblz4-dev libprotobuf-dev \
 	libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev \
-	libtbb-dev libzstd-dev librocksdb-dev libcrypto++
+	libtbb-dev libzstd-dev librocksdb-dev libcrypto++-dev
 # xapian
 sudo add-apt-repository ppa:xapian-backports/ppa
 sudo apt update -y

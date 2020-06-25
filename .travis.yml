@@ -25,18 +25,18 @@ addons:
       - libctemplate-dev
       - libtbb-dev
       - libzstd-dev
-      - libcrypto++
+      - libcrypto++-dev
 
 language: cpp
 
 branches:
   only:
-  - master
+  - devel
 
 before_install:
 - sudo apt-add-repository -y ppa:exonum/rocksdb 
 - sudo apt-add-repository -y ppa:maarten-fonville/protobuf 
-- sudo apt-add-repository -y ppa:xapian-backports/ppa 
+- sudo add-apt-repository -y ppa:xapian/backports
 - sudo apt-get update -y -qq
 - sudo apt-get install -y protobuf-compiler librocksdb-dev libprotobuf-dev libxapian-dev
 

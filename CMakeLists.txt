@@ -199,7 +199,7 @@ endif()
 # Optional Packages
 
 if (ZPDS_BUILD_WITH_XAPIAN)
-	find_package(XAPIAN 1.4 REQUIRED)
+	find_package(XAPIAN 1.4.10 REQUIRED)
 	include_directories(${XAPIAN_INCLUDE_DIRS})
 	set(ZPDS_LIB_DEPS ${ZPDS_LIB_DEPS} ${XAPIAN_LIBRARIES})
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZPDS_BUILD_WITH_XAPIAN=1")

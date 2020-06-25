@@ -13,7 +13,6 @@ RUN apt-get -y update -qq && \
     update-locale LANG=en_US.UTF-8 && \
     add-apt-repository ppa:exonum/rocksdb && \
     add-apt-repository ppa:maarten-fonville/protobuf && \
-    add-apt-repository ppa:xapian-backports/ppa && \
     apt-get update -y -qq && \
     apt-get install -y \
     --no-install-recommends \
