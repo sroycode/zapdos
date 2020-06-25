@@ -31,7 +31,7 @@ language: cpp
 
 branches:
   only:
-  - devel
+  - master
 
 before_install:
 - sudo apt-add-repository -y ppa:exonum/rocksdb 
