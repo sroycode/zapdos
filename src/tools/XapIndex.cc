@@ -269,6 +269,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (! FLAGS_nomerge) {
+			LOG(INFO) << "Starting merge";
 			// merging databases
 			if (FLAGS_xapath.empty()) throw zpds::InitialException("xapath is needed");
 			std::string mainpath = FLAGS_xapath + "/main";
