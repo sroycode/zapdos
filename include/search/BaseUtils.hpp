@@ -33,6 +33,8 @@
 #ifndef _ZPDS_SEARCH_BASE_UTILS_HPP_
 #define _ZPDS_SEARCH_BASE_UTILS_HPP_
 
+#define XAP_FORMAT_SPACE " "
+
 #include <tuple>
 #include <memory>
 #include <functional>

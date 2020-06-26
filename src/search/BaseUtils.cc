@@ -66,7 +66,7 @@ std::string zpds::search::BaseUtils::StemQuery(const std::string& input, bool no
 		else {
 			xtmp << *it;
 		}
-		if (xc>0) xtmp << " ";
+		if (xc>0) xtmp << XAP_FORMAT_SPACE;
 	}
 	return xtmp.str();
 }

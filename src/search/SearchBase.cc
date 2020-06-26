@@ -451,7 +451,7 @@ void zpds::search::SearchBase::SearchByProfile(
 		std::string q ;
 		size_t wc =0 ;
 		std::tie(q,wc ) = FlattenCount( qr->raw_query() );
-		auto pos = q.find_last_of(" ");
+		auto pos = q.find_last_of(XAP_FORMAT_SPACE);
 		if ( qr->full_words() ) {
 			q = stptr->jamdb->Correct(qr->lang(), q);
 		}
