@@ -90,6 +90,7 @@ void zpds::search::SearchWiki::CompletionQueryAction(::zpds::utils::SharedTable:
 		auto wdata = resp->mutable_wikidata()->add_records();
 		wdata->set_title( cresp->records(i).title() );
 		wdata->set_summary( cresp->records(i).summary() );
+		wdata->set_unique_id( cresp->records(i).unique_id() );
 		if (++populated >= counter) break;
 	}
 }

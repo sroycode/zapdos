@@ -443,6 +443,8 @@ void zpds::search::SearchBase::SearchByProfile(
 	const uint64_t counter = KeepInBound<uint64_t>(qr->items(), 1, 100);
 	qr->set_items( counter );
 
+	std::string corrected;
+
 	if ( ! qr->noname() ) {
 		// set last partial
 		qr->set_last_partial( qr->raw_query().back() != ' ' );
@@ -453,14 +455,16 @@ void zpds::search::SearchBase::SearchByProfile(
 		std::tie(q,wc ) = FlattenCount( qr->raw_query() );
 		auto pos = q.find_last_of(XAP_FORMAT_SPACE);
 		if ( qr->full_words() ) {
-			q = stptr->jamdb->Correct(qr->lang(), q);
+			corrected = stptr->jamdb->Correct(qr->lang(), q);
 		}
 		else if (pos != std::string::npos) {
-			q = stptr->jamdb->Correct(qr->lang(), q.substr(0,pos)) + q.substr(pos);
+			corrected = stptr->jamdb->Correct(qr->lang(), q.substr(0,pos)) + q.substr(pos);
 		}
 		else {
 			// dont correct anything if one word partial
 		}
+		// mark corrected as blank if same as q
+		if (q==corrected) corrected.clear();
 		qr->set_no_of_words( wc );
 		qr->set_query( StemQuery( q, (!qr->full_words()) ));
 		if ( qr->no_of_words() == 0 ) return;
@@ -469,21 +473,32 @@ void zpds::search::SearchBase::SearchByProfile(
 	uint64_t rule_weight = 0;
 	std::unordered_set<uint64_t> idset;
 	std::map<std::string, uint64_t> idmap;
+
 	// rules are sorted
-	for (auto i = 0 ; i < qprof->rules_size() ; ++i ) {
-		auto rule = qprof->mutable_rules(i);
-		if (rule_weight > rule->weight() && idset.size() >= counter)
-			break;
-		auto nqr =*qr;
-		bool status = RuleSearch(&nqr, rule);
-		for (auto j = 0 ; j < nqr.ids_size() ; ++j ) {
-			if (idset.find( nqr.ids(j) ) != idset.end() ) continue;
-			idset.emplace( nqr.ids(j) );
-			idmap.emplace(
-			    EncodeSortKey<uint64_t, double, uint64_t>( rule->weight(), nqr.scores(j), nqr.ids(j) ),
-			    nqr.ids(j) );
+	// repeat the search for corrected if not found
+	for (auto secondq : std::vector<bool> { false, true } ) {
+
+		if ( secondq ) {
+			if ( corrected.empty() ) break;
+			qr->set_query( StemQuery( corrected, (!qr->full_words()) ));
 		}
-		rule_weight = rule->weight();
+
+		for (auto i = 0 ; i < qprof->rules_size() ; ++i ) {
+			auto rule = qprof->mutable_rules(i);
+			if (rule_weight > rule->weight() && idset.size() >= counter)
+				break;
+			auto nqr =*qr;
+			bool status = RuleSearch(&nqr, rule);
+			for (auto j = 0 ; j < nqr.ids_size() ; ++j ) {
+				if (idset.find( nqr.ids(j) ) != idset.end() ) continue;
+				idset.emplace( nqr.ids(j) );
+				idmap.emplace(
+				    EncodeSortKey<uint64_t, double, uint64_t>( rule->weight(), nqr.scores(j), nqr.ids(j) ),
+				    nqr.ids(j) );
+			}
+			rule_weight = rule->weight();
+		}
+
 	}
 
 	// populate from db

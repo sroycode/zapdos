@@ -93,6 +93,7 @@ zpds_adddata -dtype localjson -infile photon.json -chunk 5000 -username admin -s
 Now shutdown the zpds_server normally. Then generate the index in a temporary folder , in this example `testme`.
 
 ```
+# Takes about 12 hours on a r5.2xlarge instance
 zpds_xapindex -threads 7 -indextype "localdata" -dbpath=/home/ubuntu/tmp/data/zapdos/_data --xapath `pwd`/testme --nomerge
 zpds_xapindex -threads 7 -indextype "localdata" -dbpath=/home/ubuntu/tmp/data/zapdos/_data --xapath `pwd`/testme --noindex
 # Copy the data to xapdos xapian index
