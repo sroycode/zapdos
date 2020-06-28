@@ -443,6 +443,7 @@ void zpds::search::SearchBase::SearchByProfile(
 	const uint64_t counter = KeepInBound<uint64_t>(qr->items(), 1, 100);
 	qr->set_items( counter );
 
+	std::string corrected;
 
 	if ( ! qr->noname() ) {
 		// set last partial
@@ -454,6 +455,17 @@ void zpds::search::SearchBase::SearchByProfile(
 		std::tie(q,wc ) = FlattenCount( qr->raw_query() );
 		auto pos = q.find_last_of(XAP_FORMAT_SPACE);
 		qr->set_no_of_words( wc );
+		// set corrected
+		if ( qr->full_words() ) {
+			corrected = stptr->jamdb->Correct(qr->lang(), q);
+		}
+		else if (pos != std::string::npos) {
+			corrected = stptr->jamdb->Correct(qr->lang(), q.substr(0,pos)) + q.substr(pos);
+		}
+		else {
+			// dont correct anything if one word partial
+		}
+		if (q==corrected) corrected.clear();
 		qr->set_query( StemQuery( q, (!qr->full_words()) ));
 		if ( qr->no_of_words() == 0 ) return;
 	}
@@ -467,17 +479,7 @@ void zpds::search::SearchBase::SearchByProfile(
 	for (auto secondq : std::vector<bool> { false, true } ) {
 
 		if ( secondq ) {
-			std::string corrected;
-			if ( qr->full_words() ) {
-				corrected = stptr->jamdb->Correct(qr->lang(), q);
-			}
-			else if (pos != std::string::npos) {
-				corrected = stptr->jamdb->Correct(qr->lang(), q.substr(0,pos)) + q.substr(pos);
-			}
-			else {
-				// dont correct anything if one word partial
-			}
-			if ( corrected.empty() || qr->query() == corrected || ( idset.size() > 0 ) ) break;
+			if ( corrected.empty() || ( idset.size() > 0 ) ) break;
 			qr->set_query( StemQuery( corrected, (!qr->full_words()) ));
 		}
 
