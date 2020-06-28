@@ -41,6 +41,7 @@ For instructions on setting up the development environment see [docs/COMPILE.md]
 
 Look at the folder test for expected query.
 The test/test_ scripts are for testing, you will need httpie.
+For details see [docs](docs/README.md)
 
 ## Increasing concurrency
 
