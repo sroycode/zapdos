@@ -23,10 +23,6 @@ enum KeyTypeE {
 	K_LOCALDATA                                                     = 16; // local data uses ItemDataT
 	K_WIKIDATA                                                      = 17; // wiki data uses ItemDataT
 
-// non table
-
-	KT_ITEMDATA                                                     = 47; // for all ItemDataT  tags only , no table
-
 // end
 	K_LOGNODE                                                       = 49; // must be before K_MAXNODE
 	K_MAXNODE                                                       = 50;
