@@ -2,7 +2,7 @@
  * @project zapdos
  * @file src/search/SearchBase.cc
  * @author  S Roychowdhury < sroycode at gmail dot com >
- * @version 1.0.0
+ * @version 1.0.1
  *
  * @section LICENSE
  *
