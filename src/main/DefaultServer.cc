@@ -291,9 +291,11 @@ int main(int argc, char *argv[])
 	catch(zpds::BaseException& e) {
 		LOG(INFO) << "Error : " << e.what();
 	}
+#ifdef ZPDS_BUILD_WITH_XAPIAN
 	catch(Xapian::Error& e) {
 		LOG(INFO) << "Error (xap) : " << e.get_msg() << " " << e.get_description();
 	}
+#endif // ZPDS_BUILD_WITH_XAPIAN
 	catch(std::exception& e) {
 		LOG(INFO) << "Error (sys) : " << e.what();
 	}

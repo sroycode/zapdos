@@ -34,8 +34,8 @@ brew install ctemplate
 ### For Ubuntu 18
 
 ```
-sudo add-apt-repository ppa:exonum/rocksdb
-sudo add-apt-repository ppa:maarten-fonville/protobuf
+sudo add-apt-repository -y ppa:exonum/rocksdb
+sudo add-apt-repository -y ppa:maarten-fonville/protobuf
 sudo apt update -y
 sudo apt install -y \
 	wget ccache cmake make libtool pkg-config g++ gcc autoconf automake curl jq lcov \
@@ -43,7 +43,7 @@ sudo apt install -y \
 	libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev \
 	libtbb-dev libzstd-dev librocksdb-dev libcrypto++-dev
 # xapian
-sudo add-apt-repository ppa:xapian-backports/ppa
+sudo add-apt-repository -y ppa:xapian-backports/ppa
 sudo apt update -y
 sudo apt install -y libxapian-dev 
 # optional ctemplate
