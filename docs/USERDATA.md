@@ -81,6 +81,7 @@ The following privileges exist.
 - [ExterData Update Email](./api/admin/API_ADMIN_EXTERDATA_UPDATE_EMAIL.md)
 - [ExterData Update Mobile](./api/admin/API_ADMIN_EXTERDATA_UPDATE_MOBILE.md)
 - [ExterData Add Tags](./api/admin/API_ADMIN_EXTERDATA_ADD_TAGS.md)
+- [ExterData Add Profile](./api/admin/API_ADMIN_EXTERDATA_ADD_PROFILES.md)
 
 - [ExterData Get One](./api/admin/API_ADMIN_EXTERDATA_GETONE.md)
 - [ExterData Get Many](./api/admin/API_ADMIN_EXTERDATA_GETMANY.md)
