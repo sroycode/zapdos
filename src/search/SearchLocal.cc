@@ -110,6 +110,7 @@ void zpds::search::SearchLocal::CompletionQueryAction(::zpds::utils::SharedTable
 		prop->set_name( ::zpds::utils::PrintWithComma::String( cresp->records(i).fld_name(), cresp->records(i).fld_area() ) );
 		prop->set_address( cresp->records(i).address() );
 		prop->set_postcode( cresp->records(i).pincode() );
+		prop->set_area( cresp->records(i).fld_area() );
 
 		// TODO : extents
 		if ( ! cresp->records(i).geometry().empty() ) {

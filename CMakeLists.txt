@@ -125,7 +125,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 endif()
 
 #find_package(threads REQUIRED)
-find_package(Boost 1.65.0 COMPONENTS coroutine chrono system thread context date_time filesystem regex REQUIRED)
+find_package(Boost 1.65.0 COMPONENTS coroutine chrono system thread context date_time iostreams filesystem regex REQUIRED)
 find_package(GLOG REQUIRED)
 find_package(GFLAGS REQUIRED)
 find_package(TCMALLOC REQUIRED)

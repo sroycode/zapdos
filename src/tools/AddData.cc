@@ -2,7 +2,7 @@
  * @project zapdos
  * @file src/tools/AddData.cc
  * @author  S Roychowdhury < sroycode at gmail dot com >
- * @version 1.0.0
+ * @version 1.0.2
  *
  * @section LICENSE
  *
@@ -31,7 +31,7 @@
  *
  */
 #define ZPDS_DEFAULT_EXE_NAME "zpds_adddata"
-#define ZPDS_DEFAULT_EXE_VERSION "1.0.0"
+#define ZPDS_DEFAULT_EXE_VERSION "1.0.2"
 #define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018-2020 S Roychowdhury"
 
 #define STRIP_FLAG_HELP 1
@@ -61,6 +61,7 @@ DEFINE_string(errorlog, "zpds_adddata_error.log", "error log");
 DEFINE_validator(errorlog, &IsNonEmptyMessage);
 
 DEFINE_string(dtype, "", "data type");
+DEFINE_validator(dtype, &IsNonEmptyMessage);
 // DEFINE_validator(dtype, &IsValidDtype);
 
 DEFINE_string(infile, "", "input file for records");
@@ -79,10 +80,14 @@ DEFINE_uint64(stopline, 10000000000UL, "ending line");
 
 /* GFlags Settings End */
 
-#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
+#include <iostream>
 #include <fstream>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include "query/ProtoJson.hpp"
 
@@ -168,24 +173,23 @@ int main(int argc, char *argv[])
 	google::SetLogDestination( google::GLOG_INFO, FLAGS_accesslog.c_str() );
 	google::SetLogDestination( google::GLOG_ERROR, FLAGS_errorlog.c_str() );
 
-
-	// get url endpoint
-	std::string service;
-	if ( FLAGS_dtype=="localtsv" || FLAGS_dtype=="localjson" ) {
-		service="localdata";
-	}
-	else if ( FLAGS_dtype=="wikitsv" || FLAGS_dtype=="wikijson" ) {
-		service="wikidata";
-	}
-	else {
-		throw zpds::BadCodeException("Undefined service");
-	}
-
-	std::string endpoint = "/_admin/api/v1/" + service + "/upsert";
-
 	StrSet countries;
 
 	try {
+
+		std::string service;
+		// get url endpoint
+		if ( FLAGS_dtype=="localtsv" || FLAGS_dtype=="localjson" ) {
+			service="localdata";
+		}
+		else if ( FLAGS_dtype=="wikitsv" || FLAGS_dtype=="wikijson" ) {
+			service="wikidata";
+		}
+		else {
+			throw zpds::BadCodeException("Undefined service");
+		}
+		std::string endpoint = "/_admin/api/v1/" + service + "/upsert";
+
 		if ( FLAGS_update && ( FLAGS_username.empty() || FLAGS_sessionkey.empty() ) )
 			throw zpds::ConfigException("Update needs username , sessionkey");
 
@@ -209,13 +213,24 @@ int main(int argc, char *argv[])
 			{"Content-Type", "application/json"}
 		};
 
-		std::ifstream file(FLAGS_infile.c_str());
+		std::ifstream file(FLAGS_infile.c_str(), std::ios_base::in | std::ios_base::binary);
 		if(!file.is_open())
 			throw zpds::ConfigException("Cannot Open file");
+		boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
+
+		if ( FLAGS_infile.length() > 3) {
+			if ( boost::algorithm::to_lower_copy(FLAGS_infile.substr( FLAGS_infile.length() - 3 )) == ".gz" )
+				inbuf.push(boost::iostreams::gzip_decompressor());
+		}
+
+		inbuf.push(file);
+		//Convert streambuf to istream
+		std::istream instream(&inbuf);
+
 		std::string line;
 		size_t counter=0;
 		size_t allcounter=0;
-		while(std::getline(file,line)) {
+		while(std::getline(instream,line)) {
 			++allcounter;
 			if (allcounter%1000000==1) LOG(INFO) << "Counted Records: " << allcounter;
 			if (allcounter < FLAGS_startline) continue;
@@ -363,7 +378,7 @@ bool ReadLocalTsv(std::string& line, ::zpds::store::ItemDataT* record)
 	LOCAL_HANDLE_NUMBER(14,double,lon)
 	LOCAL_HANDLE_NUMBER(15,double,rating)
 	LOCAL_HANDLE_STRING(16,landmark)
-	LOCAL_HANDLE_STRING(17,landmark)
+	// 17 local_name is deprecated
 
 	LOCAL_HANDLE_NUMBER(18,int64_t,osm_id)
 	LOCAL_HANDLE_STRING(19,osm_key)
@@ -467,11 +482,21 @@ bool ReadLocalJson(std::string& line, ::zpds::store::ItemDataT* record)
 	JSON_HANDLE_SOURCE_STRING(osm_value,osm_value)
 	JSON_HANDLE_SOURCE_STRING(osm_type,osm_type)
 
+	// handle address
+	JSON_HANDLE_SOURCE_STRING(address,housenumber)
+
+	if (record->address().empty() ) {
+		record->set_address( record->fld_area() );
+	}
+	else {
+		record->set_address( record->address() + " , " + record->fld_area() );
+	}
+
+
 	// Not handled
 	// origin : string
 	// ccode : string
 	// scode : string
-	// address : string
 	// landmark : string
 	// rating : double
 	// geometry : string

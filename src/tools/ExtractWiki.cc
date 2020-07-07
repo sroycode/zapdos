@@ -2,7 +2,7 @@
  * @project zapdos
  * @file src/tools/ExtractWiki.cc
  * @author  S Roychowdhury < sroycode at gmail dot com >
- * @version 1.0.0
+ * @version 1.0.2
  *
  * @section LICENSE
  *
@@ -31,7 +31,7 @@
  *
  */
 #define ZPDS_DEFAULT_EXE_NAME "zpds_extractwiki"
-#define ZPDS_DEFAULT_EXE_VERSION "1.0.0"
+#define ZPDS_DEFAULT_EXE_VERSION "1.0.2"
 #define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2018-2020 S Roychowdhury"
 
 
@@ -46,6 +46,9 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include "utils/BaseUtils.hpp"
@@ -72,17 +75,29 @@ int main(int argc, char *argv[])
 {
 
 	if (argc!=2) {
-		std::cerr << "The extracts wikidata json.  Sample usage: " << argv[0] << " /path/to/all.json" << std::endl;
+		std::cerr << "The extracts wikidata json.  Sample usage: " << argv[0] << " /path/to/all.json.gz" << std::endl;
 		exit (1);
 	}
 	try {
+		std::string infile{argv[1]};
 		std::stringstream sstr;
-		std::ifstream file(argv[1]);
+		std::ifstream file(infile.c_str(), std::ios_base::in | std::ios_base::binary);
 		if(!file.is_open())
 			throw zpds::ConfigException("Cannot Open file");
+		boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
+
+		if ( infile.length() > 3) {
+			if ( boost::algorithm::to_lower_copy(infile.substr( infile.length() - 3 )) == ".gz" )
+				inbuf.push(boost::iostreams::gzip_decompressor());
+		}
+
+		inbuf.push(file);
+		//Convert streambuf to istream
+		std::istream instream(&inbuf);
+
 		std::string line;
 		bool multi=false;
-		while(std::getline(file,line)) {
+		while(std::getline(instream,line)) {
 			if(line.length() < 10) continue;
 			bool line_comma = ( line.at( line.length() -1 ) == ',' );
 			if (!line_comma) {
@@ -98,7 +113,7 @@ int main(int argc, char *argv[])
 					sstr.str("");
 					sstr.clear();
 				}
-				async::spawn( std::bind(&LineReader, line , m_ptr) );
+				async::spawn( std::bind(&LineReader, line, m_ptr) );
 			}
 
 		}
@@ -122,7 +137,7 @@ int main(int argc, char *argv[])
 #define JSONH_OBJ_OBJP(AAA,BBB) \
 	auto v = data["/" #AAA ""_json_pointer]; if (v.is_object()) { for(auto it=v.begin();it!=v.end();++it) ndata[ #BBB ].push_back(it.key()); }
 #define JSONH_STR(AAA,BBB) \
-	auto v = data["/" #AAA ""_json_pointer]; if (v.is_string()) { ndata[ #BBB ]= v; } 
+	auto v = data["/" #AAA ""_json_pointer]; if (v.is_string()) { ndata[ #BBB ]= v; }
 
 void LineReader(std::string& line, MutexPtr m)
 {
@@ -132,14 +147,28 @@ void LineReader(std::string& line, MutexPtr m)
 		json ndata;
 		// int n_aliases=0;
 
-		{ JSONH_OBJ_EN_ARRAY(aliases,alias) }
-		{ JSONH_OBJ_OBJP(claims,claims) }
+		{
+			JSONH_OBJ_EN_ARRAY(aliases,alias)
+		}
+		{
+			JSONH_OBJ_OBJP(claims,claims)
+		}
 
-		{ JSONH_STR(descriptions/en/value, description) }
-		{ JSONH_STR(labels/en/value,label) }
-		{ JSONH_STR(id, unique_id) }
-		{ JSONH_STR(sitelinks/enwiki/title , title) }
-		{ JSONH_STR(sitelinks/commonswiki/title , ctitle) }
+		{
+			JSONH_STR(descriptions/en/value, description)
+		}
+		{
+			JSONH_STR(labels/en/value,label)
+		}
+		{
+			JSONH_STR(id, unique_id)
+		}
+		{
+			JSONH_STR(sitelinks/enwiki/title, title)
+		}
+		{
+			JSONH_STR(sitelinks/commonswiki/title, ctitle)
+		}
 
 		std::lock_guard<std::mutex>(*m);
 		::felicity::safe_cout << ndata.dump() << "\n";

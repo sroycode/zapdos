@@ -87,7 +87,7 @@ export shared_secret=YOUR-CHANGED_SHARED_SECRET
 bash ${ZAPDOS_HOME}/test/test_command_no_xapian.sh
 . .login
 # this populates the data dump without xapian index
-zpds_adddata -dtype localjson -infile photon.json -chunk 5000 -username admin -sessionkey $sessionkey -jurl http://localhost:9093 -update
+zpds_adddata -dtype localjson -infile photon.json.gz -chunk 5000 -username admin -sessionkey $sessionkey -jurl http://localhost:9093 -update
 ```
 
 Now shutdown the zpds_server normally. Then generate the index in a temporary folder , in this example `testme`.
@@ -123,15 +123,13 @@ elasticdump --limit=5000 --concurrency=5 --input=http://127.0.0.1:9200/photon --
 
 ### Getting the data
 
-The zipped file is about 78 GB , unzips to over 1.1 TB , so keep 1.5 TB space handy.
+The zipped file is about 78 GB.
 The default `zpds_extractwiki` rejects all records without description field, so the extract is small.
 Modify the `src/tools/ExtractWiki.cc` to suite your needs. Contact us if you need to extract targeted data from this.
-You can delete the unzipped `latest-all.json` once the first phase is done
 
 ```
 wget https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.gz
-pigz -kd latest-all.json.gz
-zpds_extractwiki latest-all.json > wikidata.json
+zpds_extractwiki latest-all.json.gz > wikidata.json
 rm -f latest-all.json
 ```
 
