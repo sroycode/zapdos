@@ -98,21 +98,6 @@ std::string zpds::store::TempNameCache::MakeKey(::zpds::store::KeyTypeE keytype,
 	return xdata;
 }
 
-/**
-* ReserveTag: reserve this string tag
-*
-*/
-bool zpds::store::TempNameCache::ReserveTag(::zpds::store::KeyTypeE keytype, const std::string& indata, bool isnew)
-{
-
-	std::string&& xdata=EncodeSecondaryKey<int32_t,std::string>(U_TAGDATA_KEYTYPE_NAME,keytype,indata);
-	if (isnew && CheckKeyExists(xdata)) return false;
-	if (tmpcache->CheckAssoc(xdata)) return false;
-	std::string temp;
-	tmpcache->SetAssoc( xdata, temp);
-	inset.insert(xdata);
-	return true;
-}
 
 /**
 * ReserveName: reserve this string

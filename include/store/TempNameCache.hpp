@@ -98,23 +98,6 @@ public:
 	bool CheckLocal(KeyTypeE keytype, const std::string& indata);
 
 	/**
-	* ReserveTag: reserve this string tag should be new
-	*
-	* @param keytype
-	*   ::zpds::store::KeyTypeE keytype
-	*
-	* @param indata
-	*   const std::string& input string to check
-	*
-	* @param isnew
-	*   bool flag if new, default false
-	*
-	* @return
-	*   bool if not found and reserved
-	*/
-	bool ReserveTag(KeyTypeE keytype, const std::string& indata, bool isnew=false);
-
-	/**
 	* ReserveName: reserve this string should be new
 	*
 	* @param keytype

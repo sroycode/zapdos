@@ -35,7 +35,7 @@
 
 #include "store/TagDataTable.hpp"
 #include "store/StoreTrans.hpp"
-#include "store/TempNameCache.hpp"
+// #include "store/TempNameCache.hpp"
 
 /**
 * Get : gets the data
@@ -113,7 +113,7 @@ void zpds::store::TagDataService::ManageDataAction(::zpds::utils::SharedTable::p
 	uint64_t currtime = ZPDS_CURRTIME_MS;
 
 	::zpds::store::TransactionT trans;
-	::zpds::store::TempNameCache namecache{stptr};
+	// ::zpds::store::TempNameCache namecache{stptr};
 
 	// update payloads if exists
 	for (size_t i = 0 ; i<resp->payloads_size(); ++i)	{
@@ -124,8 +124,6 @@ void zpds::store::TagDataService::ManageDataAction(::zpds::utils::SharedTable::p
 			throw zpds::BadDataException("Tag must have name: " + rdata->name(),M_INVALID_PARAM);
 		if ( rdata->name() != SanitNSLower(rdata->name()) )
 			throw zpds::BadDataException("Tag has invalid name: " + rdata->name(),M_INVALID_PARAM);
-		if ( namecache.CheckLocal(rdata->keytype(),rdata->name()) )
-			throw zpds::BadDataException("Duplicate tag found: " + rdata->name(),M_INVALID_PARAM);
 		status->set_updatecount( status->updatecount() + 1 );
 
 		::zpds::store::TagDataT tdata;
