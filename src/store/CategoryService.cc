@@ -115,10 +115,6 @@ void zpds::store::CategoryService::ManageDataAction(::zpds::utils::SharedTable::
 	::zpds::store::TransactionT trans;
 	::zpds::store::TempNameCache namecache{stptr};
 
-	// check concurrent update, hack to stop problems with table creation in duck
-	if (!namecache.MultiTypeLock(ZPDS_LOCK_CATEGORY_HOST))
-		throw zpds::BadDataException("Someone else is updating category",M_INVALID_PARAM);
-
 	// update payloads if exists
 	for (size_t i = 0 ; i<resp->payloads_size(); ++i)	{
 		auto rdata = resp->mutable_payloads(i);
