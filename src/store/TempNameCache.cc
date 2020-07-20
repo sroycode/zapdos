@@ -73,6 +73,10 @@ std::string zpds::store::TempNameCache::MakeKey(::zpds::store::KeyTypeE keytype,
 		throw ::zpds::BadCodeException("Invalid keytype to check");
 		break;
 	}
+	case ::zpds::store::K_TAGDATA: {
+		xdata = EncodeSecondaryKey<std::string>(U_TAGDATA_KEYTYPE_NAME,indata);
+		break;
+	}
 	case ::zpds::store::K_CATEGORY: {
 		xdata = EncodeSecondaryKey<std::string>(U_CATEGORY_NAME,indata);
 		break;
