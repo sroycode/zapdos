@@ -112,109 +112,28 @@ public:
 						break;
 					}
 
-					case ::zpds::hrpc::M_MANAGE_TAGS : {
-						zpds::query::TagDataRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::TagDataService service; //TagData
-						service.ManageDataAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " TagData Service ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
+#define HANDLE_HRPC_SERVICE(TTAG,TRESP,TSERV,TACT) \
+		case ::zpds::hrpc::TTAG : { \
+			::zpds::query::TRESP data; \
+			if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) )) \
+				throw zpds::BadDataException("Bad Protobuf Format"); \
+			::zpds::store::TSERV service; \
+			service.TACT(stptr, &data); \
+			data.SerializeToString(&output); \
+			LOG(INFO) << request->path <<  #TTAG << " Service ms: " << ZPDS_CURRTIME_MS - currtime; \
+			break; \
+		}
 
-					case ::zpds::hrpc::M_MANAGE_EXTER : {
-						zpds::query::UserDataRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::ExterDataService service; //ExterData
-						service.ManageDataAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " ExterData Service ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
+					HANDLE_HRPC_SERVICE(M_MANAGE_TAGS,TagDataRespT,TagDataService,ManageDataAction)
+					HANDLE_HRPC_SERVICE(M_MANAGE_CATEGORY,CategoryRespT,CategoryService,ManageDataAction)
+					HANDLE_HRPC_SERVICE(M_MANAGE_EXTER,UserDataRespT,ExterDataService,ManageDataAction)
+					HANDLE_HRPC_SERVICE(M_MANAGE_USER,UserDataRespT,UserDataService,ManageDataAction)
+					HANDLE_HRPC_SERVICE(M_RESETPASS_EXTER,ResetRespT,ExterDataService,ResetPassAction)
+					HANDLE_HRPC_SERVICE(M_RESETPASS_USER,ResetRespT,UserDataService,ResetPassAction)
+					HANDLE_HRPC_SERVICE(M_MANAGE_LOCALDATA,ItemDataRespT,LocalDataService,ManageDataAction)
+					HANDLE_HRPC_SERVICE(M_MANAGE_WIKIDATA,ItemDataRespT,WikiDataService,ManageDataAction)
 
-					case ::zpds::hrpc::M_MANAGE_USER : {
-						zpds::query::UserDataRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::UserDataService service; //UserData
-						service.ManageDataAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " UserData Service ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
-
-					case ::zpds::hrpc::M_RESETPASS_EXTER : {
-						zpds::query::ResetRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::ExterDataService service; //ExterData
-						service.ResetPassAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " Exter ResetPass ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
-
-					case ::zpds::hrpc::M_RESETPASS_USER : {
-						zpds::query::ResetRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::UserDataService service; //UserData
-						service.ResetPassAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " User ResetPass ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
-
-					case ::zpds::hrpc::M_MANAGE_CATEGORY : {
-						zpds::query::CategoryRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::CategoryService service; //Category
-						service.ManageDataAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " Category Service ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
-
-					case ::zpds::hrpc::M_MANAGE_LOCALDATA : {
-						zpds::query::ItemDataRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::LocalDataService service; //LocalData
-						service.ManageDataAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " LocalData Service ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
-
-					case ::zpds::hrpc::M_MANAGE_WIKIDATA : {
-						zpds::query::ItemDataRespT data;
-						if (!data.ParseFromString( ::zpds::utils::S64String::Decode(request->content.string()) ))
-							throw zpds::BadDataException("Bad Protobuf Format");
-						// action
-						zpds::store::WikiDataService service; //WikiData
-						service.ManageDataAction(stptr, &data);
-						// aftermath
-						data.SerializeToString(&output);
-						LOG(INFO) << request->path << " WikiData Service ms: " << ZPDS_CURRTIME_MS - currtime;
-						break;
-					}
+#undef HANDLE_HRPC_SERVICE
 
 					}
 					// end here
