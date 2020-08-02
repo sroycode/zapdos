@@ -20,10 +20,14 @@ RUN apt-get -y update -qq && \
     protobuf-compiler vim-common libboost-all-dev libboost-all-dev \
     libcurl4-openssl-dev zlib1g-dev liblz4-dev libprotobuf-dev \
     libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev libctemplate-dev \
-    libtbb-dev libzstd-dev libxapian-dev libcrypto++-dev librocksdb-dev && \
+    libtbb-dev libzstd-dev libxapian-dev librocksdb-dev wget && \
+		wget -q http://ftp.us.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++-dev_8.2.0-2_amd64.deb && \
+		wget -q http://ftp.us.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++-utils_8.2.0-2_amd64.deb && \
+		wget -q http://ftp.us.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++8_8.2.0-2_amd64.deb && \
+		dpkg --install libcrypto++8_8.2.0-2_amd64.deb libcrypto++-dev_8.2.0-2_amd64.deb libcrypto++-utils_8.2.0-2_amd64.deb && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+		libcrypto++8_8.2.0-2_amd64.deb libcrypto++-dev_8.2.0-2_amd64.deb libcrypto++-utils_8.2.0-2_amd64.deb
 
 WORKDIR /app
 
