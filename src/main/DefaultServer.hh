@@ -34,7 +34,7 @@
 #define _ZPDS_DEFAULTSERVER_HH_
 
 #define ZPDS_DEFAULT_EXE_NAME "zpds_server"
-#define ZPDS_DEFAULT_EXE_VERSION "1.0.0"
+#define ZPDS_DEFAULT_EXE_VERSION "1.0.2"
 #define ZPDS_DEFAULT_EXE_COPYRIGHT "Copyright (c) 2020 S Roychowdhury"
 
 #define ZPDS_DEFAULT_STRN_SYSTEM "system"
