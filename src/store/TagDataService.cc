@@ -37,6 +37,8 @@
 #include "store/StoreTrans.hpp"
 #include "store/TempNameCache.hpp"
 
+#include "utils/PrintWith.hpp"
+
 /**
 * Get : gets the data
 *
@@ -124,8 +126,14 @@ void zpds::store::TagDataService::ManageDataAction(::zpds::utils::SharedTable::p
 			throw zpds::BadDataException("Tag must have name: " + rdata->name(),M_INVALID_PARAM);
 		if ( rdata->name() != SanitNSLower(rdata->name()) )
 			throw zpds::BadDataException("Tag has invalid name: " + rdata->name(),M_INVALID_PARAM);
-		if ( namecache.CheckLocal(rdata->keytype(),rdata->name()) )
-			throw zpds::BadDataException("Duplicate tag found: " + rdata->name(),M_INVALID_PARAM);
+
+		// duplicate and parallel
+		std::string taginfo = ::zpds::utils::PrintWithPipe::String( (int)rdata->keytype(), rdata->name() );
+		if (namecache.CheckLocal(::zpds::store::K_TAGDATA,taginfo))
+			throw zpds::BadDataException("Duplicate tag found: " + taginfo,M_INVALID_PARAM);
+		if (!namecache.ReserveName(::zpds::store::K_TAGDATA,taginfo,false))
+			throw zpds::BadDataException("This tag is being worked on: " + taginfo,M_INVALID_PARAM);
+
 		status->set_updatecount( status->updatecount() + 1 );
 
 		::zpds::store::TagDataT tdata;

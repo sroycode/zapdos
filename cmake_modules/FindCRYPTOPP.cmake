@@ -49,19 +49,19 @@ FIND_PATH (CRYPTOPP_ROOT_DIR
 # Re-use the previous path:
 FIND_PATH (CRYPTOPP_INCLUDE_DIR
   NAMES cryptopp/cryptlib.h
-  HINTS ${CRYPTOPP_ROOT_DIR}
+  HINTS ${CRYPTOPP_ROOT_DIR} ${PROJECT_SOURCE_DIR}/thirdparty
   PATH_SUFFIXES include
   DOC "CryptoPP include directory")
 
 FIND_LIBRARY (CRYPTOPP_LIBRARY_DEBUG
   NAMES cryptlibd cryptoppd
-  HINTS ${CRYPTOPP_ROOT_DIR}
+  HINTS ${CRYPTOPP_ROOT_DIR} ${PROJECT_SOURCE_DIR}/thirdparty
   PATH_SUFFIXES lib
   DOC "CryptoPP debug library")
 
 FIND_LIBRARY (CRYPTOPP_LIBRARY_RELEASE
   NAMES cryptlib cryptopp
-  HINTS ${CRYPTOPP_ROOT_DIR}
+  HINTS ${CRYPTOPP_ROOT_DIR} ${PROJECT_SOURCE_DIR}/thirdparty
   PATH_SUFFIXES lib
   DOC "CryptoPP release library")
 

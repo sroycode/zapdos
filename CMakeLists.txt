@@ -12,7 +12,7 @@ set(ZPDS_VERSION_MAJOR "1")
 set(ZPDS_VERSION_MINOR "0")
 set(ZPDS_VERSION_PATCH "0")
 set(ZPDS_VERSION_STRING "${ZPDS_VERSION_MAJOR}.${ZPDS_VERSION_MINOR}.${ZPDS_VERSION_PATCH}")
-set(ZPDS_VERSION_PHASE "prerelease/${CMAKE_BUILD_TYPE}")
+set(ZPDS_VERSION_PHASE "release/${CMAKE_BUILD_TYPE}")
 
 # hide gflag default help
 OPTION(GFLAGS_STRIP_INTERNAL_FLAG_HELP "Hide help from GFLAGS modules" OFF)
@@ -125,7 +125,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 endif()
 
 #find_package(threads REQUIRED)
-find_package(Boost 1.65.0 COMPONENTS coroutine chrono system thread context date_time filesystem regex REQUIRED)
+find_package(Boost 1.65.0 COMPONENTS coroutine chrono system thread context date_time iostreams filesystem regex REQUIRED)
 find_package(GLOG REQUIRED)
 find_package(GFLAGS REQUIRED)
 find_package(TCMALLOC REQUIRED)

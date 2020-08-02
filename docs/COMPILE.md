@@ -26,7 +26,12 @@ On mac +homebrew and ubuntu-18 +apt default versions work fine.
 ### For Mac +homebrew
 
 ```
-brew install glog gflags gperftools libicu icu4c curl-openssl tbb rocksdb protobuf gperf snappy cryptopp xapian
+brew install boost cmake pkgconfig \
+glog gflags gperftools icu4c curl curl-openssl tbb rocksdb protobuf gperf snappy xapian \
+jq httpie wget
+# install crypto++ from source
+. .profile.mac 
+bash scripts/thirdparty.sh cryptopp
 # optional ctemplate
 brew install ctemplate
 ```
@@ -41,15 +46,30 @@ sudo apt install -y \
 	wget ccache cmake make libtool pkg-config g++ gcc autoconf automake curl jq lcov \
 	protobuf-compiler vim-common libboost-all-dev libboost-all-dev libcurl4-openssl-dev zlib1g-dev liblz4-dev libprotobuf-dev \
 	libgoogle-glog-dev libgflags-dev libgoogle-perftools-dev libsnappy-dev libbz2-dev libz-dev \
-	libtbb-dev libzstd-dev librocksdb-dev libcrypto++-dev
+	libtbb-dev libzstd-dev librocksdb-dev
+
 # xapian
 sudo add-apt-repository -y ppa:xapian-backports/ppa
 sudo apt update -y
 sudo apt install -y libxapian-dev 
+
+# cryptopp 8 
+wget -q http://ftp.us.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++-dev_8.2.0-2_amd64.deb
+wget -q http://ftp.us.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++-utils_8.2.0-2_amd64.deb
+wget -q http://ftp.us.debian.org/debian/pool/main/libc/libcrypto++/libcrypto++8_8.2.0-2_amd64.deb
+sudo dpkg --install libcrypto++8_8.2.0-2_amd64.deb libcrypto++-dev_8.2.0-2_amd64.deb libcrypto++-utils_8.2.0-2_amd64.deb
+
 # optional ctemplate
 sudo apt install -y libctemplate-dev
+```
+
+To remove libcrypto++ 8
 
 ```
+sudo dpkg --remove libcrypto++-dev_8.2.0 libcrypto++ libcrypto++-utils
+```
+
+
 
 ## Parameters
 
