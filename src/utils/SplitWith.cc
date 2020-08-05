@@ -32,7 +32,7 @@
  */
 #include <locale>
 #include <sstream>
-#include <boost/bind.hpp>
+#include <functional>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
@@ -91,6 +91,11 @@ std::vector<std::string> zpds::utils::SplitWith::Regex(const std::string& input,
 {
 	std::vector<std::string> output;
 	boost::algorithm::split_regex(output,input,reg);
-	if (trim) std::for_each(output.begin(), output.end(), boost::bind(&boost::trim<std::string>, _1, std::locale() ));
+	if (trim)
+		std::for_each(
+		    output.begin(),
+		    output.end(),
+		    std::bind(&boost::trim<std::string>, std::placeholders::_1, std::locale())
+		);
 	return output;
 }
