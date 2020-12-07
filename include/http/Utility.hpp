@@ -186,13 +186,13 @@ public:
 				name_end_pos = std::string::npos;
 				value_pos = std::string::npos;
 			}
-			else if(query_string[c] == '=') {
+			else if(query_string[c] == '=' && name_end_pos == std::string::npos) {
 				name_end_pos = c;
 				value_pos = c + 1;
 			}
 		}
 		if(name_pos < query_string.size()) {
-			auto name = query_string.substr(name_pos, name_end_pos - name_pos);
+			auto name = query_string.substr(name_pos, (name_end_pos == std::string::npos ? std::string::npos : name_end_pos - name_pos));
 			if(!name.empty()) {
 				auto value = value_pos >= query_string.size() ? std::string() : query_string.substr(value_pos);
 				result.emplace(std::move(name), Percent::decode(value));
@@ -304,7 +304,7 @@ public:
 			std::size_t query_start = std::string::npos;
 			std::size_t path_and_query_string_end = std::string::npos;
 			for(std::size_t i = method_end + 1; i < line.size(); ++i) {
-				if(line[i] == '?' && (i + 1) < line.size())
+				if(line[i] == '?' && (i + 1) < line.size() && query_start == std::string::npos)
 					query_start = i + 1;
 				else if(line[i] == ' ') {
 					path_and_query_string_end = i;
@@ -509,10 +509,10 @@ inline void spin_loop_pause() noexcept
 }
 } // namespace http
 } // namespace zpds
+
 // TODO: need verification that the following checks are correct:
 #elif defined(_MSC_VER) && _MSC_VER >= 1800 && (defined(_M_X64) || defined(_M_IX86))
 #include <intrin.h>
-
 namespace zpds {
 namespace http {
 inline void spin_loop_pause() noexcept
@@ -531,6 +531,7 @@ inline void spin_loop_pause() noexcept {}
 
 namespace zpds {
 namespace http {
+
 /// Makes it possible to for instance cancel Asio handlers without stopping asio::io_service.
 class ScopeRunner {
 	/// Scope count that is set to -1 if scopes are to be canceled.
@@ -579,6 +580,7 @@ public:
 		}
 	}
 };
+
 } // namespace http
 } // namespace zpds
 

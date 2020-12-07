@@ -48,17 +48,17 @@ namespace errc = boost::system::errc;
 using system_error = boost::system::system_error;
 namespace make_error_code = boost::system::errc;
 
-} // namespace http
-} // namespace zpds
-
-namespace zpds {
-namespace http {
-#if(BOOST_ASIO_VERSION >= 101300)
+#if (BOOST_ASIO_VERSION >= 101300)
 using io_context = asio::io_context;
 using io_whatever = asio::io_context;
 using resolver_results = asio::ip::tcp::resolver::results_type;
 using async_connect_endpoint = asio::ip::tcp::endpoint;
 
+template <typename handler_type>
+inline void post(io_context &context, handler_type &&handler)
+{
+	asio::post(context, std::forward<handler_type>(handler));
+}
 inline void restart(io_context &context) noexcept
 {
 	context.restart();
@@ -67,20 +67,15 @@ inline asio::ip::address make_address(const std::string &str) noexcept
 {
 	return asio::ip::make_address(str);
 }
-template <typename socket_type>
-asio::executor get_socket_executor(socket_type &socket)
+template <typename socket_type, typename duration_type>
+std::unique_ptr<asio::steady_timer> make_steady_timer(socket_type &socket, std::chrono::duration<duration_type> duration)
 {
-	return socket.get_executor();
+	return std::unique_ptr<asio::steady_timer>(new asio::steady_timer(socket.get_executor(), duration));
 }
 template <typename handler_type>
 void async_resolve(asio::ip::tcp::resolver &resolver, const std::pair<std::string, std::string> &host_port, handler_type &&handler)
 {
 	resolver.async_resolve(host_port.first, host_port.second, std::forward<handler_type>(handler));
-}
-template <typename handler_type>
-inline void post(io_context &context, handler_type &&handler)
-{
-	asio::post(context, std::forward<handler_type>(handler));
 }
 inline asio::executor_work_guard<io_context::executor_type> make_work_guard(io_context &context)
 {
@@ -92,6 +87,11 @@ using io_whatever = asio::io_service;
 using resolver_results = asio::ip::tcp::resolver::iterator;
 using async_connect_endpoint = asio::ip::tcp::resolver::iterator;
 
+template <typename handler_type>
+inline void post(io_context &context, handler_type &&handler)
+{
+	context.post(std::forward<handler_type>(handler));
+}
 inline void restart(io_context &context) noexcept
 {
 	context.reset();
@@ -100,20 +100,15 @@ inline asio::ip::address make_address(const std::string &str) noexcept
 {
 	return asio::ip::address::from_string(str);
 }
-template <typename socket_type>
-io_context &get_socket_executor(socket_type &socket)
+template <typename socket_type, typename duration_type>
+std::unique_ptr<asio::steady_timer> make_steady_timer(socket_type &socket, std::chrono::duration<duration_type> duration)
 {
-	return socket.get_io_service();
+	return std::unique_ptr<asio::steady_timer>(new asio::steady_timer(socket.get_io_service(), duration));
 }
 template <typename handler_type>
 void async_resolve(asio::ip::tcp::resolver &resolver, const std::pair<std::string, std::string> &host_port, handler_type &&handler)
 {
 	resolver.async_resolve(asio::ip::tcp::resolver::query(host_port.first, host_port.second), std::forward<handler_type>(handler));
-}
-template <typename handler_type>
-inline void post(io_context &context, handler_type &&handler)
-{
-	context.post(std::forward<handler_type>(handler));
 }
 inline io_context::work make_work_guard(io_context &context)
 {

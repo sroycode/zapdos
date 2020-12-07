@@ -47,7 +47,10 @@
 
 namespace zpds {
 namespace http {
-template <class socket_type> class HttpServer;
+
+
+template <class socket_type>
+class HttpServer;
 
 template <class socket_type>
 class HttpServerBase {
@@ -172,14 +175,14 @@ public:
 		/// Convenience function for writing status line, potential header fields, and empty content.
 		void write(StatusCode status_code = StatusCode::success_ok, const CaseInsensitiveMultimap &header = CaseInsensitiveMultimap())
 		{
-			*this << "HTTP/1.1 " << zpds::http::status_code(status_code) << "\r\n";
+			*this << "HTTP/1.1 " << ::zpds::http::status_code(status_code) << "\r\n";
 			write_header(header, 0);
 		}
 
 		/// Convenience function for writing status line, header fields, and content.
 		void write(StatusCode status_code, string_view content, const CaseInsensitiveMultimap &header = CaseInsensitiveMultimap())
 		{
-			*this << "HTTP/1.1 " << zpds::http::status_code(status_code) << "\r\n";
+			*this << "HTTP/1.1 " << ::zpds::http::status_code(status_code) << "\r\n";
 			write_header(header, content.size());
 			if(!content.empty())
 				*this << content;
@@ -188,7 +191,7 @@ public:
 		/// Convenience function for writing status line, header fields, and content.
 		void write(StatusCode status_code, std::istream &content, const CaseInsensitiveMultimap &header = CaseInsensitiveMultimap())
 		{
-			*this << "HTTP/1.1 " << zpds::http::status_code(status_code) << "\r\n";
+			*this << "HTTP/1.1 " << ::zpds::http::status_code(status_code) << "\r\n";
 			content.seekg(0, std::ios::end);
 			auto size = content.tellg();
 			content.seekg(0, std::ios::beg);
@@ -276,6 +279,17 @@ public:
 			return asio::ip::tcp::endpoint();
 		}
 
+		asio::ip::tcp::endpoint local_endpoint() const noexcept
+		{
+			try {
+				if(auto connection = this->connection.lock())
+					return connection->socket->lowest_layer().local_endpoint();
+			}
+			catch(...) {
+			}
+			return asio::ip::tcp::endpoint();
+		}
+
 		/// Deprecated, please use remote_endpoint().address().to_string() instead.
 		DEPRECATED std::string remote_endpoint_address() const noexcept
 		{
@@ -303,7 +317,7 @@ public:
 		/// Returns query keys with percent-decoded values.
 		CaseInsensitiveMultimap parse_query_string() const noexcept
 		{
-			return zpds::http::QueryString::parse(query_string);
+			return ::zpds::http::QueryString::parse(query_string);
 		}
 	};
 
@@ -337,7 +351,7 @@ protected:
 				return;
 			}
 
-			timer = std::unique_ptr<asio::steady_timer>(new asio::steady_timer(get_socket_executor(*socket), std::chrono::seconds(seconds)));
+			timer = make_steady_timer(*socket, std::chrono::seconds(seconds));
 			std::weak_ptr<Connection> self_weak(this->shared_from_this()); // To avoid keeping Connection instance alive longer than needed
 			timer->async_wait([self_weak](const error_code &ec) {
 				if(!ec) {
@@ -364,7 +378,7 @@ protected:
 		Session(std::size_t max_request_streambuf_size, std::shared_ptr<Connection> connection_) noexcept : connection(std::move(connection_)), request(new Request(max_request_streambuf_size, connection)) {}
 
 		std::shared_ptr<Connection> connection;
-		std::shared_ptr<Request> request;
+		ReqPtr request;
 	};
 
 public:
@@ -377,6 +391,9 @@ public:
 		/// Port number to use. Defaults to 80 for HTTP and 443 for HTTPS. Set to 0 get an assigned port.
 		unsigned short port;
 		/// If io_service is not set, number of threads that the server will use when start() is called.
+		/// Defaults to 1 thread.
+		/// This is not used here
+		// std::size_t thread_pool_size = 1;
 		/// Timeout on request completion. Defaults to 5 seconds.
 		long timeout_request = 5;
 		/// Timeout on request/response content completion. Defaults to 300 seconds.
@@ -433,14 +450,24 @@ public:
 		std::unique_lock<std::mutex> lock(start_stop_mutex);
 
 		asio::ip::tcp::endpoint endpoint;
-		if(config.address.size() > 0)
+		if(!config.address.empty())
 			endpoint = asio::ip::tcp::endpoint(make_address(config.address), config.port);
 		else
 			endpoint = asio::ip::tcp::endpoint(asio::ip::tcp::v6(), config.port);
 
 		if(!acceptor)
 			acceptor = std::unique_ptr<asio::ip::tcp::acceptor>(new asio::ip::tcp::acceptor(*io_whatever));
-		acceptor->open(endpoint.protocol());
+		try {
+			acceptor->open(endpoint.protocol());
+		}
+		catch(const system_error &error) {
+			if(error.code() == asio::error::address_family_not_supported && config.address.empty()) {
+				endpoint = asio::ip::tcp::endpoint(asio::ip::tcp::v4(), config.port);
+				acceptor->open(endpoint.protocol());
+			}
+			else
+				throw;
+		}
 		acceptor->set_option(asio::socket_base::reuse_address(config.reuse_address));
 		if(config.fast_open) {
 #if defined(__linux__) && defined(TCP_FASTOPEN)
@@ -450,7 +477,9 @@ public:
 #endif // End Linux
 		}
 		acceptor->bind(endpoint);
+
 		after_bind();
+
 		auto port = acceptor->local_endpoint().port();
 
 		acceptor->listen();
@@ -463,7 +492,6 @@ public:
 			io_whatever->post([callback, port] { callback(port); });
 #endif
 		}
-
 	}
 
 	/// Stop accepting new requests, and close current connections.
@@ -557,7 +585,7 @@ protected:
 				if(header_it != session->request->header.end()) {
 					unsigned long long content_length = 0;
 					try {
-						content_length = stoull(header_it->second);
+						content_length = std::stoull(header_it->second);
 					}
 					catch(const std::exception &) {
 						if(this->on_error)
@@ -565,7 +593,7 @@ protected:
 						return;
 					}
 					if(content_length > session->request->streambuf.max_size()) {
-						auto response = std::shared_ptr<Response>(new Response(session, this->config.timeout_content));
+						auto response = RespPtr(new Response(session, this->config.timeout_content));
 						response->write(StatusCode::client_error_payload_too_large);
 						if(this->on_error)
 							this->on_error(session->request, make_error_code::make_error_code(errc::message_size));
@@ -616,11 +644,11 @@ protected:
 			if(!ec) {
 				std::istream istream(chunk_size_streambuf.get());
 				std::string line;
-				getline(istream, line);
+				std::getline(istream, line);
 				bytes_transferred -= line.size() + 1;
 				unsigned long chunk_size = 0;
 				try {
-					chunk_size = stoul(line, 0, 16);
+					chunk_size = std::stoul(line, 0, 16);
 				}
 				catch(...) {
 					if(this->on_error)
@@ -628,8 +656,13 @@ protected:
 					return;
 				}
 
-				if(2 + chunk_size + session->request->streambuf.size() > session->request->streambuf.max_size()) {
-					auto response = std::shared_ptr<Response>(new Response(session, this->config.timeout_content));
+				if(chunk_size == 0) {
+					this->find_resource(session);
+					return;
+				}
+
+				if(chunk_size + session->request->streambuf.size() > session->request->streambuf.max_size()) {
+					auto response = RespPtr(new Response(session, this->config.timeout_content));
 					response->write(StatusCode::client_error_payload_too_large);
 					if(this->on_error)
 						this->on_error(session->request, make_error_code::make_error_code(errc::message_size));
@@ -647,25 +680,41 @@ protected:
 					source.consume(bytes_to_move);
 				}
 
-				if((2 + chunk_size) > num_additional_bytes) {
-					asio::async_read(*session->connection->socket, session->request->streambuf, asio::transfer_exactly(2 + chunk_size - num_additional_bytes), [this, session, chunk_size_streambuf, chunk_size](const error_code &ec, size_t /*bytes_transferred*/) {
+				if(chunk_size > num_additional_bytes) {
+					asio::async_read(*session->connection->socket, session->request->streambuf, asio::transfer_exactly(chunk_size - num_additional_bytes), [this, session, chunk_size_streambuf](const error_code &ec, size_t /*bytes_transferred*/) {
 						auto lock = session->connection->handler_runner->continue_lock();
 						if(!lock)
 							return;
 
 						if(!ec) {
-							std::istream istream(&session->request->streambuf);
-
 							// Remove "\r\n"
-							istream.get();
-							istream.get();
-
-							if(chunk_size > 0)
-								read_chunked_transfer_encoded(session, chunk_size_streambuf);
-							else
-								this->find_resource(session);
+							auto null_buffer = std::make_shared<asio::streambuf>(2);
+							asio::async_read(*session->connection->socket, *null_buffer, asio::transfer_exactly(2), [this, session, chunk_size_streambuf, null_buffer](const error_code &ec, size_t /*bytes_transferred*/) {
+								auto lock = session->connection->handler_runner->continue_lock();
+								if(!lock)
+									return;
+								if(!ec)
+									read_chunked_transfer_encoded(session, chunk_size_streambuf);
+								else
+									this->on_error(session->request, ec);
+							});
 						}
 						else if(this->on_error)
+							this->on_error(session->request, ec);
+					});
+				}
+				else if(2 + chunk_size > num_additional_bytes) { // If only end of chunk remains unread (\n or \r\n)
+					// Remove "\r\n"
+					if(2 + chunk_size - num_additional_bytes == 1)
+						istream.get();
+					auto null_buffer = std::make_shared<asio::streambuf>(2);
+					asio::async_read(*session->connection->socket, *null_buffer, asio::transfer_exactly(2 + chunk_size - num_additional_bytes), [this, session, chunk_size_streambuf, null_buffer](const error_code &ec, size_t /*bytes_transferred*/) {
+						auto lock = session->connection->handler_runner->continue_lock();
+						if(!lock)
+							return;
+						if(!ec)
+							read_chunked_transfer_encoded(session, chunk_size_streambuf);
+						else
 							this->on_error(session->request, ec);
 					});
 				}
@@ -674,10 +723,7 @@ protected:
 					istream.get();
 					istream.get();
 
-					if(chunk_size > 0)
-						read_chunked_transfer_encoded(session, chunk_size_streambuf);
-					else
-						this->find_resource(session);
+					read_chunked_transfer_encoded(session, chunk_size_streambuf);
 				}
 			}
 			else if(this->on_error)
@@ -723,8 +769,8 @@ protected:
 	void write(const std::shared_ptr<Session> &session,
 	           std::function<void(std::shared_ptr<typename HttpServerBase<socket_type>::Response>, std::shared_ptr<typename HttpServerBase<socket_type>::Request>)> &resource_function)
 	{
-		auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this](Response *response_ptr) {
-			auto response = std::shared_ptr<Response>(response_ptr);
+		auto response = RespPtr(new Response(session, config.timeout_content), [this](Response *response_ptr) {
+			auto response = RespPtr(response_ptr);
 			response->send_on_delete([this, response](const error_code &ec) {
 				response->session->connection->cancel_timeout();
 				if(!ec) {

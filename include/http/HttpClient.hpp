@@ -69,16 +69,17 @@ protected:
 			async_resolve(*resolver, *host_port, [this, session, resolver](const error_code &ec, resolver_results results) {
 				session->connection->cancel_timeout();
 				auto lock = session->connection->handler_runner->continue_lock();
-				if(!lock) return;
+				if(!lock)
+					return;
 				if(!ec) {
 					session->connection->set_timeout(config.timeout_connect);
-					boost::asio::async_connect(*session->connection->socket, results,
-					[this, session, resolver](const error_code &ec, async_connect_endpoint /*endpoint*/) {
+					asio::async_connect(*session->connection->socket, results, [this, session, resolver](const error_code &ec, async_connect_endpoint /*endpoint*/) {
 						session->connection->cancel_timeout();
 						auto lock = session->connection->handler_runner->continue_lock();
-						if(!lock) return;
+						if(!lock)
+							return;
 						if(!ec) {
-							boost::asio::ip::tcp::no_delay option(true);
+							asio::ip::tcp::no_delay option(true);
 							error_code ec;
 							session->connection->socket->set_option(option, ec);
 							this->write(session);
@@ -94,6 +95,7 @@ protected:
 		else
 			write(session);
 	}
+
 };
 
 } // namespace http

@@ -50,8 +50,8 @@ class HeaderEndMatch {
 	int lflf = 0;
 
 public:
-	/// Match condition for boost::asio::read_until to match both standard and non-standard HTTP header endings.
-	std::pair<boost::asio::buffers_iterator<boost::asio::const_buffers_1>, bool> operator()(boost::asio::buffers_iterator<boost::asio::const_buffers_1> begin, boost::asio::buffers_iterator<boost::asio::const_buffers_1> end)
+	/// Match condition for asio::read_until to match both standard and non-standard HTTP header endings.
+	std::pair<asio::buffers_iterator<asio::const_buffers_1>, bool> operator()(asio::buffers_iterator<asio::const_buffers_1> begin, asio::buffers_iterator<asio::const_buffers_1> end)
 	{
 		auto it = begin;
 		for(; it != end; ++it) {
@@ -90,14 +90,17 @@ public:
 
 namespace boost {
 namespace asio {
-template <> struct is_match_condition<::zpds::http::HeaderEndMatch> : public std::true_type {};
+template <>
+struct is_match_condition<::zpds::http::HeaderEndMatch> : public std::true_type {};
 } // namespace asio
 } // namespace boost
+
 
 namespace zpds {
 namespace http {
 
-template <class socket_type> class HttpClient;
+template <class socket_type>
+class HttpClient;
 
 template <class socket_type>
 class HttpClientBase {
@@ -113,15 +116,15 @@ public:
 		/// Convenience function to return content as a string.
 		std::string string() noexcept
 		{
-			return std::string(boost::asio::buffers_begin(streambuf.data()), boost::asio::buffers_end(streambuf.data()));
+			return std::string(asio::buffers_begin(streambuf.data()), asio::buffers_end(streambuf.data()));
 		}
 
 		/// When true, this is the last response content part from server for the current request.
 		bool end = true;
 
 	private:
-		boost::asio::streambuf &streambuf;
-		Content(boost::asio::streambuf &streambuf) noexcept : std::istream(&streambuf), streambuf(streambuf) {}
+		asio::streambuf &streambuf;
+		Content(asio::streambuf &streambuf) noexcept : std::istream(&streambuf), streambuf(streambuf) {}
 	};
 
 protected:
@@ -139,7 +142,7 @@ public:
 			CaseInsensitiveMultimap header;
 		};
 
-		boost::asio::streambuf streambuf;
+		asio::streambuf streambuf;
 
 		std::shared_ptr<Shared> shared;
 
@@ -165,9 +168,9 @@ public:
 			if(auto connection = this->connection_weak.lock())
 				connection->close();
 		}
-	};	
-	using RespPtr = std::shared_ptr<Response>;
+	};
 
+	using RespPtr = std::shared_ptr<Response>;
 	class Config {
 		friend class HttpClientBase<socket_type>;
 
@@ -195,16 +198,16 @@ protected:
 
 		std::shared_ptr<ScopeRunner> handler_runner;
 
-		std::unique_ptr<socket_type> socket; // Socket must be unique_ptr since boost::asio::ssl::stream<boost::asio::ip::tcp::socket> is not movable
+		std::unique_ptr<socket_type> socket; // Socket must be unique_ptr since asio::ssl::stream<asio::ip::tcp::socket> is not movable
 		bool in_use = false;
 		bool attempt_reconnect = true;
 
-		std::unique_ptr<boost::asio::steady_timer> timer;
+		std::unique_ptr<asio::steady_timer> timer;
 
 		void close() noexcept
 		{
 			error_code ec;
-			socket->lowest_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+			socket->lowest_layer().shutdown(asio::ip::tcp::socket::shutdown_both, ec);
 			socket->lowest_layer().cancel(ec);
 		}
 
@@ -214,7 +217,7 @@ protected:
 				timer = nullptr;
 				return;
 			}
-			timer = std::unique_ptr<boost::asio::steady_timer>(new boost::asio::steady_timer(get_socket_executor(*socket), std::chrono::seconds(seconds)));
+			timer = make_steady_timer(*socket, std::chrono::seconds(seconds));
 			std::weak_ptr<Connection> self_weak(this->shared_from_this()); // To avoid keeping Connection instance alive longer than needed
 			timer->async_wait([self_weak](const error_code &ec) {
 				if(!ec) {
@@ -238,11 +241,11 @@ protected:
 
 	class Session {
 	public:
-		Session(std::size_t max_response_streambuf_size, std::shared_ptr<Connection> connection_, std::unique_ptr<boost::asio::streambuf> request_streambuf_) noexcept
+		Session(std::size_t max_response_streambuf_size, std::shared_ptr<Connection> connection_, std::unique_ptr<asio::streambuf> request_streambuf_) noexcept
 			: connection(std::move(connection_)), request_streambuf(std::move(request_streambuf_)), response(new Response(max_response_streambuf_size, connection)) {}
 
 		std::shared_ptr<Connection> connection;
-		std::unique_ptr<boost::asio::streambuf> request_streambuf;
+		std::unique_ptr<asio::streambuf> request_streambuf;
 		RespPtr response;
 		std::function<void(const error_code &)> callback;
 	};
@@ -251,7 +254,7 @@ public:
 	/// Set before calling a request function.
 	Config config;
 
-	/// If you want to reuse an already created boost::asio::io_service, store its pointer here before calling a request function.
+	/// If you want to reuse an already created asio::io_service, store its pointer here before calling a request function.
 	/// Do not set when using synchronous request functions.
 	std::shared_ptr<::zpds::http::io_whatever> io_whatever;
 
@@ -273,7 +276,7 @@ public:
 		return sync_request(method, path, content, header);
 	}
 
-	/// Asynchronous request where running HttpClient's io_service is required.
+	/// Asynchronous request where running Client's io_service is required.
 	/// Do not use concurrently with the synchronous request functions.
 	/// When requesting Server-Sent Events: request_callback might be called more than twice, first call with empty contents on open, and with ec = error::eof on last call
 	void request(const std::string &method, const std::string &path, string_view content, const CaseInsensitiveMultimap &header,
@@ -328,7 +331,7 @@ public:
 		connect(session);
 	}
 
-	/// Asynchronous request where running HttpClient's io_service is required.
+	/// Asynchronous request where running Client's io_service is required.
 	/// Do not use concurrently with the synchronous request functions.
 	/// When requesting Server-Sent Events: request_callback might be called more than twice, first call with empty contents on open, and with ec = error::eof on last call
 	void request(const std::string &method, const std::string &path, string_view content,
@@ -337,7 +340,7 @@ public:
 		request(method, path, content, CaseInsensitiveMultimap(), std::move(request_callback_));
 	}
 
-	/// Asynchronous request where running HttpClient's io_service is required.
+	/// Asynchronous request where running Client's io_service is required.
 	/// Do not use concurrently with the synchronous request functions.
 	/// When requesting Server-Sent Events: request_callback might be called more than twice, first call with empty contents on open, and with ec = error::eof on last call
 	void request(const std::string &method, const std::string &path,
@@ -346,7 +349,7 @@ public:
 		request(method, path, std::string(), CaseInsensitiveMultimap(), std::move(request_callback_));
 	}
 
-	/// Asynchronous request where running HttpClient's io_service is required.
+	/// Asynchronous request where running Client's io_service is required.
 	/// Do not use concurrently with the synchronous request functions.
 	/// When requesting Server-Sent Events: request_callback might be called more than twice, first call with empty contents on open, and with ec = error::eof on last call
 	void request(const std::string &method, std::function<void(RespPtr, const error_code &)> &&request_callback_)
@@ -354,7 +357,7 @@ public:
 		request(method, std::string("/"), std::string(), CaseInsensitiveMultimap(), std::move(request_callback_));
 	}
 
-	/// Asynchronous request where running HttpClient's io_service is required.
+	/// Asynchronous request where running Client's io_service is required.
 	/// Do not use concurrently with the synchronous request functions.
 	/// When requesting Server-Sent Events: request_callback might be called more than twice, first call with empty contents on open, and with ec = error::eof on last call
 	void request(const std::string &method, const std::string &path, std::istream &content, const CaseInsensitiveMultimap &header,
@@ -413,7 +416,7 @@ public:
 		connect(session);
 	}
 
-	/// Asynchronous request where running HttpClient's io_service is required.
+	/// Asynchronous request where running Client's io_service is required.
 	/// Do not use concurrently with the synchronous request functions.
 	/// When requesting Server-Sent Events: request_callback might be called more than twice, first call with empty contents on open, and with ec = error::eof on last call
 	void request(const std::string &method, const std::string &path, std::istream &content,
@@ -436,10 +439,13 @@ public:
 	{
 		handler_runner->stop();
 		stop();
+		if(internal_io_service)
+			io_whatever->stop();
 	}
 
 protected:
 	bool internal_io_service = false;
+
 	std::string host;
 	unsigned short port;
 	unsigned short default_port;
@@ -470,6 +476,7 @@ protected:
 				if(io_whatever) // Throw if io_service already set
 					throw make_error_code::make_error_code(errc::operation_not_permitted);
 				io_whatever = std::make_shared<::zpds::http::io_whatever>();
+				internal_io_service = true;
 				auto io_whatever_ = io_whatever;
 				std::thread thread([io_whatever_] {
 					auto work = make_work_guard(*io_whatever_);
@@ -498,7 +505,7 @@ protected:
 					// Move partial response_ content to response:
 					auto &source = response_->streambuf;
 					auto &target = response->streambuf;
-					target.commit(boost::asio::buffer_copy(target.prepare(source.size()), source.data()));
+					target.commit(asio::buffer_copy(target.prepare(source.size()), source.data()));
 					source.consume(source.size());
 				}
 			}
@@ -560,7 +567,7 @@ protected:
 		else {
 			parsed_host_port.first = host_port.substr(0, host_end);
 			try {
-				parsed_host_port.second = static_cast<unsigned short>(stoul(host_port.substr(host_end + 1)));
+				parsed_host_port.second = static_cast<unsigned short>(std::stoul(host_port.substr(host_end + 1)));
 			}
 			catch(...) {
 				parsed_host_port.second = default_port;
@@ -572,15 +579,15 @@ protected:
 	virtual std::shared_ptr<Connection> create_connection() noexcept = 0;
 	virtual void connect(const std::shared_ptr<Session> &) = 0;
 
-	std::unique_ptr<boost::asio::streambuf> create_request_header(const std::string &method, const std::string &path, const CaseInsensitiveMultimap &header) const
+	std::unique_ptr<asio::streambuf> create_request_header(const std::string &method, const std::string &path, const CaseInsensitiveMultimap &header) const
 	{
 		auto corrected_path = path;
 		if(corrected_path == "")
 			corrected_path = "/";
-		if(!config.proxy_server.empty() && std::is_same<socket_type, boost::asio::ip::tcp::socket>::value)
+		if(!config.proxy_server.empty() && std::is_same<socket_type, asio::ip::tcp::socket>::value)
 			corrected_path = "http://" + host + ':' + std::to_string(port) + corrected_path;
 
-		std::unique_ptr<boost::asio::streambuf> streambuf(new boost::asio::streambuf());
+		std::unique_ptr<asio::streambuf> streambuf(new asio::streambuf());
 		std::ostream write_stream(streambuf.get());
 		write_stream << method << " " << corrected_path << " HTTP/1.1\r\n";
 		write_stream << "Host: " << host;
@@ -595,7 +602,7 @@ protected:
 	void write(const std::shared_ptr<Session> &session)
 	{
 		session->connection->set_timeout(config.timeout);
-		boost::asio::async_write(*session->connection->socket, session->request_streambuf->data(), [this, session](const error_code &ec, std::size_t /*bytes_transferred*/) {
+		asio::async_write(*session->connection->socket, session->request_streambuf->data(), [this, session](const error_code &ec, std::size_t /*bytes_transferred*/) {
 			auto lock = session->connection->handler_runner->continue_lock();
 			if(!lock)
 				return;
@@ -612,7 +619,7 @@ protected:
 
 	void read(const std::shared_ptr<Session> &session)
 	{
-		boost::asio::async_read_until(*session->connection->socket, session->response->streambuf, HeaderEndMatch(), [this, session](const error_code &ec, std::size_t bytes_transferred) {
+		asio::async_read_until(*session->connection->socket, session->response->streambuf, HeaderEndMatch(), [this, session](const error_code &ec, std::size_t bytes_transferred) {
 			auto lock = session->connection->handler_runner->continue_lock();
 			if(!lock)
 				return;
@@ -628,7 +635,7 @@ protected:
 
 				auto header_it = session->response->header.find("Content-Length");
 				if(header_it != session->response->header.end()) {
-					auto content_length = stoull(header_it->second);
+					auto content_length = std::stoull(header_it->second);
 					if(content_length > num_additional_bytes)
 						this->read_content(session, content_length - num_additional_bytes);
 					else
@@ -636,12 +643,12 @@ protected:
 				}
 				else if((header_it = session->response->header.find("Transfer-Encoding")) != session->response->header.end() && header_it->second == "chunked") {
 					// Expect hex number to not exceed 16 bytes (64-bit number), but take into account previous additional read bytes
-					auto chunk_size_streambuf = std::make_shared<boost::asio::streambuf>(std::max<std::size_t>(16 + 2, session->response->streambuf.size()));
+					auto chunk_size_streambuf = std::make_shared<asio::streambuf>(std::max<std::size_t>(16 + 2, session->response->streambuf.size()));
 
 					// Move leftover bytes
 					auto &source = session->response->streambuf;
 					auto &target = *chunk_size_streambuf;
-					target.commit(boost::asio::buffer_copy(target.prepare(source.size()), source.data()));
+					target.commit(asio::buffer_copy(target.prepare(source.size()), source.data()));
 					source.consume(source.size());
 
 					this->read_chunked_transfer_encoded(session, chunk_size_streambuf);
@@ -649,12 +656,12 @@ protected:
 				else if(session->response->http_version < "1.1" || ((header_it = session->response->header.find("Connection")) != session->response->header.end() && header_it->second == "close"))
 					read_content(session);
 				else if(((header_it = session->response->header.find("Content-Type")) != session->response->header.end() && header_it->second == "text/event-stream")) {
-					auto events_streambuf = std::make_shared<boost::asio::streambuf>(this->config.max_response_streambuf_size);
+					auto events_streambuf = std::make_shared<asio::streambuf>(this->config.max_response_streambuf_size);
 
 					// Move leftover bytes
 					auto &source = session->response->streambuf;
 					auto &target = *events_streambuf;
-					target.commit(boost::asio::buffer_copy(target.prepare(source.size()), source.data()));
+					target.commit(asio::buffer_copy(target.prepare(source.size()), source.data()));
 					source.consume(source.size());
 
 					session->callback(ec); // Connection to a Server-Sent Events resource is opened
@@ -695,7 +702,7 @@ protected:
 
 	void read_content(const std::shared_ptr<Session> &session, std::size_t remaining_length)
 	{
-		boost::asio::async_read(*session->connection->socket, session->response->streambuf, boost::asio::transfer_exactly(remaining_length), [this, session, remaining_length](const error_code &ec, std::size_t bytes_transferred) {
+		asio::async_read(*session->connection->socket, session->response->streambuf, asio::transfer_exactly(remaining_length), [this, session, remaining_length](const error_code &ec, std::size_t bytes_transferred) {
 			auto lock = session->connection->handler_runner->continue_lock();
 			if(!lock)
 				return;
@@ -717,7 +724,7 @@ protected:
 
 	void read_content(const std::shared_ptr<Session> &session)
 	{
-		boost::asio::async_read(*session->connection->socket, session->response->streambuf, [this, session](const error_code &ec_, std::size_t /*bytes_transferred*/) {
+		asio::async_read(*session->connection->socket, session->response->streambuf, [this, session](const error_code &ec_, std::size_t /*bytes_transferred*/) {
 			auto lock = session->connection->handler_runner->continue_lock();
 			if(!lock)
 				return;
@@ -743,9 +750,9 @@ protected:
 		});
 	}
 
-	void read_chunked_transfer_encoded(const std::shared_ptr<Session> &session, const std::shared_ptr<boost::asio::streambuf> &chunk_size_streambuf)
+	void read_chunked_transfer_encoded(const std::shared_ptr<Session> &session, const std::shared_ptr<asio::streambuf> &chunk_size_streambuf)
 	{
-		boost::asio::async_read_until(*session->connection->socket, *chunk_size_streambuf, "\r\n", [this, session, chunk_size_streambuf](const error_code &ec, size_t bytes_transferred) {
+		asio::async_read_until(*session->connection->socket, *chunk_size_streambuf, "\r\n", [this, session, chunk_size_streambuf](const error_code &ec, size_t bytes_transferred) {
 			auto lock = session->connection->handler_runner->continue_lock();
 			if(!lock)
 				return;
@@ -753,11 +760,11 @@ protected:
 			if(!ec) {
 				std::istream istream(chunk_size_streambuf.get());
 				std::string line;
-				getline(istream, line);
+				std::getline(istream, line);
 				bytes_transferred -= line.size() + 1;
 				unsigned long chunk_size = 0;
 				try {
-					chunk_size = stoul(line, 0, 16);
+					chunk_size = std::stoul(line, 0, 16);
 				}
 				catch(...) {
 					session->callback(make_error_code::make_error_code(errc::protocol_error));
@@ -769,7 +776,7 @@ protected:
 					return;
 				}
 
-				if(2 + chunk_size + session->response->streambuf.size() > session->response->streambuf.max_size()) {
+				if(chunk_size + session->response->streambuf.size() > session->response->streambuf.max_size()) {
 					session->response->content.end = false;
 					session->callback(ec);
 					session->response = RespPtr(new Response(*session->response));
@@ -781,25 +788,44 @@ protected:
 				if(bytes_to_move > 0) {
 					auto &source = *chunk_size_streambuf;
 					auto &target = session->response->streambuf;
-					target.commit(boost::asio::buffer_copy(target.prepare(bytes_to_move), source.data(), bytes_to_move));
+					target.commit(asio::buffer_copy(target.prepare(bytes_to_move), source.data(), bytes_to_move));
 					source.consume(bytes_to_move);
 				}
 
-				if((2 + chunk_size) > num_additional_bytes) {
-					boost::asio::async_read(*session->connection->socket, session->response->streambuf, boost::asio::transfer_exactly(2 + chunk_size - num_additional_bytes), [this, session, chunk_size_streambuf](const error_code &ec, size_t /*bytes_transferred*/) {
+				if(chunk_size > num_additional_bytes) {
+					asio::async_read(*session->connection->socket, session->response->streambuf, asio::transfer_exactly(chunk_size - num_additional_bytes), [this, session, chunk_size_streambuf](const error_code &ec, size_t /*bytes_transferred*/) {
 						auto lock = session->connection->handler_runner->continue_lock();
 						if(!lock)
 							return;
 
 						if(!ec) {
-							std::istream istream(&session->response->streambuf);
-
 							// Remove "\r\n"
-							istream.get();
-							istream.get();
-
-							read_chunked_transfer_encoded(session, chunk_size_streambuf);
+							auto null_buffer = std::make_shared<asio::streambuf>(2);
+							asio::async_read(*session->connection->socket, *null_buffer, asio::transfer_exactly(2), [this, session, chunk_size_streambuf, null_buffer](const error_code &ec, size_t /*bytes_transferred*/) {
+								auto lock = session->connection->handler_runner->continue_lock();
+								if(!lock)
+									return;
+								if(!ec)
+									read_chunked_transfer_encoded(session, chunk_size_streambuf);
+								else
+									session->callback(ec);
+							});
 						}
+						else
+							session->callback(ec);
+					});
+				}
+				else if(2 + chunk_size > num_additional_bytes) { // If only end of chunk remains unread (\n or \r\n)
+					// Remove "\r\n"
+					if(2 + chunk_size - num_additional_bytes == 1)
+						istream.get();
+					auto null_buffer = std::make_shared<asio::streambuf>(2);
+					asio::async_read(*session->connection->socket, *null_buffer, asio::transfer_exactly(2 + chunk_size - num_additional_bytes), [this, session, chunk_size_streambuf, null_buffer](const error_code &ec, size_t /*bytes_transferred*/) {
+						auto lock = session->connection->handler_runner->continue_lock();
+						if(!lock)
+							return;
+						if(!ec)
+							read_chunked_transfer_encoded(session, chunk_size_streambuf);
 						else
 							session->callback(ec);
 					});
@@ -817,9 +843,9 @@ protected:
 		});
 	}
 
-	void read_server_sent_event(const std::shared_ptr<Session> &session, const std::shared_ptr<boost::asio::streambuf> &events_streambuf)
+	void read_server_sent_event(const std::shared_ptr<Session> &session, const std::shared_ptr<asio::streambuf> &events_streambuf)
 	{
-		boost::asio::async_read_until(*session->connection->socket, *events_streambuf, HeaderEndMatch(), [this, session, events_streambuf](const error_code &ec, std::size_t /*bytes_transferred*/) {
+		asio::async_read_until(*session->connection->socket, *events_streambuf, HeaderEndMatch(), [this, session, events_streambuf](const error_code &ec, std::size_t /*bytes_transferred*/) {
 			auto lock = session->connection->handler_runner->continue_lock();
 			if(!lock)
 				return;
@@ -842,9 +868,9 @@ protected:
 				session->callback(ec);
 		});
 	}
-
 };
 
 } // namespace http
 } // namespace zpds
+
 #endif	/* _ZPDS_HTTP_CLIENT_BASE_HPP_ */
